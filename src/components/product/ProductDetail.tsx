@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Card, Row, Col, Typography, Tag, Button, Breadcrumb, Descriptions, Space, Image, message, Spin, Empty, Flex, Modal, InputNumber, Input, Rate, Avatar, List } from 'antd';
-import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating, getDirectMessages } from '../../lib/store';
+import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating, getDirectMessages, toggleWishlist, isWishlisted } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 
 const { Title, Text, Paragraph } = Typography;
@@ -26,6 +26,24 @@ export default function ProductDetail() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [sellerRating, setSellerRating] = useState<{ avgRating: number; totalReviews: number }>({ avgRating: 5.0, totalReviews: 0 });
   const [activeImg, setActiveImg] = useState<string>('');
+  const [favored, setFavored] = useState(false);
+
+  useEffect(() => {
+    if (product?.id) {
+      setFavored(isWishlisted(product.id));
+    }
+  }, [product]);
+
+  function handleToggleWishlist() {
+    if (!product) return;
+    const added = toggleWishlist(product.id);
+    setFavored(added);
+    if (added) {
+      messageApi.success('Produk disimpan ke Favorit!');
+    } else {
+      messageApi.info('Dihapus dari Favorit.');
+    }
+  }
 
   useEffect(() => {
     if (productId) {
@@ -198,6 +216,9 @@ export default function ProductDetail() {
                 <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
                   {product.category}
                 </Tag>
+                <Tag color="purple" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                  {product.condition || 'Bekas - Like New'}
+                </Tag>
                 {isOutOfStock ? (
                   <Tag color="red" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
                     Stok Habis (0 Unit)
@@ -325,6 +346,15 @@ export default function ProductDetail() {
                   style={{ height: 48, padding: '0 20px', fontSize: 16 }}
                 >
                   Chat Penjual di Web
+                </Button>
+
+                <Button
+                  size="large"
+                  icon={favored ? <HeartFilled style={{ color: '#ef4444' }} /> : <HeartOutlined />}
+                  onClick={handleToggleWishlist}
+                  style={{ height: 48, padding: '0 20px', fontSize: 16 }}
+                >
+                  {favored ? 'Favorit' : 'Simpan'}
                 </Button>
 
                 <Link href="/cart">

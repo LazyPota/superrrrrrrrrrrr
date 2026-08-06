@@ -3,21 +3,22 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, Avatar, Statistic, Row, Col, Button, Tag, Typography, Popconfirm, Empty, Space } from 'antd';
-import { UserOutlined, PlusOutlined, LogoutOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { UserOutlined, PlusOutlined, LogoutOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, HeartFilled } from '@ant-design/icons';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
-import { getUser, getProducts, removeUser, deleteProduct, getDirectMessages } from '../../lib/store';
+import { getUser, getProducts, removeUser, deleteProduct, getDirectMessages, getWishlist } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 
 const { Title, Text } = Typography;
 
-function formatPrice(price) {
+function formatPrice(price: number) {
   return 'Rp' + Number(price).toLocaleString('id-ID');
 }
 
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
-  const [myProducts, setMyProducts] = useState([]);
+  const [user, setUser] = useState<any>(null);
+  const [myProducts, setMyProducts] = useState<any[]>([]);
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
   const [orderCount, setOrderCount] = useState(0);
   const [purchaseCount, setPurchaseCount] = useState(0);
 
@@ -33,6 +34,10 @@ export default function ProfilePage() {
     const all = Array.from(merged.values());
     const mine = all.filter(p => p.sellerEmail === u.email);
     setMyProducts(mine);
+
+    const wishIds = getWishlist();
+    const wishList = all.filter(p => wishIds.includes(p.id));
+    setWishlistProducts(wishList);
 
     const msgs = getDirectMessages();
     setOrderCount(msgs.filter(m => m.sellerEmail === u.email).length);
@@ -185,6 +190,57 @@ export default function ProfilePage() {
                           <Button danger size="small" type="text" icon={<DeleteOutlined />} />
                         </Popconfirm>
                       </Space>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+
+            <Card
+              title={
+                <span>
+                  <HeartFilled style={{ color: '#ef4444', marginRight: 8 }} />
+                  Produk Favorit / Wishlist Saya ({wishlistProducts.length})
+                </span>
+              }
+              style={{ borderRadius: 16, marginTop: 24 }}
+            >
+              {wishlistProducts.length === 0 ? (
+                <Empty description="Belum ada produk favorit disukai. Klik ikon Hati pada produk untuk menyimpan!" />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {wishlistProducts.map(item => (
+                    <div
+                      key={item.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justify: 'space-between',
+                        gap: 12,
+                        padding: 12,
+                        borderRadius: 12,
+                        border: '1px solid #e2e8f0',
+                        background: '#ffffff',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 8, overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
+                          {(item.images?.[0] || item.image) ? (
+                            <img src={item.images?.[0] || item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 10 }}>Foto</div>
+                          )}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <Text strong ellipsis style={{ fontSize: 14, display: 'block' }}>{item.name}</Text>
+                          <Text type="danger" strong style={{ fontSize: 13 }}>{formatPrice(item.price)}</Text>
+                          <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Penjual: {item.seller}</Text>
+                        </div>
+                      </div>
+
+                      <Link href={`/product?id=${item.id}`}>
+                        <Button type="primary" size="small">Lihat Produk</Button>
+                      </Link>
                     </div>
                   ))}
                 </div>

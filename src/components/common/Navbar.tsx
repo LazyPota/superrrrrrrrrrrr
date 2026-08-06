@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Input, Badge, Button, Dropdown, Avatar, Space, Tag } from 'antd';
+import { Input, Badge, Button, Dropdown, Avatar, Space, Tag, notification } from 'antd';
 import {
   ShoppingCartOutlined,
   UserOutlined,
@@ -14,12 +14,13 @@ import {
   LoginOutlined,
   UserAddOutlined,
   MessageOutlined,
+  BellOutlined,
 } from '@ant-design/icons';
 import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
 import DirectChatDrawer from '../chat/DirectChatDrawer';
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [cartCount, setCartCount] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,6 +66,16 @@ export default function Navbar() {
       playOrderSound();
       speakVoice('Ada pesan masuk!');
       refreshState();
+
+      notification.info({
+        message: '🔔 Pesan / Orderan Baru Masuk!',
+        description: 'Ada aktivitas percakapan baru di PresUMart. Klik di sini untuk membuka kotak pesan.',
+        placement: 'topRight',
+        onClick: () => {
+          setDirectDrawerOpen(true);
+        },
+        duration: 5,
+      });
     }
 
     window.addEventListener('open-direct-chat', handleOpenDirectChat);

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Row, Col, Segmented, Empty, Button, Typography, Alert, Space } from 'antd';
+import { Row, Col, Segmented, Empty, Button, Typography, Alert, Space, Tag } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import ProductCard from '../product/ProductCard';
 import { getProducts, saveProducts } from '../../lib/store';
@@ -14,8 +14,9 @@ const { Title, Text } = Typography;
 
 export default function HomeContent() {
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [activeCat, setActiveCat] = useState(searchParams.get('cat') || 'Semua');
+  const [activeCond, setActiveCond] = useState('Semua');
   const [search, setSearch] = useState(searchParams.get('search') || '');
 
   const urlSearch = searchParams.get('search') || '';
@@ -27,7 +28,6 @@ export default function HomeContent() {
       saveProducts(SEED_PRODUCTS);
       setProducts(SEED_PRODUCTS);
     } else {
-      // BUG FIX #2 & #5: Merge seed products with stored products, deduplicated by id
       const merged = new Map();
       SEED_PRODUCTS.forEach(p => merged.set(p.id, p));
       stored.forEach(p => merged.set(p.id, p));
@@ -45,6 +45,9 @@ export default function HomeContent() {
     if (activeCat && activeCat !== 'Semua') {
       list = list.filter(p => p.category === activeCat);
     }
+    if (activeCond && activeCond !== 'Semua') {
+      list = list.filter(p => (p.condition || 'Bekas - Like New') === activeCond);
+    }
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(p =>
@@ -52,8 +55,8 @@ export default function HomeContent() {
         p.description.toLowerCase().includes(q)
       );
     }
-    return [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }, [products, activeCat, search]);
+    return [...list].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [products, activeCat, activeCond, search]);
 
   const segmentedOptions = ['Semua', ...CATEGORIES];
 
@@ -85,14 +88,40 @@ export default function HomeContent() {
       </div>
 
       {/* Category Segmented Controls */}
-      <div style={{ marginBottom: 32, overflowX: 'auto', paddingBottom: 8 }}>
+      <div style={{ marginBottom: 16, overflowX: 'auto', paddingBottom: 8 }}>
         <Segmented
           options={segmentedOptions}
           value={activeCat}
-          onChange={val => setActiveCat(val)}
+          onChange={val => setActiveCat(val as string)}
           size="large"
           style={{ background: '#e2e8f0', padding: 4, borderRadius: 12 }}
         />
+      </div>
+
+      {/* Condition Filter Tag Bar */}
+      <div style={{ marginBottom: 28, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <Text strong style={{ fontSize: 13, color: '#64748b', marginRight: 4 }}>Filter Kondisi:</Text>
+        {[
+          { label: 'Semua Kondisi', value: 'Semua' },
+          { label: '✨ Barang Baru', value: 'Barang Baru' },
+          { label: '🌟 Bekas - Seperti Baru', value: 'Bekas - Like New' },
+          { label: '👍 Bekas - Mulus', value: 'Bekas - Mulus' },
+        ].map(cond => (
+          <Tag.CheckableTag
+            key={cond.value}
+            checked={activeCond === cond.value}
+            onChange={() => setActiveCond(cond.value)}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 20,
+              fontSize: 13,
+              border: activeCond === cond.value ? '1px solid #0052cc' : '1px solid #cbd5e1',
+              cursor: 'pointer',
+            }}
+          >
+            {cond.label}
+          </Tag.CheckableTag>
+        ))}
       </div>
 
       {filtered.length === 0 ? (

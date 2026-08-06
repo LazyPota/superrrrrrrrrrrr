@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS products (
   price NUMERIC NOT NULL,
   category VARCHAR(255) NOT NULL,
   allow_nego BOOLEAN DEFAULT TRUE,
+  condition VARCHAR(100) DEFAULT 'Bekas - Seperti Baru',
   image TEXT,
   images JSONB DEFAULT '[]'::jsonb,
   seller VARCHAR(255) NOT NULL,

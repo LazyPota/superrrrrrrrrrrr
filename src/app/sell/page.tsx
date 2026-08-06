@@ -101,6 +101,7 @@ export default function SellPage() {
       description: product.description,
       price: product.price,
       category: product.category,
+      condition: product.condition || 'Bekas - Like New',
       stock: product.stock !== undefined ? product.stock : 1,
       allowNego: product.allowNego !== false,
       image: product.image || '',
@@ -144,6 +145,7 @@ export default function SellPage() {
       description: values.description.trim(),
       price: Number(values.price),
       category: values.category,
+      condition: values.condition || 'Bekas - Like New',
       stock: Number(values.stock !== undefined ? values.stock : 1),
       allowNego: values.allowNego !== undefined ? values.allowNego : true,
       image: coverImage,
@@ -311,6 +313,22 @@ export default function SellPage() {
                   rules={[{ required: true, message: 'Pilih kategori!' }]}
                 >
                   <Select placeholder="Pilih Kategori" options={CATEGORIES.map(c => ({ label: c, value: c }))} />
+                </Form.Item>
+
+                <Form.Item
+                  label="Kondisi Barang"
+                  name="condition"
+                  initialValue="Bekas - Like New"
+                  rules={[{ required: true, message: 'Pilih kondisi barang!' }]}
+                >
+                  <Select
+                    options={[
+                      { label: '✨ Barang Baru (New 100%)', value: 'Barang Baru' },
+                      { label: '🌟 Bekas - Seperti Baru (Like New)', value: 'Bekas - Like New' },
+                      { label: '👍 Bekas - Mulus / Wajar', value: 'Bekas - Mulus' },
+                      { label: '🔧 Bekas - Butuh Perbaikan', value: 'Bekas - Butuh Perbaikan' },
+                    ]}
+                  />
                 </Form.Item>
 
                 <Form.Item

@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { Card, Tag, Button, Typography, Space, message, Badge } from 'antd';
-import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined } from '@ant-design/icons';
-import { addToCart, getUser, getDirectMessages, sendDirectMessage } from '../../lib/store';
+import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { addToCart, getUser, getDirectMessages, sendDirectMessage, toggleWishlist, isWishlisted } from '../../lib/store';
 
 const { Title, Text } = Typography;
 
@@ -13,7 +13,23 @@ function formatPrice(price: number) {
 
 export default function ProductCard({ product }: { product: any }) {
   const [messageApi, contextHolder] = message.useMessage();
+  const [favored, setFavored] = useState(false);
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+
+  useEffect(() => {
+    setFavored(isWishlisted(product.id));
+  }, [product.id]);
+
+  function handleToggleWishlist(e: React.MouseEvent) {
+    e.stopPropagation();
+    const added = toggleWishlist(product.id);
+    setFavored(added);
+    if (added) {
+      messageApi.success('Produk disimpan ke Favorit!');
+    } else {
+      messageApi.info('Dihapus dari Favorit.');
+    }
+  }
 
   function handleAddToCart() {
     const user = getUser();
@@ -80,6 +96,21 @@ export default function ProductCard({ product }: { product: any }) {
           style={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0', opacity: isOutOfStock ? 0.75 : 1 }}
           cover={
             <div style={{ height: 200, overflow: 'hidden', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+              <Button
+                type="text"
+                shape="circle"
+                icon={favored ? <HeartFilled style={{ color: '#ef4444', fontSize: 18 }} /> : <HeartOutlined style={{ color: '#64748b', fontSize: 18 }} />}
+                onClick={handleToggleWishlist}
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  zIndex: 10,
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  backdropFilter: 'blur(4px)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                }}
+              />
               {coverImg ? (
                 <img
                   alt={product.name}
@@ -129,6 +160,9 @@ export default function ProductCard({ product }: { product: any }) {
                 {formatPrice(product.price)}
               </Text>
               <Space size={4} wrap>
+                <Tag color="purple" style={{ fontSize: 11, borderRadius: 4, margin: 0 }}>
+                  {product.condition || 'Bekas - Like New'}
+                </Tag>
                 {isOutOfStock ? (
                   <Tag color="red" style={{ fontSize: 11, borderRadius: 4, margin: 0 }}>Stok Habis</Tag>
                 ) : (

@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   PRODUCTS: 'presumart_products',
   DIRECT_MESSAGES: 'presumart_direct_messages',
   REVIEWS: 'presumart_reviews',
+  WISHLIST: 'presumart_wishlist',
 };
 
 export function speakVoice(text: string): void {
@@ -557,4 +558,43 @@ export function getSellerRating(sellerEmail: string): { avgRating: number; total
   const sum = sellerRevs.reduce((acc, curr) => acc + (curr.rating || 5), 0);
   const avg = (sum / sellerRevs.length).toFixed(1);
   return { avgRating: parseFloat(avg), totalReviews: sellerRevs.length };
+}
+
+/* --- WISHLIST / FAVORITES SYSTEM --- */
+
+function getWishlistKey(): string {
+  const user = getUser();
+  return user ? `presumart_wishlist_${user.email}` : 'presumart_wishlist_guest';
+}
+
+export function getWishlist(): string[] {
+  if (typeof window === 'undefined') return [];
+  const key = getWishlistKey();
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : [];
+}
+
+export function toggleWishlist(productId: string): boolean {
+  if (typeof window === 'undefined') return false;
+  const key = getWishlistKey();
+  const list = getWishlist();
+  const index = list.indexOf(productId);
+  let isAdded = false;
+
+  if (index >= 0) {
+    list.splice(index, 1);
+    isAdded = false;
+  } else {
+    list.push(productId);
+    isAdded = true;
+    speakVoice('Disimpan ke favorit!');
+  }
+
+  localStorage.setItem(key, JSON.stringify(list));
+  return isAdded;
+}
+
+export function isWishlisted(productId: string): boolean {
+  const list = getWishlist();
+  return list.includes(productId);
 }

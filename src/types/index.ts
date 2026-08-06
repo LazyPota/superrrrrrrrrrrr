@@ -13,6 +13,7 @@ export interface Product {
   price: number;
   category: string;
   allowNego?: boolean;
+  condition?: string;
   stock?: number;
   image?: string;
   images?: string[];
