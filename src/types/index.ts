@@ -57,8 +57,9 @@ export interface DirectMessage {
   productPrice: number;
   proposedPrice?: number | null;
   messageText?: string;
-  type: 'nego' | 'order';
-  status: 'pending' | 'accepted' | 'rejected';
+  type: 'inquiry' | 'nego' | 'order';
+  status: 'chat' | 'offered' | 'pending' | 'accepted' | 'rejected' | 'completed' | 'sold';
+  codLocation?: string;
   paymentMethod: string;
   createdAt: string;
   unreadBySeller: boolean;

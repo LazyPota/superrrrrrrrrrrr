@@ -336,8 +336,9 @@ export default function ProductDetail() {
                         productName: product.name,
                         productPrice: product.price,
                         proposedPrice: null,
-                        messageText: `Halo ${product.seller}, saya berminat bertanya mengenai produk ${product.name}.`,
-                        type: 'order',
+                        messageText: `Halo ${product.seller}, saya mau tanya-tanya mengenai produk ${product.name}.`,
+                        type: 'inquiry',
+                        status: 'chat',
                       });
                     }
 

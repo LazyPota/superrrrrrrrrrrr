@@ -1,21 +1,32 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input, Modal, Rate, message } from 'antd';
-import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined } from '@ant-design/icons';
-import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview } from '../../lib/store';
+import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input, Modal, Rate, message, Select } from 'antd';
+import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined, EnvironmentOutlined, ShopOutlined, TagOutlined } from '@ant-design/icons';
+import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview, reduceProductStock } from '../../lib/store';
 
 const { Title, Text, Paragraph } = Typography;
 
-function formatPrice(price) {
+function formatPrice(price: number) {
   return 'Rp' + Number(price).toLocaleString('id-ID');
 }
+
+const CAMPUS_LOCATIONS = [
+  '🏛️ Student Center President University',
+  '🏢 Lobby Building A (Rektorat)',
+  '🏢 Lobby Building B / C',
+  '🍜 Kantin President University',
+  '🏢 Dormitory Jababeka (Asrama)',
+  '⛳ President Executive Club',
+];
 
 export default function DirectChatDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [user, setUser] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [replyTextMap, setReplyTextMap] = useState<Record<string, string>>({});
   const [reviewModalMsg, setReviewModalMsg] = useState<any>(null);
+  const [codModalMsg, setCodModalMsg] = useState<any>(null);
+  const [selectedCodLoc, setSelectedCodLoc] = useState<string>(CAMPUS_LOCATIONS[0]);
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState<string>('');
   const [messageApi, contextHolder] = message.useMessage();
@@ -34,14 +45,54 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
       sellerEmail: reviewModalMsg.sellerEmail,
       buyerEmail: reviewModalMsg.buyerEmail,
       buyerName: reviewModalMsg.buyerName,
-      rating: rating,
+      rating,
       comment: comment.trim(),
     });
-    messageApi.success('Terima kasih! Ulasan & rating kamu telah dikirim.');
+    updateMessageStatus(reviewModalMsg.id, 'completed');
+    messageApi.success('Ulasan berhasil dikirim!');
     setReviewModalMsg(null);
     setComment('');
     setRating(5);
-    if (user) refreshMessages(user);
+    refreshMessages();
+  }
+
+  function handleConfirmCodOrder() {
+    if (!codModalMsg) return;
+    updateMessageStatus(codModalMsg.id, 'pending', selectedCodLoc);
+    addReplyToMessage(
+      codModalMsg.id,
+      user.email,
+      user.name,
+      `Saya menyetujui pesanan ini untuk COD di: ${selectedCodLoc}`
+    );
+    messageApi.success('Pesanan berhasil dibuat! Menunggu ketemuan COD di kampus.');
+    setCodModalMsg(null);
+    refreshMessages();
+  }
+
+  function handleSendOffer(msg: any) {
+    updateMessageStatus(msg.id, 'offered');
+    addReplyToMessage(
+      msg.id,
+      user.email,
+      user.name,
+      'Penjual telah mengirimkan tawaran kartu produk. Silakan pembeli klik "Pesan & Tentukan Lokasi COD" jika sepakat.'
+    );
+    messageApi.success('Kartu tawaran produk berhasil dikirimkan!');
+    refreshMessages();
+  }
+
+  function handleMarkAsSold(msg: any) {
+    reduceProductStock(msg.productId, 1);
+    updateMessageStatus(msg.id, 'sold');
+    addReplyToMessage(
+      msg.id,
+      user.email,
+      user.name,
+      'Penjual mengonfirmasi barang telah diserahkan & TERJUAL!'
+    );
+    messageApi.success('Barang telah ditandai TERJUAL!');
+    refreshMessages();
   }
 
   useEffect(() => {
@@ -193,46 +244,80 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                 {item.messageText && (
                   <Paragraph style={{ background: '#f8fafc', padding: 8, borderRadius: 6, fontSize: 12, margin: '8px 0', border: '1px solid #e2e8f0' }}>
                     &quot;{item.messageText}&quot;
-                  </Paragraph>
+                  </Paragraph>                
                 )}
-
-                {/* Status & Actions */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 8, borderTop: '1px dashed #e2e8f0' }}>
+                {/* Status & Actions Bar */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 8, borderTop: '1px dashed #e2e8f0', flexWrap: 'wrap', gap: 6 }}>
                   <div>
-                    {item.status === 'pending' && <Tag color="warning">Menunggu Konfirmasi</Tag>}
+                    {item.status === 'chat' && <Tag color="blue">💬 Chat Tanya Jawab</Tag>}
+                    {item.status === 'offered' && <Tag color="gold" icon={<ShopOutlined />}>📦 Produk Ditawarkan Penjual</Tag>}
+                    {item.status === 'pending' && <Tag color="processing" icon={<EnvironmentOutlined />}>📍 COD di: {item.codLocation || 'Kampus PresUniv'}</Tag>}
                     {item.status === 'accepted' && <Tag color="success" icon={<CheckCircleOutlined />}>Disetujui (Siap COD)</Tag>}
                     {item.status === 'rejected' && <Tag color="error" icon={<CloseCircleOutlined />}>Ditolak</Tag>}
+                    {(item.status === 'completed' || item.status === 'sold') && <Tag color="green" icon={<CheckCircleOutlined />}>🎉 Transaksi Selesai & Terjual</Tag>}
                   </div>
 
-                  {isSeller && item.status === 'pending' && (
-                    <Space size="small">
-                      <Popconfirm title="Terima tawaran/orderan ini?" onConfirm={() => handleStatusChange(item.id, 'accepted')} okText="Ya" cancelText="Batal">
-                        <Button type="primary" size="small" style={{ background: '#36b37e', borderColor: '#36b37e' }}>
-                          Terima
-                        </Button>
-                      </Popconfirm>
-                      <Popconfirm title="Tolak tawaran ini?" onConfirm={() => handleStatusChange(item.id, 'rejected')} okText="Ya" cancelText="Batal">
-                        <Button danger size="small" type="text">
-                          Tolak
-                        </Button>
-                      </Popconfirm>
-                    </Space>
+                  {/* Step 2 Action: Seller sends product card offer */}
+                  {isSeller && item.status === 'chat' && (
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<ShopOutlined />}
+                      onClick={() => handleSendOffer(item)}
+                      style={{ background: '#0052cc' }}
+                    >
+                      Kirim Produk ke Pembeli
+                    </Button>
                   )}
 
-                  {!isSeller && item.status === 'accepted' && (
-                    item.reviewed ? (
-                      <Tag color="green" icon={<StarOutlined />}>Ulasan Dikirim ⭐</Tag>
-                    ) : (
-                      <Button
-                        type="primary"
-                        size="small"
-                        icon={<StarOutlined />}
-                        style={{ background: '#faad14', borderColor: '#faad14' }}
-                        onClick={() => setReviewModalMsg(item)}
-                      >
-                        Beri Ulasan
-                      </Button>
-                    )
+                  {/* Step 3 Action: Buyer orders & chooses COD Campus Location */}
+                  {!isSeller && item.status === 'offered' && (
+                    <Button
+                      type="primary"
+                      size="small"
+                      icon={<ShoppingCartOutlined />}
+                      onClick={() => {
+                        setCodModalMsg(item);
+                        setSelectedCodLoc(CAMPUS_LOCATIONS[0]);
+                      }}
+                      style={{ background: '#36b37e', borderColor: '#36b37e' }}
+                    >
+                      Pesan & Tentukan Lokasi COD
+                    </Button>
+                  )}
+
+                  {/* Step 4 Actions: Finalization after COD */}
+                  {item.status === 'pending' && (
+                    <Space size="small" wrap>
+                      {!isSeller && (
+                        item.reviewed ? (
+                          <Tag color="green" icon={<StarOutlined />}>Barang Diterima & Diulas ⭐</Tag>
+                        ) : (
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<CheckCircleOutlined />}
+                            style={{ background: '#36b37e', borderColor: '#36b37e' }}
+                            onClick={() => setReviewModalMsg(item)}
+                          >
+                            Barang Sudah Diterima
+                          </Button>
+                        )
+                      )}
+
+                      {isSeller && (
+                        <Popconfirm title="Konfirmasi barang sudah terjual & COD selesai?" onConfirm={() => handleMarkAsSold(item)} okText="Ya" cancelText="Batal">
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<TagOutlined />}
+                            style={{ background: '#faad14', borderColor: '#faad14' }}
+                          >
+                            Barang Sudah Terjual
+                          </Button>
+                        </Popconfirm>
+                      )}
+                    </Space>
                   )}
                 </div>
 
@@ -278,18 +363,20 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                     size="small"
                     icon={<SendOutlined />}
                     onClick={() => handleSendReply(item.id)}
-                  />
+                  >
+                    Kirim
+                  </Button>
                 </div>
               </Card>
             );
           })}
+          <div ref={chatEndRef} />
         </div>
       )}
-      <div ref={chatEndRef} />
 
-      {contextHolder}
+      {/* Modal Beri Rating & Ulasan */}
       <Modal
-        title="⭐ Beri Ulasan & Rating Pembelian"
+        title="⭐ Beri Rating & Ulasan untuk Penjual"
         open={!!reviewModalMsg}
         onCancel={() => setReviewModalMsg(null)}
         onOk={handleSubmitReview}

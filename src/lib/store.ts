@@ -396,8 +396,9 @@ export function saveDirectMessages(messages) {
   pushToServer();
 }
 
-export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerName, productId, productName, productPrice, proposedPrice, messageText, type = 'nego' }) {
+export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerName, productId, productName, productPrice, proposedPrice, messageText, type = 'inquiry', status = 'chat', codLocation = '' }: any) {
   const messages = getDirectMessages();
+  const initialStatus = status || (type === 'order' ? 'pending' : (type === 'nego' ? 'pending' : 'chat'));
   const newMsg = {
     id: Date.now().toString(),
     sellerEmail,
@@ -410,7 +411,8 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
     proposedPrice,
     messageText,
     type,
-    status: 'pending',
+    status: initialStatus,
+    codLocation,
     paymentMethod: 'COD',
     createdAt: new Date().toISOString(),
     unreadBySeller: true,
@@ -430,7 +432,7 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
   return newMsg;
 }
 
-export function addReplyToMessage(messageId, senderEmail, senderName, text) {
+export function addReplyToMessage(messageId: string, senderEmail: string, senderName: string, text: string) {
   const messages = getDirectMessages();
   const msg = messages.find(m => m.id === messageId);
   if (msg) {
@@ -456,18 +458,28 @@ export function addReplyToMessage(messageId, senderEmail, senderName, text) {
   return messages;
 }
 
-export function updateMessageStatus(id, status) {
+export function updateMessageStatus(id: string, status: string, codLocation?: string) {
   const messages = getDirectMessages();
   const msg = messages.find(m => m.id === id);
   if (msg) {
     msg.status = status;
+    if (codLocation) {
+      msg.codLocation = codLocation;
+    }
     msg.unreadByBuyer = true;
+    msg.unreadBySeller = true;
     saveDirectMessages(messages);
     playOrderSound();
     if (status === 'accepted') {
       speakVoice('Orderan disetujui!');
     } else if (status === 'rejected') {
       speakVoice('Orderan ditolak!');
+    } else if (status === 'offered') {
+      speakVoice('Penawaran produk dikirim!');
+    } else if (status === 'completed') {
+      speakVoice('Barang telah diterima!');
+    } else if (status === 'sold') {
+      speakVoice('Barang sudah terjual!');
     }
   }
   return messages;
