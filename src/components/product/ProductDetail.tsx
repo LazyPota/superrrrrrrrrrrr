@@ -104,23 +104,29 @@ export default function ProductDetail() {
 
   if (notFound) {
     return (
-      <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', minHeight: '60vh' }}>
-        <Card style={{ textAlign: 'center', padding: '48px 24px', borderRadius: 16 }}>
-          <Empty description={<Title level={4}>Produk Tidak Ditemukan</Title>}>
-            <Link href="/">
-              <Button type="primary" icon={<ArrowLeftOutlined />}>Kembali ke Beranda</Button>
-            </Link>
-          </Empty>
-        </Card>
-      </main>
+      <>
+        {contextHolder}
+        <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', minHeight: '60vh' }}>
+          <Card style={{ textAlign: 'center', padding: '48px 24px', borderRadius: 16 }}>
+            <Empty description={<Title level={4}>Produk Tidak Ditemukan</Title>}>
+              <Link href="/">
+                <Button type="primary" icon={<ArrowLeftOutlined />}>Kembali ke Beranda</Button>
+              </Link>
+            </Empty>
+          </Card>
+        </main>
+      </>
     );
   }
 
   if (!product) {
     return (
-      <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', textAlign: 'center', minHeight: '60vh' }}>
-        <Spin size="large" description="Memuat detail produk..." />
-      </main>
+      <>
+        {contextHolder}
+        <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', textAlign: 'center', minHeight: '60vh' }}>
+          <Spin size="large" description="Memuat detail produk..." />
+        </main>
+      </>
     );
   }
 
