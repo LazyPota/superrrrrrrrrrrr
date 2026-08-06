@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
   category VARCHAR(255) NOT NULL,
   allow_nego BOOLEAN DEFAULT TRUE,
   image TEXT,
+  images JSONB DEFAULT '[]'::jsonb,
   seller VARCHAR(255) NOT NULL,
   seller_email VARCHAR(255) NOT NULL,
   seller_major VARCHAR(255),

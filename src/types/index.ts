@@ -15,6 +15,7 @@ export interface Product {
   allowNego?: boolean;
   stock?: number;
   image?: string;
+  images?: string[];
   seller: string;
   sellerEmail: string;
   sellerMajor?: string;

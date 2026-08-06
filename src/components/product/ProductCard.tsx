@@ -33,6 +33,8 @@ export default function ProductCard({ product }: { product: any }) {
     messageApi.success('Produk berhasil ditambahkan ke keranjang!');
   }
 
+  const coverImg = (product.images && product.images.length > 0) ? product.images[0] : product.image;
+
   return (
     <>
       {contextHolder}
@@ -42,10 +44,10 @@ export default function ProductCard({ product }: { product: any }) {
           style={{ height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0', opacity: isOutOfStock ? 0.75 : 1 }}
           cover={
             <div style={{ height: 200, overflow: 'hidden', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-              {product.image ? (
+              {coverImg ? (
                 <img
                   alt={product.name}
-                  src={product.image}
+                  src={coverImg}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (

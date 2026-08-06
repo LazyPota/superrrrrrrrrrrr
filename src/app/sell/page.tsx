@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, Form, Input, Select, InputNumber, Button, Table, Popconfirm, Alert, Row, Col, Typography, Tag, Space, message, Switch } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ShopOutlined, CloseOutlined, CheckCircleOutlined, DollarOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Select, InputNumber, Button, Table, Popconfirm, Alert, Row, Col, Typography, Tag, Space, message, Switch, Upload } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ShopOutlined, CloseOutlined, CheckCircleOutlined, DollarOutlined, CameraOutlined, UploadOutlined } from '@ant-design/icons';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import { getUser, getProducts, addProduct, updateProduct, deleteProduct } from '../../lib/store';
@@ -14,15 +14,24 @@ import SEED_PRODUCTS from '../../data/seed';
 
 const { Title, Text, Paragraph } = Typography;
 
+const getBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+
 function formatPrice(price) {
   return 'Rp' + Number(price).toLocaleString('id-ID');
 }
 
 export default function SellPage() {
-  const [user, setUser] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [user, setUser] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [formError, setFormError] = useState('');
+  const [fileList, setFileList] = useState<any[]>([]);
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -30,7 +39,6 @@ export default function SellPage() {
     const u = getUser();
     setUser(u);
     if (!u) return;
-    // BUG FIX #8: Merge seed products with stored products so seed items show up
     const stored = getProducts();
     const merged = new Map();
     SEED_PRODUCTS.forEach(p => merged.set(p.id, p));
@@ -40,32 +48,53 @@ export default function SellPage() {
     setProducts(mine);
   }, []);
 
-  function handleEdit(product) {
+  const handleUploadChange = async ({ fileList: newFileList }: any) => {
+    const updatedList = await Promise.all(
+      newFileList.map(async (file: any) => {
+        if (file.originFileObj && !file.url && !file.thumbUrl) {
+          file.url = await getBase64(file.originFileObj);
+        }
+        return file;
+      })
+    );
+    setFileList(updatedList);
+  };
+
+  function handleEdit(product: any) {
     setEditingProduct(product);
     form.setFieldsValue({
       name: product.name,
       description: product.description,
       price: product.price,
       category: product.category,
+      stock: product.stock !== undefined ? product.stock : 1,
       allowNego: product.allowNego !== false,
       image: product.image || '',
     });
+    if (product.images && product.images.length > 0) {
+      setFileList(product.images.map((url: string, index: number) => ({ uid: `-${index}`, name: `photo-${index}.png`, status: 'done', url })));
+    } else if (product.image) {
+      setFileList([{ uid: '-1', name: 'photo-1.png', status: 'done', url: product.image }]);
+    } else {
+      setFileList([]);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handleCancelEdit() {
     setEditingProduct(null);
+    setFileList([]);
     form.resetFields();
     setFormError('');
   }
 
-  function handleDelete(id) {
+  function handleDelete(id: string) {
     deleteProduct(id);
     setProducts(prev => prev.filter(p => p.id !== id));
     messageApi.success('Produk berhasil dihapus.');
   }
 
-  function onFinish(values) {
+  function onFinish(values: any) {
     setFormError('');
 
     if (isProductBlocked(values.name, values.description)) {
@@ -73,13 +102,18 @@ export default function SellPage() {
       return;
     }
 
+    const uploadedImages = fileList.map(f => f.url || f.thumbUrl).filter(Boolean);
+    const coverImage = uploadedImages[0] || (values.image ? values.image.trim() : '');
+
     const productData = {
       name: values.name.trim(),
       description: values.description.trim(),
       price: Number(values.price),
       category: values.category,
+      stock: Number(values.stock !== undefined ? values.stock : 1),
       allowNego: values.allowNego !== undefined ? values.allowNego : true,
-      image: values.image ? values.image.trim() : '',
+      image: coverImage,
+      images: uploadedImages.length > 0 ? uploadedImages : (coverImage ? [coverImage] : []),
       seller: user.name,
       sellerEmail: user.email,
       sellerMajor: user.major,
@@ -267,11 +301,32 @@ export default function SellPage() {
                   <Switch checkedChildren="Nego Aktif" unCheckedChildren="Harga Pas" />
                 </Form.Item>
 
+                <Form.Item label="Upload Foto Produk (Maksimal 3 Foto)">
+                  <Upload
+                    listType="picture-card"
+                    fileList={fileList}
+                    onChange={handleUploadChange}
+                    beforeUpload={() => false}
+                    maxCount={3}
+                    accept="image/*"
+                  >
+                    {fileList.length < 3 && (
+                      <div style={{ textAlign: 'center' }}>
+                        <CameraOutlined style={{ fontSize: 20, color: '#0052cc' }} />
+                        <div style={{ marginTop: 6, fontSize: 11, fontWeight: 600 }}>Upload ({fileList.length}/3)</div>
+                      </div>
+                    )}
+                  </Upload>
+                  <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                    Unggah hingga 3 foto produk dari perangkat/HP.
+                  </Text>
+                </Form.Item>
+
                 <Form.Item
-                  label="Link Foto Produk (Opsional)"
+                  label="Atau Tempel Link URL Foto (Opsional)"
                   name="image"
                 >
-                  <Input placeholder="Tempel URL gambar produk (https://...)" />
+                  <Input placeholder="https://..." />
                 </Form.Item>
 
                 <Button type="primary" htmlType="submit" size="large" block icon={<PlusOutlined />} style={{ height: 44, fontSize: 16, marginTop: 8 }}>

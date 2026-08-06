@@ -123,6 +123,13 @@ export default function ProductDetail() {
     );
   }
 
+  const [activeImg, setActiveImg] = useState<string>('');
+
+  const allImages = product
+    ? (product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []))
+    : [];
+  const currentImage = activeImg || allImages[0] || '';
+
   return (
     <>
       {contextHolder}
@@ -140,12 +147,12 @@ export default function ProductDetail() {
           <Row gutter={[32, 32]}>
             {/* Image Side */}
             <Col xs={24} md={10}>
-              <div style={{ borderRadius: 12, overflow: 'hidden', background: '#f1f5f9', minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {product.image ? (
+              <div style={{ borderRadius: 12, overflow: 'hidden', background: '#f1f5f9', minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                {currentImage ? (
                   <Image
                     alt={product.name}
-                    src={product.image}
-                    style={{ width: '100%', objectFit: 'cover' }}
+                    src={currentImage}
+                    style={{ width: '100%', maxHeight: 380, objectFit: 'contain' }}
                   />
                 ) : (
                   <div style={{ textAlign: 'center', color: '#94a3b8' }}>
@@ -154,6 +161,30 @@ export default function ProductDetail() {
                   </div>
                 )}
               </div>
+
+              {/* Thumbnails Gallery */}
+              {allImages.length > 1 && (
+                <Flex gap="small" justify="center">
+                  {allImages.map((imgUrl: string, idx: number) => (
+                    <div
+                      key={idx}
+                      onClick={() => setActiveImg(imgUrl)}
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        border: currentImage === imgUrl ? '2px solid #0052cc' : '1px solid #cbd5e1',
+                        opacity: currentImage === imgUrl ? 1 : 0.65,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <img src={imgUrl} alt={`Foto ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  ))}
+                </Flex>
+              )}
             </Col>
 
             {/* Info Side */}
