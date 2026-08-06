@@ -151,42 +151,43 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
       {messages.length === 0 ? (
         <Empty description="Belum ada transaksi pesan atau orderan masuk." />
       ) : (
-        <List
-          dataSource={messages}
-          renderItem={item => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {messages.map(item => {
             const isSeller = item.sellerEmail === user.email;
 
             return (
               <Card
                 key={item.id}
                 size="small"
-                style={{
-                  marginBottom: 16,
-                  borderRadius: 12,
-                  borderColor: item.status === 'accepted' ? '#36b37e' : item.status === 'rejected' ? '#ff4d4f' : '#0052cc',
-                  background: '#ffffff',
-                }}
+                style={{ borderRadius: 12, border: item.status === 'accepted' ? '2px solid #36b37e' : '1px solid #e2e8f0', background: '#ffffff' }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                  <Tag color={item.type === 'nego' ? 'gold' : 'blue'}>
-                    {item.type === 'nego' ? '🤝 Penawaran Nego' : '🛒 Pesanan COD'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                  <Space align="center">
+                    <Avatar style={{ backgroundColor: isSeller ? '#0052cc' : '#36b37e' }} icon={<UserOutlined />}>
+                      {isSeller ? 'P' : 'B'}
+                    </Avatar>
+                    <div>
+                      <Text strong style={{ fontSize: 13, display: 'block' }}>
+                        {isSeller ? `Pembeli: ${item.buyerName}` : `Penjual: ${item.sellerName}`}
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 11 }}>
+                        {item.type === 'order' ? 'Pesanan COD' : 'Tawaran Nego'} • {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Text>
+                    </div>
+                  </Space>
+                  <Tag color={item.type === 'order' ? 'cyan' : 'gold'} style={{ borderRadius: 4, margin: 0 }}>
+                    {item.type === 'order' ? 'Order' : 'Nego'}
                   </Tag>
-                  <Text type="secondary" style={{ fontSize: 11 }}>
-                    {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
                 </div>
 
-                <Title level={5} style={{ margin: '0 0 4px 0' }}>{item.productName}</Title>
-
-                <div style={{ fontSize: 12, color: '#475569', marginBottom: 8 }}>
-                  <div>{isSeller ? `Dari Pembeli: ${item.buyerName}` : `Penjual: ${item.sellerName}`}</div>
-                  <div>Harga Tertera: {formatPrice(item.productPrice)}</div>
-                  {item.proposedPrice && (
-                    <div style={{ fontWeight: 700, color: '#0052cc', fontSize: 14, marginTop: 2 }}>
-                      Harga Tawaran: {formatPrice(item.proposedPrice)}
-                    </div>
-                  )}
-                  <Tag color="green" style={{ marginTop: 4, fontSize: 10 }}>Metode: COD Tunai</Tag>
+                <div style={{ background: '#f8fafc', padding: 10, borderRadius: 8, margin: '8px 0', border: '1px solid #f1f5f9' }}>
+                  <Text strong style={{ fontSize: 13, display: 'block', color: '#0f172a' }}>{item.productName}</Text>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Total Transaksi COD:</Text>
+                    <Text strong style={{ color: '#0052cc', fontSize: 14 }}>
+                      {formatPrice(item.type === 'nego' && item.proposedPrice ? item.proposedPrice : item.productPrice)}
+                    </Text>
+                  </div>
                 </div>
 
                 {item.messageText && (
@@ -239,7 +240,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                 {item.replies && item.replies.length > 0 && (
                   <div style={{ marginTop: 12, background: '#f1f5f9', padding: 8, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
                     <Text strong style={{ fontSize: 11, color: '#64748b' }}>Percakapan Obrolan:</Text>
-                    {item.replies.map(r => {
+                    {item.replies.map((r: any) => {
                       const isMe = r.senderEmail === user.email;
                       return (
                         <div
@@ -281,8 +282,8 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                 </div>
               </Card>
             );
-          }}
-        />
+          })}
+        </div>
       )}
       <div ref={chatEndRef} />
 

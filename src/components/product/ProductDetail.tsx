@@ -295,27 +295,23 @@ export default function ProductDetail() {
                 {reviews.length === 0 ? (
                   <Empty description="Belum ada ulasan untuk produk ini. Jadilah pembeli pertama yang memberikan ulasan!" />
                 ) : (
-                  <List
-                    itemLayout="vertical"
-                    dataSource={reviews}
-                    renderItem={(item: any) => (
-                      <List.Item key={item.id} style={{ padding: '16px 0', borderBottom: '1px solid #f1f5f9' }}>
-                        <List.Item.Meta
-                          avatar={<Avatar icon={<UserOutlined />} style={{ backgroundColor: '#0052cc' }} />}
-                          title={
-                            <Space wrap>
-                              <Text strong>{item.buyerName}</Text>
-                              <Rate disabled value={item.rating} style={{ fontSize: 14 }} />
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {new Date(item.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
-                              </Text>
-                            </Space>
-                          }
-                          description={<Text style={{ fontSize: 14, color: '#1e293b' }}>&quot;{item.comment}&quot;</Text>}
-                        />
-                      </List.Item>
-                    )}
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {reviews.map((item: any) => (
+                      <div key={item.id} style={{ padding: '16px 0', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                        <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#0052cc', flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                            <Text strong>{item.buyerName}</Text>
+                            <Rate disabled value={item.rating} style={{ fontSize: 13 }} />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              • {new Date(item.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </Text>
+                          </div>
+                          <Text style={{ fontSize: 14, color: '#1e293b' }}>&quot;{item.comment}&quot;</Text>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </Col>
