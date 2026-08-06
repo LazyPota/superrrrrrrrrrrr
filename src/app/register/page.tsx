@@ -19,8 +19,9 @@ export default function RegisterPage() {
 
   function onFinish(values) {
     setFormError('');
-    if (!values.email.toLowerCase().endsWith('@president.ac.id')) {
-      setFormError('Pendaftaran khusus email kampus President University (@president.ac.id).');
+    const emailLower = values.email.trim().toLowerCase();
+    if (!emailLower.includes('president.ac.id')) {
+      setFormError('Pendaftaran khusus email kampus President University (@student.president.ac.id / @president.ac.id).');
       return;
     }
 
