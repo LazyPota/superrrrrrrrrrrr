@@ -1,3 +1,5 @@
+import { User, Product, DirectMessage, Reply } from '../types';
+
 const STORAGE_KEYS = {
   USER: 'presumart_user',
   USERS: 'presumart_users',
@@ -5,7 +7,7 @@ const STORAGE_KEYS = {
   DIRECT_MESSAGES: 'presumart_direct_messages',
 };
 
-export function speakVoice(text) {
+export function speakVoice(text: string): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   try {
     window.speechSynthesis.cancel();
@@ -25,14 +27,14 @@ export function speakVoice(text) {
   }
 }
 
-export function playOrderSound() {
+export function playOrderSound(): void {
   if (typeof window === 'undefined') return;
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
 
-    const playNote = (freq, startTime, duration) => {
+    const playNote = (freq: number, startTime: number, duration: number) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
