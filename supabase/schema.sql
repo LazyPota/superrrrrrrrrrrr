@@ -1,57 +1,43 @@
--- PresUMart Supabase Production Database Schema
-
--- 1. Users Table
-CREATE TABLE IF NOT EXISTS public.users (
-  email TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  password TEXT NOT NULL,
-  major TEXT NOT NULL,
-  batch TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS users (
+  email VARCHAR(255) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  major VARCHAR(255) NOT NULL,
+  batch VARCHAR(50) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Products Table
-CREATE TABLE IF NOT EXISTS public.products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS products (
+  id VARCHAR(255) PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   price NUMERIC NOT NULL,
-  category TEXT NOT NULL,
+  category VARCHAR(255) NOT NULL,
   allow_nego BOOLEAN DEFAULT TRUE,
   image TEXT,
-  seller TEXT NOT NULL,
-  seller_email TEXT NOT NULL,
-  seller_major TEXT,
-  seller_batch TEXT,
+  seller VARCHAR(255) NOT NULL,
+  seller_email VARCHAR(255) NOT NULL,
+  seller_major VARCHAR(255),
+  seller_batch VARCHAR(50),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Messages Table
-CREATE TABLE IF NOT EXISTS public.messages (
-  id TEXT PRIMARY KEY,
-  seller_email TEXT NOT NULL,
-  seller_name TEXT NOT NULL,
-  buyer_email TEXT NOT NULL,
-  buyer_name TEXT NOT NULL,
-  product_id TEXT NOT NULL,
-  product_name TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS messages (
+  id VARCHAR(255) PRIMARY KEY,
+  seller_email VARCHAR(255) NOT NULL,
+  seller_name VARCHAR(255) NOT NULL,
+  buyer_email VARCHAR(255) NOT NULL,
+  buyer_name VARCHAR(255) NOT NULL,
+  product_id VARCHAR(255) NOT NULL,
+  product_name VARCHAR(255) NOT NULL,
   product_price NUMERIC NOT NULL,
   proposed_price NUMERIC,
   message_text TEXT,
-  type TEXT NOT NULL DEFAULT 'nego',
-  status TEXT NOT NULL DEFAULT 'pending',
-  payment_method TEXT DEFAULT 'COD',
+  type VARCHAR(50) NOT NULL DEFAULT 'nego',
+  status VARCHAR(50) NOT NULL DEFAULT 'pending',
+  payment_method VARCHAR(50) DEFAULT 'COD',
   unread_by_seller BOOLEAN DEFAULT TRUE,
   unread_by_buyer BOOLEAN DEFAULT FALSE,
   replies JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- Enable RLS (Row Level Security) & add public policies
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow public access users" ON public.users FOR ALL USING (true);
-CREATE POLICY "Allow public access products" ON public.products FOR ALL USING (true);
-CREATE POLICY "Allow public access messages" ON public.messages FOR ALL USING (true);
