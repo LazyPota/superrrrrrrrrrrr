@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Row, Col, Typography, Divider, Space, Flex } from 'antd';
-import { ShopOutlined, EnvironmentOutlined, HeartOutlined } from '@ant-design/icons';
+import { ShopOutlined, EnvironmentOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -57,8 +57,8 @@ export default function Footer() {
           <Text style={{ color: '#64748b', fontSize: 12 }}>
             © {new Date().getFullYear()} PresUMart - President University. Hak Cipta Dilindungi.
           </Text>
-          <Text style={{ color: '#94a3b8', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            Dibuat dengan <HeartOutlined style={{ color: '#ef4444' }} /> oleh <span style={{ color: '#38bdf8', fontWeight: 600 }}>Anak Mamah</span>
+          <Text style={{ color: '#94a3b8', fontSize: 12 }}>
+            Dikembangkan oleh <span style={{ color: '#38bdf8', fontWeight: 600 }}>Anak Mamah</span>
           </Text>
         </div>
       </div>
