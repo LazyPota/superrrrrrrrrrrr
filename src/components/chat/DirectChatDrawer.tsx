@@ -79,6 +79,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     );
     messageApi.success('Pesanan berhasil dibuat! Menunggu ketemuan COD di kampus.');
     setCodModalMsg(null);
+    setShouldScrollBottom(true);
     refreshMessages();
   }
 
@@ -91,6 +92,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
       'Penjual telah mengirimkan tawaran kartu produk. Silakan pembeli klik "Pesan & Tentukan Lokasi COD" jika sepakat.'
     );
     messageApi.success('Kartu tawaran produk berhasil dikirimkan!');
+    setShouldScrollBottom(true);
     refreshMessages();
   }
 
@@ -104,12 +106,16 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
       'Penjual mengonfirmasi barang telah diserahkan & TERJUAL!'
     );
     messageApi.success('Barang telah ditandai TERJUAL!');
+    setShouldScrollBottom(true);
     refreshMessages();
   }
 
+  const [shouldScrollBottom, setShouldScrollBottom] = useState(false);
+
   useEffect(() => {
-    let interval;
+    let interval: any;
     if (open) {
+      setShouldScrollBottom(true);
       const u = getUser();
       setUser(u);
       if (u) {
@@ -140,12 +146,13 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     };
   }, [open]);
 
-  // BUG FIX #9: Auto-scroll to bottom when messages/replies change
+  // Scroll to bottom ONLY on initial open or when explicitly triggered (e.g. sending a message)
   useEffect(() => {
-    if (chatEndRef.current) {
+    if (shouldScrollBottom && chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      setShouldScrollBottom(false);
     }
-  }, [messages]);
+  }, [shouldScrollBottom]);
 
   function refreshMessages(currentUser?: any) {
     const u = currentUser || getUser();
@@ -153,12 +160,19 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
       const msgs = getDirectMessages();
       const userMsgs = msgs.filter(m => m.sellerEmail === u.email || m.buyerEmail === u.email);
       userMsgs.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-      setMessages(userMsgs);
+      
+      setMessages(prev => {
+        if (JSON.stringify(prev) === JSON.stringify(userMsgs)) {
+          return prev;
+        }
+        return userMsgs;
+      });
     }
   }
 
   function handleStatusChange(id: string, newStatus: any) {
     updateMessageStatus(id, newStatus);
+    setShouldScrollBottom(true);
     refreshMessages(user);
   }
 
@@ -167,6 +181,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     if (!text || !text.trim()) return;
     addReplyToMessage(msgId, user.email, user.name, text.trim());
     setReplyTextMap(prev => ({ ...prev, [msgId]: '' }));
+    setShouldScrollBottom(true);
     refreshMessages(user);
   }
 
