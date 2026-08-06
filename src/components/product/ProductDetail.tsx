@@ -25,6 +25,7 @@ export default function ProductDetail() {
   const [messageApi, contextHolder] = message.useMessage();
   const [reviews, setReviews] = useState<any[]>([]);
   const [sellerRating, setSellerRating] = useState<{ avgRating: number; totalReviews: number }>({ avgRating: 5.0, totalReviews: 0 });
+  const [activeImg, setActiveImg] = useState<string>('');
 
   useEffect(() => {
     if (productId) {
@@ -122,8 +123,6 @@ export default function ProductDetail() {
       </main>
     );
   }
-
-  const [activeImg, setActiveImg] = useState<string>('');
 
   const allImages = product
     ? (product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []))

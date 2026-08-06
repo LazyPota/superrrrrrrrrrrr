@@ -14,15 +14,49 @@ import SEED_PRODUCTS from '../../data/seed';
 
 const { Title, Text, Paragraph } = Typography;
 
-const getBase64 = (file: File): Promise<string> =>
+const compressAndResizeImage = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
+    reader.onload = event => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIMENSION = 800; // Max 800px width/height for sharp product view & tiny file size
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_DIMENSION) {
+            height = Math.round((height * MAX_DIMENSION) / width);
+            width = MAX_DIMENSION;
+          }
+        } else {
+          if (height > MAX_DIMENSION) {
+            width = Math.round((width * MAX_DIMENSION) / height);
+            height = MAX_DIMENSION;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          // Compress to JPEG quality 0.7 (reduces file size by 95%+ down to ~30-50KB)
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(compressedDataUrl);
+        } else {
+          resolve(event.target?.result as string);
+        }
+      };
+      img.onerror = err => reject(err);
+    };
+    reader.onerror = err => reject(err);
   });
 
-function formatPrice(price) {
+function formatPrice(price: number) {
   return 'Rp' + Number(price).toLocaleString('id-ID');
 }
 
@@ -52,7 +86,7 @@ export default function SellPage() {
     const updatedList = await Promise.all(
       newFileList.map(async (file: any) => {
         if (file.originFileObj && !file.url && !file.thumbUrl) {
-          file.url = await getBase64(file.originFileObj);
+          file.url = await compressAndResizeImage(file.originFileObj);
         }
         return file;
       })
