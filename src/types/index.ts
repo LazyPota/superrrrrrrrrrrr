@@ -20,6 +20,8 @@ export interface Product {
   sellerMajor?: string;
   sellerBatch?: string;
   createdAt?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 export interface Reply {
@@ -28,6 +30,18 @@ export interface Reply {
   senderName: string;
   text: string;
   timestamp: string;
+}
+
+export interface Review {
+  id: string;
+  productId: string;
+  productName: string;
+  sellerEmail: string;
+  buyerEmail: string;
+  buyerName: string;
+  rating: number; // 1 to 5
+  comment: string;
+  createdAt: string;
 }
 
 export interface DirectMessage {
@@ -47,5 +61,6 @@ export interface DirectMessage {
   createdAt: string;
   unreadBySeller: boolean;
   unreadByBuyer: boolean;
+  reviewed?: boolean;
   replies: Reply[];
 }

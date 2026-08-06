@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input } from 'antd';
-import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined } from '@ant-design/icons';
-import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer } from '../../lib/store';
+import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input, Modal, Rate, message } from 'antd';
+import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined } from '@ant-design/icons';
+import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview } from '../../lib/store';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -11,11 +11,38 @@ function formatPrice(price) {
   return 'Rp' + Number(price).toLocaleString('id-ID');
 }
 
-export default function DirectChatDrawer({ open, onClose }) {
-  const [user, setUser] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [replyTextMap, setReplyTextMap] = useState({});
-  const chatEndRef = useRef(null);
+export default function DirectChatDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [user, setUser] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [replyTextMap, setReplyTextMap] = useState<Record<string, string>>({});
+  const [reviewModalMsg, setReviewModalMsg] = useState<any>(null);
+  const [rating, setRating] = useState<number>(5);
+  const [comment, setComment] = useState<string>('');
+  const [messageApi, contextHolder] = message.useMessage();
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  function handleSubmitReview() {
+    if (!reviewModalMsg) return;
+    if (!comment.trim()) {
+      messageApi.error('Harap isi pesan ulasan kamu!');
+      return;
+    }
+    addReview({
+      messageId: reviewModalMsg.id,
+      productId: reviewModalMsg.productId,
+      productName: reviewModalMsg.productName,
+      sellerEmail: reviewModalMsg.sellerEmail,
+      buyerEmail: reviewModalMsg.buyerEmail,
+      buyerName: reviewModalMsg.buyerName,
+      rating: rating,
+      comment: comment.trim(),
+    });
+    messageApi.success('Terima kasih! Ulasan & rating kamu telah dikirim.');
+    setReviewModalMsg(null);
+    setComment('');
+    setRating(5);
+    if (user) refreshMessages(user);
+  }
 
   useEffect(() => {
     let interval;
@@ -190,6 +217,22 @@ export default function DirectChatDrawer({ open, onClose }) {
                       </Popconfirm>
                     </Space>
                   )}
+
+                  {!isSeller && item.status === 'accepted' && (
+                    item.reviewed ? (
+                      <Tag color="green" icon={<StarOutlined />}>Ulasan Dikirim ⭐</Tag>
+                    ) : (
+                      <Button
+                        type="primary"
+                        size="small"
+                        icon={<StarOutlined />}
+                        style={{ background: '#faad14', borderColor: '#faad14' }}
+                        onClick={() => setReviewModalMsg(item)}
+                      >
+                        Beri Ulasan
+                      </Button>
+                    )
+                  )}
                 </div>
 
                 {/* Live Chat History */}
@@ -242,6 +285,42 @@ export default function DirectChatDrawer({ open, onClose }) {
         />
       )}
       <div ref={chatEndRef} />
+
+      {contextHolder}
+      <Modal
+        title="⭐ Beri Ulasan & Rating Pembelian"
+        open={!!reviewModalMsg}
+        onCancel={() => setReviewModalMsg(null)}
+        onOk={handleSubmitReview}
+        okText="Kirim Ulasan"
+        cancelText="Batal"
+      >
+        {reviewModalMsg && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 12 }}>
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 4 }}>Produk:</Text>
+              <Text type="secondary">{reviewModalMsg.productName}</Text>
+            </div>
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 4 }}>Penjual:</Text>
+              <Text type="secondary">{reviewModalMsg.sellerName}</Text>
+            </div>
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>Rating (1 - 5 Bintang):</Text>
+              <Rate value={rating} onChange={setRating} style={{ fontSize: 24 }} />
+            </div>
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>Pesan Ulasan:</Text>
+              <Input.TextArea
+                rows={4}
+                placeholder="Ceritakan pengalaman berbelanja kamu (kondisi barang, ketepatan waktu COD, respon penjual)..."
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+      </Modal>
     </Drawer>
   );
 }

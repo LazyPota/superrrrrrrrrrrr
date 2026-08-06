@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Card, Row, Col, Typography, Tag, Button, Breadcrumb, Descriptions, Space, Image, message, Spin, Empty, Flex, Modal, InputNumber, Input } from 'antd';
-import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined } from '@ant-design/icons';
-import { getProducts, addToCart, getUser, sendDirectMessage } from '../../lib/store';
+import { Card, Row, Col, Typography, Tag, Button, Breadcrumb, Descriptions, Space, Image, message, Spin, Empty, Flex, Modal, InputNumber, Input, Rate, Avatar, List } from 'antd';
+import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
+import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 
 const { Title, Text, Paragraph } = Typography;
@@ -23,21 +23,24 @@ export default function ProductDetail() {
   const [negoPrice, setNegoPrice] = useState(0);
   const [negoNote, setNegoNote] = useState('');
   const [messageApi, contextHolder] = message.useMessage();
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [sellerRating, setSellerRating] = useState<{ avgRating: number; totalReviews: number }>({ avgRating: 5.0, totalReviews: 0 });
 
   useEffect(() => {
-    if (!productId) {
-      setNotFound(true);
-      return;
-    }
-    const stored = getProducts();
-    const fromStore = stored.find(p => p.id === productId);
-    const fromSeed = SEED_PRODUCTS.find(p => p.id === productId);
-    const found = fromStore || fromSeed;
-    if (found) {
-      setProduct(found);
-      setNegoPrice(Math.round(found.price * 0.9));
-    } else {
-      setNotFound(true);
+    if (productId) {
+      const all = getProducts();
+      let found = all.find(p => p.id === productId);
+      if (!found) {
+        found = SEED_PRODUCTS.find(p => p.id === productId);
+      }
+      if (found) {
+        setProduct(found);
+        setNegoPrice(found.price);
+        setReviews(getProductReviews(found.id));
+        setSellerRating(getSellerRating(found.sellerEmail));
+      } else {
+        setNotFound(true);
+      }
     }
   }, [productId]);
 
@@ -199,7 +202,10 @@ export default function ProductDetail() {
                   <Text type="secondary">
                     {product.sellerMajor} • Angkatan {product.sellerBatch}
                   </Text>
-                  <Tag color="green" icon={<CheckCircleOutlined />}>Terverifikasi Mahasiswa PresUniv</Tag>
+                  <Space wrap>
+                    <Tag color="green" icon={<CheckCircleOutlined />}>Terverifikasi Mahasiswa PresUniv</Tag>
+                    <Tag color="gold" icon={<StarOutlined />}>⭐ {sellerRating.avgRating} / 5.0 ({sellerRating.totalReviews} Ulasan)</Tag>
+                  </Space>
                 </Flex>
               </Card>
 
@@ -268,6 +274,49 @@ export default function ProductDetail() {
                 <Paragraph style={{ fontSize: 15, lineHeight: 1.7, color: '#334155', whiteSpace: 'pre-line' }}>
                   {product.description}
                 </Paragraph>
+              </div>
+
+              {/* Reviews & Rating Section */}
+              <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+                  <Title level={4} style={{ margin: 0 }}>
+                    Ulasan & Rating Pembeli ({reviews.length})
+                  </Title>
+                  {reviews.length > 0 && (
+                    <Space wrap>
+                      <Rate disabled value={Math.round(reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length)} />
+                      <Text strong style={{ fontSize: 16 }}>
+                        {(reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)} / 5.0
+                      </Text>
+                    </Space>
+                  )}
+                </div>
+
+                {reviews.length === 0 ? (
+                  <Empty description="Belum ada ulasan untuk produk ini. Jadilah pembeli pertama yang memberikan ulasan!" />
+                ) : (
+                  <List
+                    itemLayout="vertical"
+                    dataSource={reviews}
+                    renderItem={(item: any) => (
+                      <List.Item key={item.id} style={{ padding: '16px 0', borderBottom: '1px solid #f1f5f9' }}>
+                        <List.Item.Meta
+                          avatar={<Avatar icon={<UserOutlined />} style={{ backgroundColor: '#0052cc' }} />}
+                          title={
+                            <Space wrap>
+                              <Text strong>{item.buyerName}</Text>
+                              <Rate disabled value={item.rating} style={{ fontSize: 14 }} />
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {new Date(item.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+                              </Text>
+                            </Space>
+                          }
+                          description={<Text style={{ fontSize: 14, color: '#1e293b' }}>&quot;{item.comment}&quot;</Text>}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                )}
               </div>
             </Col>
           </Row>

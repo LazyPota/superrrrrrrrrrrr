@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
 
-let serverDb = {
+let serverDb: {
+  users: any[];
+  products: any[];
+  messages: any[];
+  reviews: any[];
+} = {
   users: [
     {
       name: 'Rina S.',
@@ -20,6 +25,7 @@ let serverDb = {
   ],
   products: [],
   messages: [],
+  reviews: [],
 };
 
 function mergeMessages(existingList: any[], incomingList: any[]) {
@@ -42,6 +48,7 @@ function mergeMessages(existingList: any[], incomingList: any[]) {
         ...existing,
         ...incoming,
         status: updatedStatus,
+        reviewed: incoming.reviewed || existing.reviewed,
         replies: mergedReplies,
       });
     }
@@ -64,11 +71,19 @@ function mergeProducts(existingList: any[], incomingList: any[]) {
   return Array.from(map.values());
 }
 
+function mergeReviews(existingList: any[], incomingList: any[]) {
+  const map = new Map();
+  (existingList || []).forEach(r => map.set(r.id, r));
+  (incomingList || []).forEach(r => map.set(r.id, r));
+  return Array.from(map.values()).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
 export async function GET() {
   try {
     const { data: supaUsers } = await supabase.from('users').select('*');
     const { data: supaProds } = await supabase.from('products').select('*');
     const { data: supaMsgs } = await supabase.from('messages').select('*');
+    const { data: supaRevs } = await supabase.from('reviews').select('*');
 
     if (supaUsers && supaUsers.length > 0) {
       serverDb.users = mergeUsers(serverDb.users, supaUsers);
@@ -78,6 +93,9 @@ export async function GET() {
     }
     if (supaMsgs && supaMsgs.length > 0) {
       serverDb.messages = mergeMessages(serverDb.messages, supaMsgs);
+    }
+    if (supaRevs && supaRevs.length > 0) {
+      serverDb.reviews = mergeReviews(serverDb.reviews, supaRevs);
     }
   } catch (e) {
     // Fallback if Supabase tables are not created yet
@@ -92,12 +110,14 @@ export async function POST(req: Request) {
     if (data.users) serverDb.users = mergeUsers(serverDb.users, data.users);
     if (data.products) serverDb.products = mergeProducts(serverDb.products, data.products);
     if (data.messages) serverDb.messages = mergeMessages(serverDb.messages, data.messages);
+    if (data.reviews) serverDb.reviews = mergeReviews(serverDb.reviews, data.reviews);
 
     // Try upserting to Supabase DB
     try {
       if (data.users?.length) await supabase.from('users').upsert(data.users, { onConflict: 'email' });
       if (data.products?.length) await supabase.from('products').upsert(data.products, { onConflict: 'id' });
       if (data.messages?.length) await supabase.from('messages').upsert(data.messages, { onConflict: 'id' });
+      if (data.reviews?.length) await supabase.from('reviews').upsert(data.reviews, { onConflict: 'id' });
     } catch (e) {
       // Ignore Supabase sync errors if table doesn't exist
     }

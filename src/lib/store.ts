@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
   USERS: 'presumart_users',
   PRODUCTS: 'presumart_products',
   DIRECT_MESSAGES: 'presumart_direct_messages',
+  REVIEWS: 'presumart_reviews',
 };
 
 export function speakVoice(text: string): void {
@@ -487,4 +488,73 @@ export function markMessagesAsRead(userEmail) {
   if (updated) {
     saveDirectMessages(messages);
   }
+}
+
+/* --- REVIEWS & RATINGS SYSTEM --- */
+
+export function getReviews(): any[] {
+  if (typeof window === 'undefined') return [];
+  const data = localStorage.getItem(STORAGE_KEYS.REVIEWS);
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveReviews(reviews: any[]): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEYS.REVIEWS, JSON.stringify(reviews));
+  pushToServer();
+}
+
+export function addReview(data: {
+  messageId: string;
+  productId: string;
+  productName: string;
+  sellerEmail: string;
+  buyerEmail: string;
+  buyerName: string;
+  rating: number;
+  comment: string;
+}) {
+  const reviews = getReviews();
+  const newReview = {
+    id: 'rev-' + Date.now(),
+    productId: data.productId,
+    productName: data.productName,
+    sellerEmail: data.sellerEmail,
+    buyerEmail: data.buyerEmail,
+    buyerName: data.buyerName,
+    rating: data.rating,
+    comment: data.comment,
+    createdAt: new Date().toISOString(),
+  };
+
+  reviews.unshift(newReview);
+  saveReviews(reviews);
+
+  // Mark message as reviewed
+  const messages = getDirectMessages();
+  const msg = messages.find(m => m.id === data.messageId);
+  if (msg) {
+    msg.reviewed = true;
+    saveDirectMessages(messages);
+  }
+
+  playOrderSound();
+  speakVoice('Ulasan berhasil dikirim!');
+  return reviews;
+}
+
+export function getProductReviews(productId: string): any[] {
+  return getReviews().filter(r => r.productId === productId);
+}
+
+export function getSellerReviews(sellerEmail: string): any[] {
+  return getReviews().filter(r => r.sellerEmail === sellerEmail);
+}
+
+export function getSellerRating(sellerEmail: string): { avgRating: number; totalReviews: number } {
+  const sellerRevs = getSellerReviews(sellerEmail);
+  if (sellerRevs.length === 0) return { avgRating: 5.0, totalReviews: 0 };
+  const sum = sellerRevs.reduce((acc, curr) => acc + (curr.rating || 5), 0);
+  const avg = (sum / sellerRevs.length).toFixed(1);
+  return { avgRating: parseFloat(avg), totalReviews: sellerRevs.length };
 }

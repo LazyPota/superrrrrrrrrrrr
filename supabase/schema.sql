@@ -38,6 +38,19 @@ CREATE TABLE IF NOT EXISTS messages (
   payment_method VARCHAR(50) DEFAULT 'COD',
   unread_by_seller BOOLEAN DEFAULT TRUE,
   unread_by_buyer BOOLEAN DEFAULT FALSE,
+  reviewed BOOLEAN DEFAULT FALSE,
   replies JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS reviews (
+  id VARCHAR(255) PRIMARY KEY,
+  product_id VARCHAR(255) NOT NULL,
+  product_name VARCHAR(255) NOT NULL,
+  seller_email VARCHAR(255) NOT NULL,
+  buyer_email VARCHAR(255) NOT NULL,
+  buyer_name VARCHAR(255) NOT NULL,
+  rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
