@@ -4,25 +4,26 @@ const API_URL = 'https://api.gutstore.my.id/v1/chat/completions';
 const API_KEY = process.env.CHAT_API_KEY || '';
 const MODEL = 'ling-3.0-flash';
 
-export async function POST(req) {
+const DEFAULT_FRIENDLY_REPLY = 'Waduh, barang atau produk yang kamu cari belum tersedia saat ini di PresUMart 😅. Kamu bisa cek lagi nanti atau jadi yang pertama menjual barang ini di menu Jual Barang!';
+
+export async function POST(req: Request) {
   try {
     const { messages, products } = await req.json();
 
     const productList = (products || [])
-      .map(p => `- ${p.name}: Rp${Number(p.price).toLocaleString('id-ID')} (${p.category})`)
+      .map((p: any) => `- ${p.name}: Rp${Number(p.price).toLocaleString('id-ID')} (${p.category})`)
       .join('\n');
 
-    const systemPrompt = `Kamu adalah asisten belanja PresUMart, marketplace khusus mahasiswa President University. Bantu user menemukan produk yang mereka cari.
+    const systemPrompt = `Kamu adalah Asisten AI PresUMart, marketplace khusus mahasiswa President University Jababeka.
 
-Produk yang tersedia saat ini:
+Daftar produk yang sedang dijual mahasiswa saat ini:
 ${productList || 'Belum ada produk.'}
 
-Tugasmu:
-- Rekomendasikan produk berdasarkan apa yang user cari
-- Jawab dalam Bahasa Indonesia yang santai, sopan, dan friendly
-- Jika produk tidak tersedia, sarankan user untuk cek lagi nanti
-- Jangan rekomendasikan produk di luar daftar yang tersedia
-- DILARANG menggunakan tanda bintang ganda atau tunggal (seperti ** atau *) pada teks balasan. Tulis nama produk dan harga dengan teks biasa tanpa format markdown bintang.`;
+Aturan Jawabanmu:
+1. Jika produk yang dicari user ADA di daftar di atas, rekomendasikan nama produk dan harganya dengan ramah.
+2. Jika produk yang dicari user BELUM ADA di daftar di atas, JANGAN PERNAH menjawab "Maaf AI tidak memberikan tanggapan" atau kalimat kaku! Jawablah dengan hangat dan sopan: "Waduh, produk yang kamu cari belum ada yang menjual saat ini di PresUMart 😅. Kamu bisa berkala cek lagi nanti, atau kamu bisa pasang iklan jual barang ini di menu Jual Barang!"
+3. Gunakan Bahasa Indonesia yang ramah, sopan, dan membantu layaknya sesama mahasiswa President University.
+4. DILARANG menggunakan tanda bintang ganda atau tunggal (seperti ** atau *). Tulis teks biasa tanpa format bintang markdown.`;
 
     const body = {
       model: MODEL,
@@ -44,20 +45,23 @@ Tugasmu:
     });
 
     if (!res.ok) {
-      const errorText = await res.text().catch(() => '');
-      console.error('External Chat API error:', res.status, errorText);
-      return NextResponse.json({ error: `API error: ${res.status}` }, { status: 502 });
+      console.error('External Chat API error:', res.status);
+      return NextResponse.json({ reply: DEFAULT_FRIENDLY_REPLY });
     }
 
     const data = await res.json();
-    let reply = data.choices?.[0]?.message?.content || 'Maaf, AI tidak memberikan tanggapan.';
-    
+    let reply = data.choices?.[0]?.message?.content?.trim();
+
+    if (!reply || reply.includes('tidak memberikan tanggapan')) {
+      reply = DEFAULT_FRIENDLY_REPLY;
+    }
+
     // Hapus semua tanda bintang (asterisk) dari balasan
     reply = reply.replace(/\*/g, '');
 
     return NextResponse.json({ reply });
   } catch (error) {
     console.error('Next.js API Chat Route Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ reply: DEFAULT_FRIENDLY_REPLY });
   }
 }

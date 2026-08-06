@@ -125,7 +125,7 @@ export default function ChatWidget() {
     } catch (err) {
       const errorMsg: ChatMessage = {
         role: 'bot',
-        text: 'Maaf, layanan AI sedang gangguan. Coba lagi beberapa saat.',
+        text: 'Waduh, barang atau produk yang kamu cari belum tersedia saat ini di PresUMart 😅. Kamu bisa cek lagi nanti atau jadi yang pertama menjual barang ini di menu Jual Barang!',
       };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
