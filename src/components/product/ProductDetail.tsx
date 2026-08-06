@@ -459,7 +459,7 @@ export default function ProductDetail() {
                   value={negoPrice}
                   onChange={val => setNegoPrice(val || 0)}
                   formatter={val => `Rp ${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                  parser={val => val.replace(/Rp\s?|(\.*)/g, '')}
+                  parser={val => Number(val ? val.replace(/Rp\s?|(\.*)/g, '') : 0)}
                 />
               </div>
 

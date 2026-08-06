@@ -34,17 +34,23 @@ function findProductsInReply(replyText, userText) {
   });
 }
 
+interface ChatMessage {
+  role: 'user' | 'bot';
+  text: string;
+  products?: any[];
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     { role: 'bot', text: WELCOME },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesRef = useRef(null);
+  const messagesRef = useRef<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const [drawerWidth, setDrawerWidth] = useState(380);
+  const [drawerWidth, setDrawerWidth] = useState<number | string>(380);
 
   useEffect(() => {
     function handleResize() {
@@ -94,7 +100,7 @@ export default function ChatWidget() {
     const content = (text || input).trim();
     if (!content || loading) return;
 
-    const userMsg = { role: 'user', text: content };
+    const userMsg: ChatMessage = { role: 'user', text: content };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setLoading(true);
@@ -114,12 +120,14 @@ export default function ChatWidget() {
       const reply = rawReply.replace(/\*/g, '');
       const matched = findProductsInReply(reply, content);
 
-      setMessages(prev => [...prev, { role: 'bot', text: reply, products: matched }]);
+      const botMsg: ChatMessage = { role: 'bot', text: reply, products: matched };
+      setMessages(prev => [...prev, botMsg]);
     } catch (err) {
-      setMessages(prev => [...prev, {
+      const errorMsg: ChatMessage = {
         role: 'bot',
         text: 'Maaf, layanan AI sedang gangguan. Coba lagi beberapa saat.',
-      }]);
+      };
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setLoading(false);
     }

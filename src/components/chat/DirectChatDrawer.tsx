@@ -84,30 +84,30 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     }
   }, [messages]);
 
-  function refreshMessages(currentUser) {
+  function refreshMessages(currentUser?: any) {
     const u = currentUser || getUser();
     if (u) {
       const msgs = getDirectMessages();
       const userMsgs = msgs.filter(m => m.sellerEmail === u.email || m.buyerEmail === u.email);
-      userMsgs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      userMsgs.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setMessages(userMsgs);
     }
   }
 
-  function handleStatusChange(id, newStatus) {
+  function handleStatusChange(id: string, newStatus: any) {
     updateMessageStatus(id, newStatus);
-    refreshMessages();
+    refreshMessages(user);
   }
 
-  function handleSendReply(msgId) {
+  function handleSendReply(msgId: string) {
     const text = replyTextMap[msgId];
     if (!text || !text.trim()) return;
     addReplyToMessage(msgId, user.email, user.name, text.trim());
     setReplyTextMap(prev => ({ ...prev, [msgId]: '' }));
-    refreshMessages();
+    refreshMessages(user);
   }
 
-  const [drawerWidth, setDrawerWidth] = useState(380);
+  const [drawerWidth, setDrawerWidth] = useState<number | string>(380);
 
   useEffect(() => {
     function handleResize() {

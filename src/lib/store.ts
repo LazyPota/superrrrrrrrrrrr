@@ -144,7 +144,7 @@ export async function syncWithServer() {
           const replyMap = new Map();
           (existing.replies || []).forEach(r => replyMap.set(r.id, r));
           (incoming.replies || []).forEach(r => replyMap.set(r.id, r));
-          const mergedReplies = Array.from(replyMap.values()).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          const mergedReplies = Array.from(replyMap.values()).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
           mergedMap.set(incoming.id, {
             ...existing,
@@ -154,7 +154,7 @@ export async function syncWithServer() {
         }
       });
 
-      const mergedMsgs = Array.from(mergedMap.values()).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const mergedMsgs = Array.from(mergedMap.values()).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       if (JSON.stringify(mergedMsgs) !== JSON.stringify(localMsgs)) {
         localStorage.setItem(STORAGE_KEYS.DIRECT_MESSAGES, JSON.stringify(mergedMsgs));
         updated = true;

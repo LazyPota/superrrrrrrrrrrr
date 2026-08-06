@@ -103,7 +103,7 @@ export default function Navbar() {
     router.push('/login');
   }
 
-  const userMenuItems = [
+  const userMenuItems: any[] = [
     {
       key: 'profile',
       icon: <UserOutlined />,
@@ -120,8 +120,8 @@ export default function Navbar() {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
+      label: 'Keluar Akun',
       danger: true,
-      label: 'Keluar',
       onClick: handleLogout,
     },
   ];
