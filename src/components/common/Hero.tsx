@@ -1,7 +1,7 @@
 'use client';
 
 import { Typography, Card, Tag, Button, Row, Col, Space } from 'antd';
-import { SafetyCertificateOutlined, RocketOutlined, ShopOutlined, TeamOutlined, CodeOutlined } from '@ant-design/icons';
+import { SafetyCertificateOutlined, RocketOutlined, ShopOutlined, TeamOutlined, CodeOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
 const { Title, Paragraph } = Typography;
