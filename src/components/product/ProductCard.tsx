@@ -153,15 +153,19 @@ export default function ProductCard({ product }: { product: any }) {
             </Button>,
           ]}
         >
-          <div style={{ flex: 1 }}>
-            <Title level={5} ellipsis={{ rows: 2 }} style={{ marginBottom: 8, height: 44, lineHeight: '22px' }}>
-              {product.name}
-            </Title>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, flexWrap: 'wrap', gap: 4 }}>
-              <Text type="danger" style={{ fontSize: 17, fontWeight: 800 }}>
-                {formatPrice(product.price)}
-              </Text>
-              <Space size={4} wrap>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <Title level={5} ellipsis={{ rows: 2 }} style={{ marginBottom: 10, minHeight: 44, fontSize: 15, lineHeight: '22px' }}>
+                {product.name}
+              </Title>
+
+              <div style={{ marginBottom: 10 }}>
+                <Text type="danger" style={{ fontSize: 18, fontWeight: 800, display: 'block' }}>
+                  {formatPrice(product.price)}
+                </Text>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
                 <Tag color="purple" style={{ fontSize: 11, borderRadius: 4, margin: 0 }}>
                   {product.condition || 'Bekas - Like New'}
                 </Tag>
@@ -173,14 +177,15 @@ export default function ProductCard({ product }: { product: any }) {
                 {product.allowNego !== false ? (
                   <Tag color="gold" style={{ fontSize: 11, borderRadius: 4, margin: 0 }}>Nego</Tag>
                 ) : (
-                  <Tag color="default" style={{ fontSize: 11, borderRadius: 4, margin: 0 }}>Pas</Tag>
+                  <Tag color="default" style={{ fontSize: 11, borderRadius: 4, margin: 0 }}>Harga Pas</Tag>
                 )}
-              </Space>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
-              <CheckCircleOutlined style={{ color: '#36b37e', fontSize: 14 }} />
+
+            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 8, marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CheckCircleOutlined style={{ color: '#36b37e', fontSize: 13 }} />
               <Text type="secondary" style={{ fontSize: 12 }} ellipsis>
-                {product.seller} ({product.sellerMajor || 'PresUniv'})
+                {product.seller} {product.sellerMajor ? `• ${product.sellerMajor}` : ''}
               </Text>
             </div>
           </div>
