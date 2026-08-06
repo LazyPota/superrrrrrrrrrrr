@@ -215,12 +215,13 @@ export default function ProfilePage() {
                       style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justify: 'space-between',
+                        justifyContent: 'space-between',
                         gap: 12,
                         padding: 12,
                         borderRadius: 12,
                         border: '1px solid #e2e8f0',
                         background: '#ffffff',
+                        flexWrap: 'wrap',
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, overflow: 'hidden' }}>
