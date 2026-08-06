@@ -614,17 +614,28 @@ export function isWishlisted(productId: string): boolean {
 /* --- DELETE MESSAGES SYSTEM --- */
 
 export function deleteDirectMessageThread(messageId: string) {
-  const messages = getDirectMessages().filter(m => m.id !== messageId);
+  const user = getUser();
+  const messages = getDirectMessages();
+  const msg = messages.find((m: any) => m.id === messageId);
+  if (msg) {
+    if (user) {
+      if (msg.buyerEmail === user.email) msg.deletedByBuyer = true;
+      if (msg.sellerEmail === user.email) msg.deletedBySeller = true;
+    }
+    msg.deleted = true;
+  }
+  // Remove deleted ones from local array too
+  const activeMessages = messages.filter((m: any) => !m.deleted && !(user && ((m.buyerEmail === user.email && m.deletedByBuyer) || (m.sellerEmail === user.email && m.deletedBySeller))));
   saveDirectMessages(messages);
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('messages-updated'));
   }
-  return messages;
+  return activeMessages;
 }
 
 export function deleteMessageReply(threadId: string, replyId: string) {
   const messages = getDirectMessages();
-  const msg = messages.find(m => m.id === threadId);
+  const msg = messages.find((m: any) => m.id === threadId);
   if (msg && msg.replies) {
     msg.replies = msg.replies.filter((r: any) => r.id !== replyId);
     saveDirectMessages(messages);

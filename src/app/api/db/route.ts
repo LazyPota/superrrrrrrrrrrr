@@ -48,6 +48,9 @@ function mergeMessages(existingList: any[], incomingList: any[]) {
         ...existing,
         ...incoming,
         status: updatedStatus,
+        deleted: incoming.deleted || existing.deleted,
+        deletedByBuyer: incoming.deletedByBuyer || existing.deletedByBuyer,
+        deletedBySeller: incoming.deletedBySeller || existing.deletedBySeller,
         reviewed: incoming.reviewed || existing.reviewed,
         replies: mergedReplies,
       });

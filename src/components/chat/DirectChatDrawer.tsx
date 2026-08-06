@@ -158,7 +158,12 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     const u = currentUser || getUser();
     if (u) {
       const msgs = getDirectMessages();
-      const userMsgs = msgs.filter(m => m.sellerEmail === u.email || m.buyerEmail === u.email);
+      const userMsgs = msgs.filter((m: any) => {
+        if (m.deleted) return false;
+        if (m.buyerEmail === u.email && m.deletedByBuyer) return false;
+        if (m.sellerEmail === u.email && m.deletedBySeller) return false;
+        return m.sellerEmail === u.email || m.buyerEmail === u.email;
+      });
       userMsgs.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       
       setMessages(prev => {
