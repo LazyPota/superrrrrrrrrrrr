@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Row, Col, Typography, Divider, Space, Flex } from 'antd';
-import { ShopOutlined, EnvironmentOutlined, CodeOutlined } from '@ant-design/icons';
+import { ShopOutlined, EnvironmentOutlined, HeartOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -20,28 +20,6 @@ export default function Footer() {
               Platform jual beli resmi khusus komunitas mahasiswa President University.
               Transaksi aman, cepat, dan terpercaya antar sesama mahasiswa.
             </Paragraph>
-            <div style={{ marginTop: 12 }}>
-              <a
-                href="https://presuit26.netlify.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  background: 'rgba(56, 189, 248, 0.1)',
-                  color: '#38bdf8',
-                  border: '1px solid rgba(56, 189, 248, 0.3)',
-                  padding: '6px 14px',
-                  borderRadius: 8,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  transition: 'all 0.2s',
-                }}
-              >
-                <CodeOutlined /> Created by IT Major Batch 2026
-              </a>
-            </div>
           </Col>
 
           <Col xs={12} sm={6} md={5}>
@@ -79,16 +57,8 @@ export default function Footer() {
           <Text style={{ color: '#64748b', fontSize: 12 }}>
             © {new Date().getFullYear()} PresUMart - President University. Hak Cipta Dilindungi.
           </Text>
-          <Text style={{ color: '#94a3b8', fontSize: 12 }}>
-            Developed with excellence by{' '}
-            <a
-              href="https://presuit26.netlify.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#38bdf8', fontWeight: 600 }}
-            >
-              Information Technology Major (Batch 2026)
-            </a>
+          <Text style={{ color: '#94a3b8', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            Dibuat dengan <HeartOutlined style={{ color: '#ef4444' }} /> oleh <span style={{ color: '#38bdf8', fontWeight: 600 }}>Anak Mamah</span>
           </Text>
         </div>
       </div>

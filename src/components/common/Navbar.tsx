@@ -120,19 +120,8 @@ export default function Navbar() {
       <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1000 }}>
         {/* Top Banner Bar */}
         <div style={{ background: '#002b66', color: '#e6f0ff', padding: '6px 16px', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-          <span>🎓 PresUMart - Marketplace Mahasiswa PresUniv</span>
-          <span className="hide-mobile">
-            Dikembangkan oleh{' '}
-            <a
-              href="https://presuit26.netlify.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#60a5fa', fontWeight: 600, textDecoration: 'underline' }}
-            >
-              IT Major Batch 2026
-            </a>{' '}
-            • Kampus Jababeka
-          </span>
+          <span>🎓 PresUMart - Marketplace Resmi Mahasiswa PresUniv</span>
+          <span className="hide-mobile">📍 President University • Kampus Jababeka</span>
         </div>
 
         {/* Main Navbar */}

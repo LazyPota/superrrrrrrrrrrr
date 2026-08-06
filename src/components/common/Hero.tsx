@@ -16,11 +16,9 @@ export default function Hero() {
               <Tag color="cyan" icon={<SafetyCertificateOutlined />} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 20 }}>
                 Marketplace Resmi Mahasiswa PresUniv
               </Tag>
-              <a href="https://presuit26.netlify.app/" target="_blank" rel="noopener noreferrer">
-                <Tag color="blue" icon={<CodeOutlined />} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 20, cursor: 'pointer', background: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)', color: '#fff' }}>
-                  Created by IT Major Batch 2026
-                </Tag>
-              </a>
+              <Tag color="blue" icon={<CheckCircleOutlined />} style={{ fontSize: 13, padding: '4px 12px', borderRadius: 20, background: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)', color: '#fff' }}>
+                Khusus Komunitas Kampus Jababeka
+              </Tag>
             </Space>
             <Title level={1} style={{ color: '#fff', fontSize: '2.5rem', fontWeight: 800, margin: '12px 0', lineHeight: 1.2 }}>
               Jual & Beli Barang Kampus Dengan Aman & Cepat
@@ -54,8 +52,8 @@ export default function Hero() {
               <Col span={12}>
                 <Card style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: 16 }}>
                   <CodeOutlined style={{ fontSize: 32, color: '#ffab00', marginBottom: 8 }} />
-                  <Title level={4} style={{ color: '#fff', margin: 0 }}>IT Batch 2026</Title>
-                  <Paragraph style={{ color: '#c1d7ff', margin: 0, fontSize: 12 }}>Dikembangkan oleh Mahasiswa IT PresUniv</Paragraph>
+                  <Title level={4} style={{ color: '#fff', margin: 0 }}>Transaksi COD</Title>
+                  <Paragraph style={{ color: '#c1d7ff', margin: 0, fontSize: 12 }}>Bayar langsung tunai saat ketemuan di kampus</Paragraph>
                 </Card>
               </Col>
             </Row>
