@@ -268,10 +268,24 @@ export function deleteProduct(id) {
   return products;
 }
 
-export function updateProduct(id, updates) {
+export function updateProduct(id: string, updates: any) {
   const products = getProducts().map(p => p.id === id ? { ...p, ...updates } : p);
   saveProducts(products);
   return products;
+}
+
+export function reduceProductStock(id: string, qtyPurchased: number) {
+  const products = getProducts();
+  const updated = products.map(p => {
+    if (p.id === id) {
+      const currentStock = p.stock !== undefined ? p.stock : 1;
+      const newStock = Math.max(0, currentStock - qtyPurchased);
+      return { ...p, stock: newStock };
+    }
+    return p;
+  });
+  saveProducts(updated);
+  return updated;
 }
 
 /* --- ISOLATED CART PER USER (BUG FIX #1) --- */

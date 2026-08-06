@@ -6,7 +6,7 @@ import { Card, Table, Button, InputNumber, Popconfirm, Statistic, Row, Col, Typo
 import { ShoppingCartOutlined, DeleteOutlined, ArrowLeftOutlined, CheckCircleOutlined, DollarOutlined } from '@ant-design/icons';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
-import { getUser, getCart, removeFromCart, updateCartQty, clearCart, sendDirectMessage } from '../../lib/store';
+import { getUser, getCart, removeFromCart, updateCartQty, clearCart, sendDirectMessage, reduceProductStock } from '../../lib/store';
 
 const { Title, Text } = Typography;
 
@@ -20,8 +20,8 @@ export default function CartPage() {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    setCart(getCart());
     setUser(getUser());
+    setCart(getCart());
   }, []);
 
   function handleQty(id, qty) {
@@ -45,6 +45,9 @@ export default function CartPage() {
     }
 
     cart.forEach((item, index) => {
+      // Reduce stock count in database
+      reduceProductStock(item.id, item.qty);
+
       // Add index offset to prevent ID collision when sending multiple orders at once
       setTimeout(() => {
         sendDirectMessage({

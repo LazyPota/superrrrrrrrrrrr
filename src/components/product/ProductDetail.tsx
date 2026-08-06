@@ -41,6 +41,8 @@ export default function ProductDetail() {
     }
   }, [productId]);
 
+  const isOutOfStock = product?.stock !== undefined && product?.stock <= 0;
+
   function handleAddToCart() {
     const user = getUser();
     if (!user) {
@@ -49,6 +51,10 @@ export default function ProductDetail() {
     }
     if (user.email === product.sellerEmail) {
       messageApi.warning('Tidak bisa membeli produk sendiri.');
+      return;
+    }
+    if (isOutOfStock) {
+      messageApi.error('Maaf, stok produk ini telah habis.');
       return;
     }
     addToCart(product);
@@ -153,6 +159,15 @@ export default function ProductDetail() {
                 <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
                   {product.category}
                 </Tag>
+                {isOutOfStock ? (
+                  <Tag color="red" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                    Stok Habis (0 Unit)
+                  </Tag>
+                ) : (
+                  <Tag color="green" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                    Stok Tersedia: {product.stock ?? 1} Unit
+                  </Tag>
+                )}
                 {product.allowNego !== false ? (
                   <Tag color="gold" icon={<DollarOutlined />} style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
                     Bisa Nego Harga
@@ -162,8 +177,8 @@ export default function ProductDetail() {
                     Harga Pas (Nego Nonaktif)
                   </Tag>
                 )}
-                <Tag color="green" icon={<DollarOutlined />} style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
-                  Pembayaran: COD (Cash On Delivery)
+                <Tag color="cyan" icon={<DollarOutlined />} style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                  Pembayaran: COD
                 </Tag>
               </Space>
 
@@ -189,15 +204,24 @@ export default function ProductDetail() {
               </Card>
 
               <Space size="middle" style={{ marginBottom: 32 }} wrap>
-                <Button type="primary" size="large" icon={<ShoppingCartOutlined />} onClick={handleAddToCart} style={{ height: 48, padding: '0 28px', fontSize: 16 }}>
-                  Tambah ke Keranjang
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<ShoppingCartOutlined />}
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  danger={isOutOfStock}
+                  style={{ height: 48, padding: '0 28px', fontSize: 16 }}
+                >
+                  {isOutOfStock ? 'Stok Habis' : 'Tambah ke Keranjang'}
                 </Button>
 
                 {product.allowNego !== false && (
                   <Button
                     type="default"
                     size="large"
-                    icon={<DollarOutlined style={{ color: '#d97706' }} />}
+                    disabled={isOutOfStock}
+                    icon={<DollarOutlined style={{ color: isOutOfStock ? '#94a3b8' : '#d97706' }} />}
                     onClick={() => {
                       const u = getUser();
                       if (!u) {
@@ -210,7 +234,7 @@ export default function ProductDetail() {
                       }
                       setNegoModalOpen(true);
                     }}
-                    style={{ height: 48, padding: '0 24px', fontSize: 16, borderColor: '#f59e0b', color: '#b45309' }}
+                    style={{ height: 48, padding: '0 24px', fontSize: 16, borderColor: isOutOfStock ? '#d1d5db' : '#f59e0b', color: isOutOfStock ? '#94a3b8' : '#b45309' }}
                   >
                     Nego Harga
                   </Button>

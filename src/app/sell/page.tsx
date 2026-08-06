@@ -152,6 +152,18 @@ export default function SellPage() {
       render: price => <Text strong style={{ color: '#0052cc' }}>{formatPrice(price)}</Text>,
     },
     {
+      title: 'Stok',
+      dataIndex: 'stock',
+      key: 'stock',
+      render: (stock: number) => (
+        stock !== undefined && stock <= 0 ? (
+          <Tag color="red">Habis (0)</Tag>
+        ) : (
+          <Tag color="green">{stock ?? 1} unit</Tag>
+        )
+      ),
+    },
+    {
       title: 'Aksi',
       key: 'action',
       render: (_, record) => (
@@ -231,6 +243,19 @@ export default function SellPage() {
                   rules={[{ required: true, message: 'Pilih kategori!' }]}
                 >
                   <Select placeholder="Pilih Kategori" options={CATEGORIES.map(c => ({ label: c, value: c }))} />
+                </Form.Item>
+
+                <Form.Item
+                  label="Jumlah Stok Barang"
+                  name="stock"
+                  rules={[
+                    { required: true, message: 'Jumlah stok wajib diisi!' },
+                    { type: 'number', min: 0, message: 'Stok minimal 0!' },
+                  ]}
+                  initialValue={1}
+                  extra="Jika stok habis (0), produk otomatis tidak dapat dibeli oleh pembeli."
+                >
+                  <InputNumber min={0} max={999} style={{ width: '100%' }} placeholder="1" />
                 </Form.Item>
 
                 <Form.Item
