@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { Card, Tag, Button, Typography, Space, message, Badge } from 'antd';
-import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined } from '@ant-design/icons';
-import { addToCart, getUser } from '../../lib/store';
+import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined } from '@ant-design/icons';
+import { addToCart, getUser, getDirectMessages, sendDirectMessage } from '../../lib/store';
 
 const { Title, Text } = Typography;
 
-function formatPrice(price) {
+function formatPrice(price: number) {
   return 'Rp' + Number(price).toLocaleString('id-ID');
 }
 
@@ -31,6 +31,42 @@ export default function ProductCard({ product }: { product: any }) {
     }
     addToCart(product);
     messageApi.success('Produk berhasil ditambahkan ke keranjang!');
+  }
+
+  function handleStartChat() {
+    const user = getUser();
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+    if (user.email === product.sellerEmail) {
+      messageApi.warning('Ini adalah produk jualan kamu sendiri.');
+      return;
+    }
+
+    const existingMsgs = getDirectMessages();
+    const found = existingMsgs.find(
+      (m: any) =>
+        (m.buyerEmail === user.email && m.sellerEmail === product.sellerEmail && m.productId === product.id) ||
+        (m.sellerEmail === user.email && m.buyerEmail === product.sellerEmail && m.productId === product.id)
+    );
+
+    if (!found) {
+      sendDirectMessage({
+        sellerEmail: product.sellerEmail,
+        sellerName: product.seller,
+        buyerEmail: user.email,
+        buyerName: user.name,
+        productId: product.id,
+        productName: product.name,
+        productPrice: product.price,
+        proposedPrice: null,
+        messageText: `Halo ${product.seller}, saya tertarik bertanya mengenai produk ${product.name}.`,
+        type: 'order',
+      });
+    }
+
+    window.dispatchEvent(new CustomEvent('open-direct-chat'));
   }
 
   const coverImg = (product.images && product.images.length > 0) ? product.images[0] : product.image;
@@ -64,6 +100,14 @@ export default function ProductCard({ product }: { product: any }) {
                 Detail
               </Button>
             </Link>,
+            <Button
+              type="text"
+              icon={<MessageOutlined style={{ color: '#0052cc' }} />}
+              onClick={handleStartChat}
+              key="chat"
+            >
+              Chat
+            </Button>,
             <Button
               type="primary"
               icon={<ShoppingCartOutlined />}

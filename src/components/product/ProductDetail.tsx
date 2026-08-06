@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Card, Row, Col, Typography, Tag, Button, Breadcrumb, Descriptions, Space, Image, message, Spin, Empty, Flex, Modal, InputNumber, Input, Rate, Avatar, List } from 'antd';
 import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined } from '@ant-design/icons';
-import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating } from '../../lib/store';
+import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating, getDirectMessages } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 
 const { Title, Text, Paragraph } = Typography;
@@ -286,6 +286,35 @@ export default function ProductDetail() {
                       window.location.href = '/login';
                       return;
                     }
+                    if (u.email === product.sellerEmail) {
+                      messageApi.warning('Ini adalah produk jualan kamu sendiri.');
+                      return;
+                    }
+
+                    // Check if chat thread already exists
+                    const existingMsgs = getDirectMessages();
+                    const found = existingMsgs.find(
+                      (m: any) =>
+                        (m.buyerEmail === u.email && m.sellerEmail === product.sellerEmail && m.productId === product.id) ||
+                        (m.sellerEmail === u.email && m.buyerEmail === product.sellerEmail && m.productId === product.id)
+                    );
+
+                    if (!found) {
+                      // Initialize a new direct message thread for this seller/product
+                      sendDirectMessage({
+                        sellerEmail: product.sellerEmail,
+                        sellerName: product.seller,
+                        buyerEmail: u.email,
+                        buyerName: u.name,
+                        productId: product.id,
+                        productName: product.name,
+                        productPrice: product.price,
+                        proposedPrice: null,
+                        messageText: `Halo ${product.seller}, saya berminat bertanya mengenai produk ${product.name}.`,
+                        type: 'order',
+                      });
+                    }
+
                     window.dispatchEvent(new CustomEvent('open-direct-chat'));
                   }}
                   style={{ height: 48, padding: '0 20px', fontSize: 16 }}
