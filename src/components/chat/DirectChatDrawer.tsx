@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input, Modal, Rate, message, Select } from 'antd';
-import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined, EnvironmentOutlined, ShopOutlined, TagOutlined } from '@ant-design/icons';
-import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview, reduceProductStock } from '../../lib/store';
+import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined, EnvironmentOutlined, ShopOutlined, TagOutlined, DeleteOutlined } from '@ant-design/icons';
+import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview, reduceProductStock, deleteDirectMessageThread, deleteMessageReply } from '../../lib/store';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -31,6 +31,18 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
   const [comment, setComment] = useState<string>('');
   const [messageApi, contextHolder] = message.useMessage();
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  function handleDeleteThread(threadId: string) {
+    deleteDirectMessageThread(threadId);
+    messageApi.success('Riwayat obrolan pesan berhasil dihapus.');
+    refreshMessages();
+  }
+
+  function handleDeleteReply(threadId: string, replyId: string) {
+    deleteMessageReply(threadId, replyId);
+    messageApi.success('Pesan berhasil dihapus.');
+    refreshMessages();
+  }
 
   function handleSubmitReview() {
     if (!reviewModalMsg) return;
@@ -226,9 +238,14 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                       </Text>
                     </div>
                   </Space>
-                  <Tag color={item.type === 'order' ? 'cyan' : 'gold'} style={{ borderRadius: 4, margin: 0 }}>
-                    {item.type === 'order' ? 'Order' : 'Nego'}
-                  </Tag>
+                  <Space align="center" size={4}>
+                    <Tag color={item.type === 'order' ? 'cyan' : (item.type === 'inquiry' ? 'blue' : 'gold')} style={{ borderRadius: 4, margin: 0 }}>
+                      {item.type === 'order' ? 'Order' : (item.type === 'inquiry' ? 'Chat' : 'Nego')}
+                    </Tag>
+                    <Popconfirm title="Hapus seluruh riwayat pesan obrolan ini?" onConfirm={() => handleDeleteThread(item.id)} okText="Hapus" cancelText="Batal">
+                      <Button danger size="small" type="text" icon={<DeleteOutlined style={{ fontSize: 13 }} />} title="Hapus Obrolan" />
+                    </Popconfirm>
+                  </Space>
                 </div>
 
                 <div style={{ background: '#f8fafc', padding: 10, borderRadius: 8, margin: '8px 0', border: '1px solid #f1f5f9' }}>
@@ -341,7 +358,14 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                             border: isMe ? 'none' : '1px solid #cbd5e1',
                           }}
                         >
-                          <div style={{ fontSize: 10, opacity: 0.8, marginBottom: 2 }}>{r.senderName}</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 10, opacity: 0.85, marginBottom: 2 }}>
+                            <span>{r.senderName}</span>
+                            {isMe && (
+                              <Popconfirm title="Hapus pesan ini?" onConfirm={() => handleDeleteReply(item.id, r.id)} okText="Ya" cancelText="Batal">
+                                <DeleteOutlined style={{ cursor: 'pointer', fontSize: 11, color: '#fca5a5' }} title="Hapus Pesan" />
+                              </Popconfirm>
+                            )}
+                          </div>
                           <div>{r.text}</div>
                         </div>
                       );

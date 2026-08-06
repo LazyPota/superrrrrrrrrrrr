@@ -610,3 +610,27 @@ export function isWishlisted(productId: string): boolean {
   const list = getWishlist();
   return list.includes(productId);
 }
+
+/* --- DELETE MESSAGES SYSTEM --- */
+
+export function deleteDirectMessageThread(messageId: string) {
+  const messages = getDirectMessages().filter(m => m.id !== messageId);
+  saveDirectMessages(messages);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('messages-updated'));
+  }
+  return messages;
+}
+
+export function deleteMessageReply(threadId: string, replyId: string) {
+  const messages = getDirectMessages();
+  const msg = messages.find(m => m.id === threadId);
+  if (msg && msg.replies) {
+    msg.replies = msg.replies.filter((r: any) => r.id !== replyId);
+    saveDirectMessages(messages);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('messages-updated'));
+    }
+  }
+  return messages;
+}
