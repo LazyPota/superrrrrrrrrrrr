@@ -164,7 +164,7 @@ export default function CartPage() {
                   pagination={false}
                   scroll={{ x: 550 }}
                 />
-                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
                   <Link href="/">
                     <Button icon={<ArrowLeftOutlined />}>Lanjut Belanja</Button>
                   </Link>

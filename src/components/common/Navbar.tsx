@@ -68,7 +68,7 @@ export default function Navbar() {
       refreshState();
 
       notification.info({
-        message: '🔔 Pesan / Orderan Baru Masuk!',
+        title: '🔔 Pesan / Orderan Baru Masuk!',
         description: 'Ada aktivitas percakapan baru di PresUMart. Klik di sini untuk membuka kotak pesan.',
         placement: 'topRight',
         onClick: () => {
@@ -151,9 +151,9 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar */}
-          <div style={{ flex: '1 1 240px', maxWidth: 500, minWidth: 200 }}>
+          <div style={{ flex: '1 1 180px', maxWidth: 500, minWidth: 140 }}>
             <Input.Search
-              placeholder="Cari produk di PresUMart..."
+              placeholder="Cari..."
               allowClear
               enterButton={<Button type="primary" icon={<SearchOutlined />}>Cari</Button>}
               size="middle"
