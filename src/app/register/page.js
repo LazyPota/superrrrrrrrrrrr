@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Form, Input, Select, Button, Alert, Row, Col, Typography, Tag } from 'antd';
 import { UserOutlined, MailOutlined, LockOutlined, UserAddOutlined, IdcardOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 import { registerUser } from '../../lib/store';
 import MAJORS from '../../lib/majors';
 

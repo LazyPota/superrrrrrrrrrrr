@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, Avatar, Statistic, Row, Col, Button, Tag, Typography, Popconfirm, Empty, Space } from 'antd';
 import { UserOutlined, PlusOutlined, LogoutOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 import { getUser, getProducts, removeUser, deleteProduct, getDirectMessages } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 

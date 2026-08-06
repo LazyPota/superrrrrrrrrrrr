@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Card, Tag, Button, Typography, Space, message, Badge } from 'antd';
 import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined } from '@ant-design/icons';
-import { addToCart, getUser } from '../lib/store';
+import { addToCart, getUser } from '../../lib/store';
 
 const { Title, Text } = Typography;
 

@@ -5,10 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Row, Col, Segmented, Empty, Button, Typography, Alert, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import ProductCard from '../components/ProductCard';
-import { getProducts, saveProducts } from '../lib/store';
-import SEED_PRODUCTS from '../data/seed';
-import CATEGORIES from '../data/categories';
+import ProductCard from '../product/ProductCard';
+import { getProducts, saveProducts } from '../../lib/store';
+import SEED_PRODUCTS from '../../data/seed';
+import CATEGORIES from '../../data/categories';
 
 const { Title, Text } = Typography;
 

@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { FloatButton, Drawer, Input, Button, Tag, Avatar, Spin, Space, Typography, Card, message } from 'antd';
 import { RobotOutlined, SendOutlined, ShoppingCartOutlined, EyeOutlined, PictureOutlined } from '@ant-design/icons';
-import { sendChatMessage } from '../lib/chat';
-import { getProducts, addToCart, getUser } from '../lib/store';
-import SEED_PRODUCTS from '../data/seed';
+import { sendChatMessage } from '../../lib/chat';
+import { getProducts, addToCart, getUser } from '../../lib/store';
+import SEED_PRODUCTS from '../../data/seed';
 
 const { Text } = Typography;
 

@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import Hero from '../components/Hero';
-import HomeContent from './HomeContent';
+import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
+import Hero from '../components/common/Hero';
+import HomeContent from '../components/home/HomeContent';
 
 export default function HomePage() {
   return (

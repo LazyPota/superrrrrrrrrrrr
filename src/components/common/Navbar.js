@@ -15,8 +15,8 @@ import {
   UserAddOutlined,
   MessageOutlined,
 } from '@ant-design/icons';
-import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../lib/store';
-import DirectChatDrawer from './DirectChatDrawer';
+import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
+import DirectChatDrawer from '../chat/DirectChatDrawer';
 
 export default function Navbar() {
   const [user, setUser] = useState(null);

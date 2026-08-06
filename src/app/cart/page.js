@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, Table, Button, InputNumber, Popconfirm, Statistic, Row, Col, Typography, Empty, message, Tag, Space } from 'antd';
 import { ShoppingCartOutlined, DeleteOutlined, ArrowLeftOutlined, CheckCircleOutlined, DollarOutlined } from '@ant-design/icons';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+import Navbar from '../../components/common/Navbar';
+import Footer from '../../components/common/Footer';
 import { getUser, getCart, removeFromCart, updateCartQty, clearCart, sendDirectMessage } from '../../lib/store';
 
 const { Title, Text } = Typography;

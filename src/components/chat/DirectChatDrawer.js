@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input } from 'antd';
 import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined } from '@ant-design/icons';
-import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer } from '../lib/store';
+import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer } from '../../lib/store';
 
 const { Title, Text, Paragraph } = Typography;
 
