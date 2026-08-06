@@ -1,0 +1,26 @@
+const MAJORS = [
+  'Accounting',
+  'Actuarial Science',
+  'Biotechnology',
+  'Business Administration',
+  'Civil Engineering',
+  'Communications',
+  'Computer Science',
+  'Diplomacy',
+  'Electrical Engineering',
+  'Environmental Engineering',
+  'Film & Television',
+  'Industrial Engineering',
+  'Information Systems',
+  'Information Technology',
+  'Interior Design',
+  'International Business',
+  'International Relations',
+  'Law',
+  'Management',
+  'Mechanical Engineering',
+  'Psychology',
+  'Visual Communication Design',
+];
+
+export default MAJORS;

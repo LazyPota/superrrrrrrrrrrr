@@ -1,0 +1,303 @@
+.wrapper {
+  flex: 1;
+}
+
+.main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 8px;
+}
+
+.title span {
+  color: var(--red);
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  margin-bottom: 24px;
+}
+
+.loginPrompt {
+  text-align: center;
+  padding: 64px 16px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+}
+
+.loginPrompt h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--gray-900);
+}
+
+.loginPrompt p {
+  color: var(--gray-600);
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.loginLink {
+  display: inline-block;
+  background: var(--red);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.formCard {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.formTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cancelEdit {
+  background: none;
+  border: none;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 6px;
+}
+
+.label span {
+  color: var(--red);
+}
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  outline: none;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--blue);
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.inputError {
+  border-color: var(--red);
+}
+
+.errorText {
+  font-size: 0.75rem;
+  color: var(--red);
+  margin-top: 4px;
+}
+
+.formError {
+  background: #fdecea;
+  border: 1px solid var(--red-light);
+  color: var(--red-dark);
+  font-size: 0.85rem;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.blockNotice {
+  background: #fff3cd;
+  border: 1px solid #ffe08a;
+  color: #856404;
+  font-size: 0.8rem;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.blockNotice strong {
+  color: #b5200d;
+}
+
+.btn {
+  width: 100%;
+  background: var(--red);
+  color: var(--white);
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: var(--red-dark);
+}
+
+.productsCard {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.productsTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 20px;
+}
+
+.productList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.productItem {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.productThumb {
+  width: 56px;
+  height: 56px;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.productName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productMeta {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  margin-top: 4px;
+}
+
+.productPrice {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.itemActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  background: var(--blue-dark);
+  color: var(--white);
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.editBtn:hover {
+  background: var(--blue);
+}
+
+.deleteBtn {
+  background: var(--white);
+  color: var(--red);
+  border: 1px solid var(--red);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.deleteBtn:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+.noProducts {
+  text-align: center;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  padding: 32px 16px;
+  background: var(--gray-50);
+  border-radius: var(--radius);
+}
+
+.ownerBadge {
+  display: inline-block;
+  background: var(--blue-100);
+  color: var(--blue-dark);
+  border: 1px solid var(--blue);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
