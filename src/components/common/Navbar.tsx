@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Input, Badge, Button, Dropdown, Avatar, Space, Tag, notification } from 'antd';
+import { Popconfirm, Input, Badge, Button, Dropdown, Avatar, Space, Tag, notification } from 'antd';
 import {
   ShoppingCartOutlined,
   UserOutlined,
@@ -14,7 +14,7 @@ import {
   LoginOutlined,
   UserAddOutlined,
   MessageOutlined,
-  BellOutlined,
+  HeartOutlined,
 } from '@ant-design/icons';
 import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
 import DirectChatDrawer from '../chat/DirectChatDrawer';
@@ -92,7 +92,7 @@ export default function Navbar() {
     };
   }, [directDrawerOpen]);
 
-  function handleSearch(value) {
+  function handleSearch(value: string) {
     if (!value || !value.trim()) return;
     router.push(`/?search=${encodeURIComponent(value.trim())}`);
   }
@@ -100,19 +100,20 @@ export default function Navbar() {
   function handleLogout() {
     removeUser();
     setUser(null);
+    speakVoice('Berhasil keluar akun.');
     router.push('/login');
   }
 
   const userMenuItems: any[] = [
     {
       key: 'profile',
-      icon: <UserOutlined />,
-      label: <Link href="/profile">Profil Saya</Link>,
+      icon: <UserOutlined style={{ color: '#0052cc' }} />,
+      label: <Link href="/profile" style={{ fontWeight: 600 }}>Profil Saya & Wishlist</Link>,
     },
     {
       key: 'sell',
-      icon: <PlusCircleOutlined />,
-      label: <Link href="/sell">Jual Barang</Link>,
+      icon: <PlusCircleOutlined style={{ color: '#36b37e' }} />,
+      label: <Link href="/sell" style={{ fontWeight: 600 }}>Jual Barang Baru</Link>,
     },
     {
       type: 'divider',
@@ -120,7 +121,7 @@ export default function Navbar() {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Keluar Akun',
+      label: 'Keluar Akun (Logout)',
       danger: true,
       onClick: handleLogout,
     },
@@ -129,19 +130,37 @@ export default function Navbar() {
   return (
     <>
       <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 1000 }}>
-        {/* Top Banner Bar */}
-        <div style={{ background: '#002b66', color: '#e6f0ff', padding: '6px 16px', fontSize: '11px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 4 }}>
-          <span>🎓 PresUMart - Marketplace Resmi Mahasiswa PresUniv</span>
-          <span className="hide-mobile">📍 President University • Kampus Jababeka</span>
+        {/* Top Banner Utility Bar */}
+        <div style={{ background: '#002b66', color: '#e6f0ff', padding: '6px 16px', fontSize: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
+          <span>🎓 PresUMart • Marketplace Resmi Mahasiswa President University</span>
+          <div>
+            {user ? (
+              <Space size="middle" align="center">
+                <span className="hide-mobile">👤 Halo, <b>{user.name}</b> ({user.email})</span>
+                <Popconfirm title="Apakah kamu yakin ingin keluar akun?" onConfirm={handleLogout} okText="Ya, Keluar" cancelText="Batal">
+                  <Button type="link" size="small" icon={<LogoutOutlined />} style={{ color: '#ff85c0', padding: 0, height: 'auto', fontWeight: 700 }}>
+                    Keluar (Logout)
+                  </Button>
+                </Popconfirm>
+              </Space>
+            ) : (
+              <Space size="small" align="center">
+                <span>Belum punya akun?</span>
+                <Link href="/login" style={{ color: '#93c5fd', fontWeight: 700, textDecoration: 'underline' }}>🔑 Masuk (Sign In)</Link>
+                <span style={{ color: '#475569' }}>|</span>
+                <Link href="/register" style={{ color: '#6ee7b7', fontWeight: 700, textDecoration: 'underline' }}>📝 Daftar (Sign Up)</Link>
+              </Space>
+            )}
+          </div>
         </div>
 
         {/* Main Navbar */}
         <div style={{ maxWidth: 1240, margin: '0 auto', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           {/* Brand Logo */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
-            <ShopOutlined style={{ fontSize: 24, color: '#0052cc' }} />
+            <ShopOutlined style={{ fontSize: 26, color: '#0052cc' }} />
             <div>
-              <span style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>
+              <span style={{ fontSize: 21, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>
                 Pres<span style={{ color: '#0052cc' }}>U</span>Mart
               </span>
               <Tag color="blue" style={{ marginLeft: 6, fontSize: 9, fontWeight: 700, borderRadius: 4 }}>
@@ -151,9 +170,9 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar */}
-          <div style={{ flex: '1 1 180px', maxWidth: 500, minWidth: 140 }}>
+          <div style={{ flex: '1 1 180px', maxWidth: 480, minWidth: 140 }}>
             <Input.Search
-              placeholder="Cari..."
+              placeholder="Cari barang, buku, baju..."
               allowClear
               enterButton={<Button type="primary" icon={<SearchOutlined />}>Cari</Button>}
               size="middle"
@@ -163,7 +182,7 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Actions */}
+          {/* User Action Buttons */}
           <Space size="small" align="center" style={{ flexWrap: 'nowrap' }}>
             {user && (
               <Badge count={unreadCount} overflowCount={99} color="#ff4d4f">
@@ -190,28 +209,38 @@ export default function Navbar() {
             {user ? (
               <Space size="small">
                 <Link href="/sell">
-                  <Button type="primary" size="middle" icon={<PlusCircleOutlined />} title="Jual Barang">
-                    <span className="hide-mobile">Jual</span>
+                  <Button type="primary" size="middle" icon={<PlusCircleOutlined />} style={{ background: '#36b37e', borderColor: '#36b37e', fontWeight: 600 }}>
+                    <span className="hide-mobile">Jual Barang</span>
                   </Button>
                 </Link>
                 <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow={{ pointAtCenter: true }}>
-                  <Button size="middle" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 8px' }}>
+                  <Button size="middle" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px', borderColor: '#0052cc' }}>
                     <Avatar size="small" style={{ backgroundColor: '#0052cc' }} icon={<UserOutlined />}>
                       {user.name?.charAt(0).toUpperCase()}
                     </Avatar>
-                    <span className="hide-mobile" style={{ fontWeight: 600, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontWeight: 600, maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {user.name}
                     </span>
                   </Button>
                 </Dropdown>
+
+                <Popconfirm title="Apakah kamu yakin ingin keluar akun?" onConfirm={handleLogout} okText="Ya, Keluar" cancelText="Batal">
+                  <Button danger size="middle" icon={<LogoutOutlined />} title="Keluar Akun (Logout)">
+                    <span className="hide-mobile">Keluar</span>
+                  </Button>
+                </Popconfirm>
               </Space>
             ) : (
               <Space size="small">
                 <Link href="/login">
-                  <Button size="middle" icon={<LoginOutlined />}>Masuk</Button>
+                  <Button type="primary" size="middle" icon={<LoginOutlined />} style={{ background: '#0052cc', fontWeight: 700 }}>
+                    Masuk
+                  </Button>
                 </Link>
                 <Link href="/register">
-                  <Button type="primary" size="middle" icon={<UserAddOutlined />}>Daftar</Button>
+                  <Button type="default" size="middle" icon={<UserAddOutlined />} style={{ fontWeight: 600, borderColor: '#0052cc', color: '#0052cc' }}>
+                    Daftar
+                  </Button>
                 </Link>
               </Space>
             )}
