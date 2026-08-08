@@ -63,7 +63,7 @@ export default function RegisterPage() {
             <Text type="secondary">Isi data identitas mahasiswamu dengan benar</Text>
           </div>
 
-          {formError && <Alert title={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
+          {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
 
           <Form layout="vertical" onFinish={onFinish} size="large">
             <Form.Item

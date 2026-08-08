@@ -67,11 +67,7 @@ export default function ProductDetail() {
 
   function handleAddToCart() {
     const user = getUser();
-    if (!user) {
-      window.location.href = '/login';
-      return;
-    }
-    if (user.email === product.sellerEmail) {
+    if (user && user.email === product.sellerEmail) {
       messageApi.warning('Tidak bisa membeli produk sendiri.');
       return;
     }

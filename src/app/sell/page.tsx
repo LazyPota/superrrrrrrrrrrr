@@ -247,6 +247,28 @@ export default function SellPage() {
     },
   ];
 
+  if (!user) {
+    return (
+      <>
+        {contextHolder}
+        <Navbar />
+        <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', minHeight: '60vh' }}>
+          <Card style={{ textAlign: 'center', padding: '48px 24px', borderRadius: 16 }}>
+            <Empty description={<Title level={4}>Anda Belum Login</Title>}>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                Silakan masuk akun kampus President University untuk menjual produk atau mengelola toko kamu.
+              </Text>
+              <Link href="/login">
+                <Button type="primary" size="large">Masuk Akun Kampus</Button>
+              </Link>
+            </Empty>
+          </Card>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       {contextHolder}
@@ -269,7 +291,7 @@ export default function SellPage() {
               extra={editingProduct && <Button type="text" icon={<CloseOutlined />} onClick={handleCancelEdit}>Batal</Button>}
               style={{ borderRadius: 16 }}
             >
-              {formError && <Alert title={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
+              {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
 
               <Form form={form} layout="vertical" onFinish={onFinish} size="large" initialValues={{ allowNego: true }}>
                 <Form.Item

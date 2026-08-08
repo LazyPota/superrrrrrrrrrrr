@@ -40,7 +40,10 @@ export default function CartPage() {
 
   function handleCheckout() {
     if (!user) {
-      window.location.href = '/login';
+      messageApi.info('Silakan masuk akun kampus terlebih dahulu untuk membuat pesanan COD.');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1200);
       return;
     }
 
@@ -137,15 +140,7 @@ export default function CartPage() {
           Keranjang <span style={{ color: '#0052cc' }}>Saya</span>
         </Title>
 
-        {!user ? (
-          <Card style={{ textAlign: 'center', padding: '48px 24px', borderRadius: 16 }}>
-            <Empty description={<Title level={4}>Silakan Masuk Terlebih Dahulu</Title>}>
-              <Link href="/login">
-                <Button type="primary" size="large">Masuk Akun Kampus</Button>
-              </Link>
-            </Empty>
-          </Card>
-        ) : cart.length === 0 ? (
+        {cart.length === 0 ? (
           <Card style={{ textAlign: 'center', padding: '48px 24px', borderRadius: 16 }}>
             <Empty description={<Title level={4}>Keranjang Masih Kosong</Title>}>
               <Link href="/">
@@ -179,6 +174,14 @@ export default function CartPage() {
               <Card style={{ borderRadius: 16, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
                 <Title level={4} style={{ marginBottom: 16 }}>Ringkasan Pesanan</Title>
 
+                {!user && (
+                  <Card size="small" style={{ background: '#fef3c7', borderColor: '#fde68a', marginBottom: 16, borderRadius: 8 }}>
+                    <Text style={{ fontSize: 12, color: '#92400e' }}>
+                      💡 Kamu sedang menjelajah sebagai tamu. Silakan <b>Masuk Akun Kampus</b> untuk membuat pesanan COD.
+                    </Text>
+                  </Card>
+                )}
+
                 <Card size="small" style={{ background: '#f0fdf4', borderColor: '#bbf7d0', marginBottom: 16, borderRadius: 8 }}>
                   <Space direction="vertical" size={2}>
                     <Tag color="green" icon={<DollarOutlined />}>Metode Pembayaran: COD Only</Tag>
@@ -204,7 +207,7 @@ export default function CartPage() {
                   onClick={handleCheckout}
                   style={{ height: 48, fontSize: 16, background: '#36b37e', borderColor: '#36b37e' }}
                 >
-                  Buat Pesanan COD
+                  {user ? 'Buat Pesanan COD' : 'Masuk untuk Buat Pesanan COD'}
                 </Button>
               </Card>
             </Col>

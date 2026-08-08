@@ -77,7 +77,7 @@ export default function LoginPage() {
             </Space>
           </Card>
 
-          {formError && <Alert title={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
+          {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
 
           <Form form={form} layout="vertical" onFinish={onFinish} size="large">
             <Form.Item
