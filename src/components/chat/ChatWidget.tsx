@@ -13,23 +13,30 @@ const { Text } = Typography;
 const SUGGESTIONS = ['Rekomendasi produk', 'Cari kalkulator', 'Buku kalkulus', 'Makanan enak', 'Laptop bekas'];
 const WELCOME = 'Halo! Aku asisten AI PresUMart. Mau cari atau tanya produk apa hari ini? Ketik pertanyaanmu atau pilih saran di bawah.';
 
-function findProductsInReply(replyText, userText) {
+function findProductsInReply(replyText: string, userText: string) {
   const stored = getProducts();
   const allProducts = Array.from(
     new Map([...stored, ...SEED_PRODUCTS].map(p => [p.id, p])).values()
   );
 
   const combinedText = (replyText + ' ' + userText).toLowerCase();
+  const stopWords = ['bekas', 'untuk', 'edisi', 'saya', 'mau', 'beli', 'cari', 'ada', 'yang', 'dan', 'bisa', 'nih', 'deh'];
 
   return allProducts.filter(p => {
     const nameLower = p.name.toLowerCase();
-    if (combinedText.includes(nameLower)) return true;
+    const catLower = (p.category || '').toLowerCase();
+    const descLower = (p.description || '').toLowerCase();
 
-    const keyWords = nameLower.split(/\s+/).filter(w => w.length >= 4 && !['bekas', 'untuk', 'edisi'].includes(w));
+    // Direct string inclusion
+    if (combinedText.includes(nameLower) || nameLower.includes(userText.toLowerCase().trim())) return true;
+
+    // Filter keywords with length >= 3
+    const keyWords = nameLower.split(/\s+/).filter(w => w.length >= 3 && !stopWords.includes(w));
     if (keyWords.length > 0) {
       const matchCount = keyWords.filter(kw => combinedText.includes(kw)).length;
-      return matchCount >= Math.min(2, keyWords.length);
+      return matchCount >= 1;
     }
+
     return false;
   });
 }
