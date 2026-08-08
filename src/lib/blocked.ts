@@ -3,35 +3,41 @@ const BLOCKED_TERMS = [
   'narkoba', 'drugs', 'ganja', 'marijuana', 'cocaine', 'heroin', 'sabu', 'ekstasi', 'inex', 'tramadol', 'koplo', 'kratom', 'obat keras', 'resep dokter',
   
   // Judi & Slot Online
-  'judi', 'gambling', 'slot', 'togel', 'judol', 'zeus', 'gacor', 'maxwin', 'taruhan', 'poker', 'domino qiu', 'pragmatic',
+  'judi', 'gambling', 'slot online', 'slot gacor', 'slot zeus', 'togel', 'judol', 'zeus maxwin', 'gacor maxwin', 'taruhan online', 'poker judi', 'domino qiu', 'pragmatic play',
   
   // Minuman Keras & Alkohol
-  'miras', 'alkohol', 'alcohol', 'liquor', 'beer', 'bir', 'vodka', 'wine', 'ciu', 'arak', 'soju', 'whisky', 'whiskey', 'spirits', 'whisky',
+  'miras', 'alkohol', 'alcohol', 'liquor', 'beer', 'bir bintang', 'vodka', 'wine', 'ciu', 'arak', 'soju', 'whisky', 'whiskey', 'spirits',
   
   // Rokok & Vape
-  'rokok', 'vape', 'cigarette', 'e-cigarette', 'pod', 'liquid vape', 'cerutu', 'tobacco',
+  'rokok', 'vape', 'cigarette', 'e-cigarette', 'liquid vape', 'cerutu', 'tobacco',
   
   // Senjata & Bahan Peledak
-  'senjata', 'weapon', 'gun', 'pistol', 'senapan', 'peluru', 'amunisi', 'bom', 'bomb', 'explosive', 'petasan', 'mercon', 'clurit', 'celurit', 'samurai', 'pisau lipat',
+  'senjata api', 'weapon', 'gun', 'pistol', 'senapan', 'peluru', 'amunisi', 'bom', 'explosive', 'petasan', 'mercon', 'clurit', 'celurit', 'pisau lipat',
   
-  // Racun & Organ
-  'racun', 'poison', 'cyanide', 'sianida', 'organ', 'kidney', 'ginjal',
+  // Racun & Organ Manusia
+  'racun', 'poison', 'cyanide', 'sianida', 'organ manusia', 'jual ginjal', 'kidney sale',
   
   // Konten Dewasa & Ilegal
-  'porno', 'porn', 'adult content', 'bokep', 'dildo', 'counterfeit', 'palsu', 'fake id', 'ijazah palsu', 'stnk palsu',
+  'porno', 'porn', 'adult content', 'bokep', 'dildo', 'counterfeit', 'fake id', 'ijazah palsu', 'stnk palsu',
   
-  // Cheat & Hack
-  'hack', 'crack', 'cheat', 'exploit',
+  // Cheat & Hack Ilegal
+  'cheat game', 'hack akun', 'crack software', 'exploit tool',
 ];
 
 export function isProductBlocked(name: string, description: string) {
   const text = `${name} ${description}`.toLowerCase();
-  return BLOCKED_TERMS.some(term => text.includes(term));
+  return BLOCKED_TERMS.some(term => {
+    const regex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    return regex.test(text);
+  });
 }
 
 export function getBlockReason(name: string, description: string) {
   const text = `${name} ${description}`.toLowerCase();
-  const found = BLOCKED_TERMS.find(term => text.includes(term));
+  const found = BLOCKED_TERMS.find(term => {
+    const regex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    return regex.test(text);
+  });
   if (!found) return null;
   return `❌ Produk Ditolak & Diblokir Otomatis! Mengandung kata/barang terlarang: "${found}". Barang berbahaya seperti judi, alkohol, narkoba, senjata, rokok, atau produk ilegal tidak diizinkan di PresUMart.`;
 }
