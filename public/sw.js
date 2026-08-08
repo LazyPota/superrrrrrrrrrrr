@@ -1,4 +1,4 @@
-const CACHE_NAME = 'presumart-pwa-v1';
+const CACHE_NAME = 'presumart-pwa-v2';
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -40,6 +40,23 @@ self.addEventListener('fetch', (event) => {
       return fetch(event.request).catch(() => {
         return caches.match('/');
       });
+    })
+  );
+});
+
+// Handle PWA Native System OS Notification Click
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
     })
   );
 });

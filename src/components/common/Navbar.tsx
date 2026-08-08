@@ -41,6 +41,11 @@ export default function Navbar() {
     const interval = setInterval(() => {
       syncWithServer().then(() => refreshState());
     }, 3000);
+    // Auto-request browser/device notification permission if logged in
+    if (user && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     function handleOpenDirectChat() { setDirectDrawerOpen(true); }
     function handleCartUpdated() {
       const cart = getCart();
@@ -51,6 +56,8 @@ export default function Navbar() {
       playOrderSound();
       speakVoice('Ada pesan masuk!');
       refreshState();
+      
+      // 1. AntD In-App Toast
       notification.info({
         message: '🔔 Pesan / Orderan Baru Masuk!',
         description: 'Ada aktivitas percakapan baru di PresUMart.',
@@ -58,6 +65,30 @@ export default function Navbar() {
         onClick: () => { setDirectDrawerOpen(true); },
         duration: 5,
       });
+
+      // 2. Native System/OS Device PWA Notification
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification('🔔 PresUMart: Pesan / Orderan Baru Masuk!', {
+                body: 'Ada pesan atau pesanan COD baru di aplikasi PresUMart.',
+                icon: '/icon-192.svg',
+                badge: '/icon-192.svg',
+                tag: 'presumart-msg-' + Date.now(),
+              });
+            });
+          } else {
+            new Notification('🔔 PresUMart: Pesan / Orderan Baru Masuk!', {
+              body: 'Ada pesan atau pesanan COD baru di aplikasi PresUMart.',
+              icon: '/icon-192.svg',
+              tag: 'presumart-msg-' + Date.now(),
+            });
+          }
+        } catch (e) {
+          // Fallback if browser blocks popups
+        }
+      }
     }
     window.addEventListener('open-direct-chat', handleOpenDirectChat);
     window.addEventListener('cart-updated', handleCartUpdated);
