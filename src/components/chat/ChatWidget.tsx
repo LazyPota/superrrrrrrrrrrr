@@ -20,7 +20,25 @@ function findProductsInReply(replyText: string, userText: string) {
   );
 
   const combinedText = (replyText + ' ' + userText).toLowerCase();
-  const stopWords = ['bekas', 'untuk', 'edisi', 'saya', 'mau', 'beli', 'cari', 'ada', 'yang', 'dan', 'bisa', 'nih', 'deh'];
+  const stopWords = ['bekas', 'untuk', 'edisi', 'saya', 'mau', 'beli', 'cari', 'ada', 'yang', 'dan', 'bisa', 'nih', 'deh', 'dong', 'ya', 'kak', 'min'];
+
+  const intentMap: Record<string, string[]> = {
+    food: ['makan', 'lapar', 'jajan', 'haus', 'minum', 'kuliner', 'snack', 'mie', 'ayam'],
+    study: ['buku', 'kuliah', 'belajar', 'kalkulus', 'calculus', 'tulis', 'pen', 'stewart'],
+    electronics: ['laptop', 'kalkulator', 'komputer', 'casio', 'elektronik', 'hp', 'gadget', 'koding', 'tugas'],
+    apparel: ['jaket', 'hoodie', 'baju', 'pakaian', 'kaos', 'celana', 'fashion'],
+    sports: ['sepatu', 'futsal', 'olahraga', 'nike', 'bola'],
+    dorm: ['kost', 'kasur', 'asrama', 'kamar', 'furniture', 'lipat'],
+    services: ['jasa', 'desain', 'logo', 'banner', 'poster', 'edit'],
+  };
+
+  let matchedCategory = '';
+  for (const [catKey, keywords] of Object.entries(intentMap)) {
+    if (keywords.some(kw => combinedText.includes(kw))) {
+      matchedCategory = catKey;
+      break;
+    }
+  }
 
   return allProducts.filter(p => {
     const nameLower = p.name.toLowerCase();
@@ -28,14 +46,23 @@ function findProductsInReply(replyText: string, userText: string) {
     const descLower = (p.description || '').toLowerCase();
 
     // Direct string inclusion
-    if (combinedText.includes(nameLower) || nameLower.includes(userText.toLowerCase().trim())) return true;
+    if (userText.trim().length >= 3 && (nameLower.includes(userText.toLowerCase().trim()) || userText.toLowerCase().includes(nameLower))) return true;
 
     // Filter keywords with length >= 3
     const keyWords = nameLower.split(/\s+/).filter(w => w.length >= 3 && !stopWords.includes(w));
     if (keyWords.length > 0) {
       const matchCount = keyWords.filter(kw => combinedText.includes(kw)).length;
-      return matchCount >= 1;
+      if (matchCount >= 1) return true;
     }
+
+    // Semantic category matching
+    if (matchedCategory === 'food' && catLower.includes('makanan')) return true;
+    if (matchedCategory === 'study' && (catLower.includes('buku') || nameLower.includes('buku') || nameLower.includes('kalkulus'))) return true;
+    if (matchedCategory === 'electronics' && (catLower.includes('elektronik') || nameLower.includes('laptop') || nameLower.includes('kalkulator'))) return true;
+    if (matchedCategory === 'apparel' && (catLower.includes('pakaian') || nameLower.includes('hoodie') || nameLower.includes('jaket'))) return true;
+    if (matchedCategory === 'sports' && (catLower.includes('olahraga') || nameLower.includes('sepatu') || nameLower.includes('futsal'))) return true;
+    if (matchedCategory === 'dorm' && (catLower.includes('kost') || nameLower.includes('kasur'))) return true;
+    if (matchedCategory === 'services' && (catLower.includes('jasa') || nameLower.includes('desain'))) return true;
 
     return false;
   });
