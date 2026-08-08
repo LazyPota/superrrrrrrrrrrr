@@ -228,6 +228,10 @@ img {
   .hide-mobile {
     display: none !important;
   }
+  .navbar-top-bar {
+    font-size: 10px !important;
+    padding: 4px 12px !important;
+  }
 }
 
 @media (min-width: 641px) {
