@@ -63,7 +63,7 @@ export default function HomeContent() {
   return (
     <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 48px 24px' }}>
       <Alert
-        title="Terverifikasi Mahasiswa PresUniv"
+        message="Terverifikasi Mahasiswa PresUniv"
         description="Semua produk dijual langsung oleh mahasiswa aktif President University Jababeka."
         type="info"
         showIcon

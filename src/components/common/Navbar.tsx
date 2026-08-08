@@ -52,7 +52,7 @@ export default function Navbar() {
       speakVoice('Ada pesan masuk!');
       refreshState();
       notification.info({
-        title: '🔔 Pesan / Orderan Baru Masuk!',
+        message: '🔔 Pesan / Orderan Baru Masuk!',
         description: 'Ada aktivitas percakapan baru di PresUMart.',
         placement: 'topRight',
         onClick: () => { setDirectDrawerOpen(true); },

@@ -453,6 +453,42 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
           </div>
         )}
       </Modal>
+
+      {/* Modal Konfirmasi COD & Pilih Lokasi Kampus */}
+      <Modal
+        title="📍 Konfirmasi Pesanan & Pilih Lokasi COD Kampus"
+        open={!!codModalMsg}
+        onCancel={() => setCodModalMsg(null)}
+        onOk={handleConfirmCodOrder}
+        okText="Konfirmasi Pesanan COD"
+        cancelText="Batal"
+      >
+        {codModalMsg && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 12 }}>
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 4 }}>Barang yang Dipesan:</Text>
+              <Text style={{ fontSize: 16, fontWeight: 700, color: '#0052cc' }}>{codModalMsg.productName}</Text>
+              <div><Text type="secondary">{formatPrice(codModalMsg.productPrice)}</Text></div>
+            </div>
+
+            <div>
+              <Text strong style={{ display: 'block', marginBottom: 8 }}>Pilih Titik Ketemuan COD (Jababeka Campus):</Text>
+              <Select
+                value={selectedCodLoc}
+                onChange={setSelectedCodLoc}
+                style={{ width: '100%' }}
+                options={CAMPUS_LOCATIONS.map(loc => ({ label: loc, value: loc }))}
+              />
+            </div>
+
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: 12, borderRadius: 8 }}>
+              <Text type="secondary" style={{ fontSize: 12, color: '#166534' }}>
+                💡 <b>Petunjuk:</b> Setelah kamu klik konfirmasi, pesan otomatis akan terkirim ke penjual dengan lokasi ketemuan yang kamu pilih. Pembayaran dilakukan secara tunai/QRIS saat bertemu langsung (COD).
+              </Text>
+            </div>
+          </div>
+        )}
+      </Modal>
     </Drawer>
   );
 }

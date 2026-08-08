@@ -147,28 +147,13 @@ img {
   background-clip: text;
 }
 
-/* Ant Design Overrides & Polish */
 .ant-btn {
   transition: all var(--transition-fast) !important;
 }
 
-.ant-btn:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.ant-btn:not(:disabled):active {
-  transform: translateY(1px);
-}
-
 .ant-card {
-  transition: all var(--transition-normal) !important;
+  transition: box-shadow var(--transition-normal), border-color var(--transition-normal) !important;
   border-radius: 12px;
-}
-
-.ant-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
 }
 
 .ant-input, .ant-input-number, .ant-select-selector {

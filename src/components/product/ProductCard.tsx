@@ -148,7 +148,7 @@ export default function ProductCard({ product }: { product: any }) {
           hoverable
           className="product-card"
           style={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: isOutOfStock ? 0.75 : 1 }}
-          bodyStyle={{ padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}
+          styles={{ body: { padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column' } }}
           actions={[
             <Link href={`/product?id=${product.id}`} key="detail">
               <Button type="text" className="action-button" icon={<EyeOutlined style={{ fontSize: 20, color: '#64748b' }} />} />

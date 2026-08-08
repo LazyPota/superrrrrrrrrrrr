@@ -232,7 +232,12 @@ export function loginUser(email, password) {
 export function getUser() {
   if (typeof window === 'undefined') return null;
   const data = localStorage.getItem(STORAGE_KEYS.USER);
-  return data ? JSON.parse(data) : null;
+  if (!data) return null;
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return null;
+  }
 }
 
 export function setUser(user) {
@@ -248,7 +253,12 @@ export function removeUser() {
 export function getProducts() {
   if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveProducts(products) {
@@ -330,7 +340,12 @@ export function getCart() {
   if (typeof window === 'undefined') return [];
   const key = getCartKey();
   const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveCart(cart) {
@@ -387,7 +402,12 @@ export function clearCart() {
 export function getDirectMessages() {
   if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.DIRECT_MESSAGES);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveDirectMessages(messages) {
@@ -508,7 +528,12 @@ export function markMessagesAsRead(userEmail) {
 export function getReviews(): any[] {
   if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.REVIEWS);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
 }
 
 export function saveReviews(reviews: any[]): void {
@@ -583,7 +608,12 @@ export function getWishlist(): string[] {
   if (typeof window === 'undefined') return [];
   const key = getWishlistKey();
   const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
 }
 
 export function toggleWishlist(productId: string): boolean {

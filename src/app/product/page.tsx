@@ -7,7 +7,7 @@ export default function ProductPage() {
   return (
     <>
       <Navbar />
-      <Suspense>
+      <Suspense fallback={<div style={{ maxWidth: 1240, margin: '40px auto', padding: '0 24px', textAlign: 'center', color: '#64748b' }}>Memuat rincian produk...</div>}>
         <ProductDetail />
       </Suspense>
       <Footer />
