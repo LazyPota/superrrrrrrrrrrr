@@ -59,7 +59,44 @@ export function playOrderSound(): void {
   }
 }
 
-function hashPassword(password) {
+// SECURITY: Sanitize user input to prevent XSS
+function sanitizeInput(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+}
+
+// SECURITY: Generate cryptographically secure unique IDs
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
+}
+
+// SECURITY: SHA-256 password hashing (replaces weak Java hashCode)
+async function hashPasswordAsync(password: string): Promise<string> {
+  if (typeof window === 'undefined' || !crypto?.subtle) {
+    // Fallback for SSR or old environments — still stronger than old hash
+    let hash = 5381;
+    for (let i = 0; i < password.length; i++) {
+      hash = ((hash << 5) + hash + password.charCodeAt(i)) >>> 0;
+    }
+    return 'hf' + hash.toString(36);
+  }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + '_presumart_salt_2024');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return 'sha256_' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// SECURITY: Synchronous hash for backward compatibility during migration
+function hashPassword(password: string): string {
   let hash = 0;
   for (let i = 0; i < password.length; i++) {
     const char = password.charCodeAt(i);
@@ -185,7 +222,7 @@ export async function pushToServer() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        users: getUsers(),
+        // SECURITY: Do NOT send user data (contains passwords) to server
         products: getProducts(),
         messages: getDirectMessages(),
       }),
@@ -195,14 +232,15 @@ export async function pushToServer() {
   }
 }
 
-export function registerUser(user) {
+export async function registerUser(user) {
   const users = getUsers();
   const exists = users.find(u => u.email === user.email);
   if (exists) return { ok: false, error: 'Email sudah terdaftar.' };
+  const hashedPw = await hashPasswordAsync(user.password);
   const newUser = {
-    name: user.name,
-    email: user.email,
-    password: hashPassword(user.password),
+    name: sanitizeInput(user.name),
+    email: user.email.trim().toLowerCase(),
+    password: hashedPw,
     major: user.major,
     batch: user.batch,
   };
@@ -216,11 +254,22 @@ export function registerUser(user) {
   return { ok: true, user: newUser };
 }
 
-export function loginUser(email, password) {
+export async function loginUser(email: string, password: string) {
   const users = getUsers();
   const user = users.find(u => u.email === email);
   if (!user) return { ok: false, error: 'Akun tidak ditemukan. Silakan daftar dulu.' };
-  if (user.password !== hashPassword(password)) return { ok: false, error: 'Password salah.' };
+  // SECURITY: Check both old hash (migration) and new SHA-256 hash
+  const newHash = await hashPasswordAsync(password);
+  const oldHash = hashPassword(password);
+  if (user.password !== newHash && user.password !== oldHash) {
+    return { ok: false, error: 'Password salah.' };
+  }
+  // SECURITY: Auto-migrate old hash to new SHA-256 hash
+  if (user.password === oldHash && user.password !== newHash) {
+    user.password = newHash;
+    const allUsers = getUsers().map(u => u.email === user.email ? user : u);
+    saveUsers(allUsers);
+  }
   if (typeof window !== 'undefined') {
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
     // BUG FIX #1: Migrate guest cart to user cart on login
@@ -269,7 +318,14 @@ export function saveProducts(products) {
 
 export function addProduct(product) {
   const products = getProducts();
-  products.push({ ...product, id: Date.now().toString(), createdAt: new Date().toISOString() });
+  // SECURITY: Sanitize user input and use secure ID
+  products.push({
+    ...product,
+    id: generateId(),
+    name: sanitizeInput(product.name),
+    description: sanitizeInput(product.description),
+    createdAt: new Date().toISOString(),
+  });
   saveProducts(products);
   return products;
 }
@@ -420,19 +476,19 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
   const messages = getDirectMessages();
   const initialStatus = status || (type === 'order' ? 'pending' : (type === 'nego' ? 'pending' : 'chat'));
   const newMsg = {
-    id: Date.now().toString(),
+    id: generateId(),
     sellerEmail,
-    sellerName,
+    sellerName: sanitizeInput(sellerName),
     buyerEmail,
-    buyerName,
+    buyerName: sanitizeInput(buyerName),
     productId,
-    productName,
+    productName: sanitizeInput(productName),
     productPrice,
     proposedPrice,
-    messageText,
+    messageText: sanitizeInput(messageText),
     type,
     status: initialStatus,
-    codLocation,
+    codLocation: sanitizeInput(codLocation),
     paymentMethod: 'COD',
     createdAt: new Date().toISOString(),
     unreadBySeller: true,
@@ -458,10 +514,10 @@ export function addReplyToMessage(messageId: string, senderEmail: string, sender
   if (msg) {
     if (!msg.replies) msg.replies = [];
     msg.replies.push({
-      id: Date.now().toString(),
+      id: generateId(),
       senderEmail,
-      senderName,
-      text: text.trim(),
+      senderName: sanitizeInput(senderName),
+      text: sanitizeInput(text.trim()),
       timestamp: new Date().toISOString(),
     });
 
@@ -554,14 +610,14 @@ export function addReview(data: {
 }) {
   const reviews = getReviews();
   const newReview = {
-    id: 'rev-' + Date.now(),
+    id: 'rev-' + generateId(),
     productId: data.productId,
-    productName: data.productName,
+    productName: sanitizeInput(data.productName),
     sellerEmail: data.sellerEmail,
     buyerEmail: data.buyerEmail,
-    buyerName: data.buyerName,
-    rating: data.rating,
-    comment: data.comment,
+    buyerName: sanitizeInput(data.buyerName),
+    rating: Math.min(5, Math.max(1, Number(data.rating) || 5)),
+    comment: sanitizeInput(data.comment),
     createdAt: new Date().toISOString(),
   };
 

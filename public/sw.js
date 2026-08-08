@@ -1,10 +1,14 @@
-const CACHE_NAME = 'presumart-pwa-v2';
+const CACHE_NAME = 'presumart-pwa-v3';
 const urlsToCache = [
   '/',
   '/manifest.json',
   '/icon-192.svg',
   '/icon-512.svg',
 ];
+
+// Only cache static assets, never API routes
+const CACHEABLE_EXTENSIONS = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)$/;
+const API_ROUTES = /\/api\//;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -32,16 +36,36 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        return caches.match('/');
-      });
-    })
-  );
+
+  const url = new URL(event.request.url);
+
+  // SECURITY: Never cache API routes or dynamic HTML pages
+  if (API_ROUTES.test(url.pathname)) return;
+
+  // Only cache static assets
+  const isStaticAsset = CACHEABLE_EXTENSIONS.test(url.pathname) || urlsToCache.includes(url.pathname);
+
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((response) => {
+          // Only cache successful responses
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return response;
+        }).catch(() => {
+          return caches.match('/');
+        });
+      })
+    );
+  }
 });
 
 // Handle PWA Native System OS Notification Click

@@ -17,19 +17,26 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  function onFinish(values) {
+  async function onFinish(values) {
     setFormError('');
     const emailLower = values.email.trim().toLowerCase();
-    if (!emailLower.includes('president.ac.id')) {
+    // SECURITY V7: Use endsWith() to prevent bypass like hacker@president.ac.id.evil.com
+    if (!emailLower.endsWith('@student.president.ac.id') && !emailLower.endsWith('@president.ac.id')) {
       setFormError('Pendaftaran khusus email kampus President University (@student.president.ac.id / @president.ac.id).');
+      return;
+    }
+
+    // SECURITY: Password strength check
+    if (values.password.length < 8) {
+      setFormError('Password minimal 8 karakter untuk keamanan akun.');
       return;
     }
 
     setLoading(true);
 
-    const result = registerUser({
+    const result = await registerUser({
       name: values.name.trim(),
-      email: values.email.trim().toLowerCase(),
+      email: emailLower,
       password: values.password,
       major: values.major,
       batch: values.batch,
@@ -95,7 +102,7 @@ export default function RegisterPage() {
                   name="password"
                   rules={[
                     { required: true, message: 'Password wajib diisi!' },
-                    { min: 6, message: 'Minimal 6 karakter!' },
+                    { min: 8, message: 'Minimal 8 karakter untuk keamanan!' },
                   ]}
                 >
                   <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Minimal 6 karakter" />

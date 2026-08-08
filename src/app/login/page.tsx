@@ -17,25 +17,49 @@ export default function LoginPage() {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  function onFinish(values) {
+  // SECURITY V6: Rate limiting - max 5 failed attempts, 60s lockout
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number>(0);
+
+  async function onFinish(values) {
     setFormError('');
+
+    // SECURITY: Check if login is locked
+    const now = Date.now();
+    if (lockedUntil > now) {
+      const remainSec = Math.ceil((lockedUntil - now) / 1000);
+      setFormError(`⏳ Terlalu banyak percobaan gagal. Coba lagi dalam ${remainSec} detik.`);
+      return;
+    }
+
     setLoading(true);
 
-    const result = loginUser(values.email.trim().toLowerCase(), values.password);
+    const result = await loginUser(values.email.trim().toLowerCase(), values.password);
 
     if (!result.ok) {
-      setFormError(result.error);
+      const newFailed = failedAttempts + 1;
+      setFailedAttempts(newFailed);
+      if (newFailed >= 5) {
+        setLockedUntil(Date.now() + 60000);
+        setFormError('🔒 Akun terkunci sementara! 5x percobaan gagal. Tunggu 60 detik.');
+        setFailedAttempts(0);
+      } else {
+        setFormError(`${result.error} (Percobaan ${newFailed}/5)`);
+      }
       setLoading(false);
       return;
     }
 
+    setFailedAttempts(0);
     setLoading(false);
     router.push('/');
   }
 
-  function handleQuickLogin(email, password) {
+  async function handleQuickLogin(email, password) {
+    setFailedAttempts(0);
+    setLockedUntil(0);
     form.setFieldsValue({ email, password });
-    onFinish({ email, password });
+    await onFinish({ email, password });
   }
 
   return (
