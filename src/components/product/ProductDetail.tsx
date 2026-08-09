@@ -105,21 +105,36 @@ export default function ProductDetail() {
   }
 
   useEffect(() => {
-    if (productId) {
-      const all = getProducts();
-      let found = all.find(p => p.id === productId);
-      if (!found) {
-        found = SEED_PRODUCTS.find(p => p.id === productId);
-      }
-      if (found) {
-        setProduct(found);
-        setNegoPrice(found.price);
-        setReviews(getProductReviews(found.id));
-        setSellerRating(getSellerRating(found.sellerEmail));
-      } else {
-        setNotFound(true);
+    function loadProductData() {
+      if (productId) {
+        const all = getProducts();
+        let found = all.find(p => p.id === productId);
+        if (!found) {
+          found = SEED_PRODUCTS.find(p => p.id === productId);
+        }
+        if (found) {
+          setProduct(found);
+          setNegoPrice(found.price);
+          setReviews(getProductReviews(found.id));
+          setSellerRating(getSellerRating(found.sellerEmail));
+        } else {
+          setNotFound(true);
+        }
       }
     }
+
+    loadProductData();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('products-updated', loadProductData);
+      window.addEventListener('storage', loadProductData);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('products-updated', loadProductData);
+        window.removeEventListener('storage', loadProductData);
+      }
+    };
   }, [productId]);
 
   const isOutOfStock = (product?.stock !== undefined && product?.stock <= 0) || product?.status === 'sold';

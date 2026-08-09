@@ -144,12 +144,29 @@ export async function syncWithServer() {
     if (serverDb.products) {
       const localProds = getProducts();
       const mergedMap = new Map();
-      localProds.forEach(p => mergedMap.set(p.id, p));
-      serverDb.products.forEach((p: any) => mergedMap.set(p.id, p));
+      localProds.forEach(p => mergedMap.set(p.id, { ...p }));
+      serverDb.products.forEach((incoming: any) => {
+        const existing = mergedMap.get(incoming.id);
+        if (!existing) {
+          mergedMap.set(incoming.id, { ...incoming });
+        } else {
+          const isSold = existing.status === 'sold' || incoming.status === 'sold' || existing.stock <= 0 || incoming.stock <= 0;
+          const minStock = isSold ? 0 : Math.min(existing.stock ?? 1, incoming.stock ?? 1);
+          mergedMap.set(incoming.id, {
+            ...existing,
+            ...incoming,
+            stock: minStock,
+            status: isSold ? 'sold' : (incoming.status || existing.status),
+          });
+        }
+      });
       const mergedProds = Array.from(mergedMap.values()).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
       if (JSON.stringify(mergedProds) !== JSON.stringify(localProds)) {
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(mergedProds));
         updated = true;
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('products-updated'));
+        }
       }
     }
 

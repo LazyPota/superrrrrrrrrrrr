@@ -65,8 +65,23 @@ function mergeUsers(existingList: any[], incomingList: any[]) {
 
 function mergeProducts(existingList: any[], incomingList: any[]) {
   const map = new Map();
-  (existingList || []).forEach(p => map.set(p.id, p));
-  (incomingList || []).forEach(p => map.set(p.id, p));
+  (existingList || []).forEach(p => map.set(p.id, { ...p }));
+
+  (incomingList || []).forEach(incoming => {
+    const existing = map.get(incoming.id);
+    if (!existing) {
+      map.set(incoming.id, { ...incoming });
+    } else {
+      const isSold = existing.status === 'sold' || incoming.status === 'sold' || existing.stock <= 0 || incoming.stock <= 0;
+      const minStock = isSold ? 0 : Math.min(existing.stock ?? 1, incoming.stock ?? 1);
+      map.set(incoming.id, {
+        ...existing,
+        ...incoming,
+        stock: minStock,
+        status: isSold ? 'sold' : (incoming.status || existing.status),
+      });
+    }
+  });
   return Array.from(map.values());
 }
 
