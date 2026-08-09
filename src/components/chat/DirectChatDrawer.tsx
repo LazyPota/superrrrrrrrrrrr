@@ -126,13 +126,13 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
         document.body.style.overflow = 'hidden';
       }
 
-      // Live sync interval while open
+      // Fast live sync interval while drawer is open (600ms for instant real-time chat)
       interval = setInterval(() => {
         const currentUser = getUser();
         if (currentUser) {
           syncWithServer().then(() => refreshMessages(currentUser));
         }
-      }, 2000);
+      }, 600);
     } else {
       if (typeof document !== 'undefined') {
         document.body.style.overflow = '';
@@ -285,7 +285,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                     senderEmail: item.buyerEmail,
                     senderName: item.buyerName,
                     text: item.messageText,
-                    timestamp: item.createdAt,
+                    timestamp: item.createdAt || new Date(0).toISOString(),
                     isInitial: true,
                   }] : [];
 
@@ -294,15 +294,16 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                     senderEmail: r.senderEmail,
                     senderName: r.senderName,
                     text: r.text,
-                    timestamp: r.timestamp,
+                    timestamp: r.timestamp || new Date().toISOString(),
                     isInitial: false,
-                  }));
-
-                  const allBubbles = [...initialBubble, ...replyBubbles].sort((a: any, b: any) => {
-                    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-                    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                  })).sort((a: any, b: any) => {
+                    const timeA = new Date(a.timestamp).getTime();
+                    const timeB = new Date(b.timestamp).getTime();
                     return timeA - timeB;
                   });
+
+                  // Buyer's initial message is ALWAYS first at the top of the chat!
+                  const allBubbles = [...initialBubble, ...replyBubbles];
 
                   if (allBubbles.length === 0) return null;
 

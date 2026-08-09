@@ -562,6 +562,9 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
   } else {
     speakVoice('Pesan terkirim!');
   }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('messages-updated'));
+  }
   return newMsg;
 }
 
@@ -587,6 +590,9 @@ export function addReplyToMessage(messageId: string, senderEmail: string, sender
     saveDirectMessages(messages);
     playOrderSound();
     speakVoice('Pesan terkirim!');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('messages-updated'));
+    }
   }
   return messages;
 }
