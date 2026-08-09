@@ -95,28 +95,19 @@ export default function ProductCard({ product }: { product: any }) {
       return;
     }
 
-    const existingMsgs = getDirectMessages();
-    const found = existingMsgs.find(
-      (m: any) =>
-        (m.buyerEmail === user.email && m.sellerEmail === product.sellerEmail && m.productId === product.id) ||
-        (m.sellerEmail === user.email && m.buyerEmail === product.sellerEmail && m.productId === product.id)
-    );
-
-    if (!found) {
-      sendDirectMessage({
-        sellerEmail: product.sellerEmail,
-        sellerName: product.seller,
-        buyerEmail: user.email,
-        buyerName: user.name,
-        productId: product.id,
-        productName: product.name,
-        productPrice: product.price,
-        proposedPrice: null,
-        messageText: `Halo ${product.seller}, saya mau tanya-tanya mengenai produk ${product.name}.`,
-        type: 'inquiry',
-        status: 'chat',
-      });
-    }
+    sendDirectMessage({
+      sellerEmail: product.sellerEmail,
+      sellerName: product.seller,
+      buyerEmail: user.email,
+      buyerName: user.name,
+      productId: product.id,
+      productName: product.name,
+      productPrice: product.price,
+      proposedPrice: null,
+      messageText: `Halo ${product.seller}, saya mau tanya-tanya mengenai produk ${product.name}.`,
+      type: 'inquiry',
+      status: 'chat',
+    });
 
     window.dispatchEvent(new CustomEvent('open-direct-chat'));
   }

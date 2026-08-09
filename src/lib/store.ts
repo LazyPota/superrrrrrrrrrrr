@@ -194,14 +194,16 @@ export async function syncWithServer() {
         let hasTrulyNewIncoming = false;
 
         mergedMsgs.forEach(m => {
-          // Check if thread is sent to current user by someone else
-          if (m.sellerEmail === currentUser.email && m.buyerEmail !== currentUser.email) {
-            if (!notifiedSet.has(m.id)) {
-              hasTrulyNewIncoming = true;
-              notifiedSet.add(m.id);
-            }
+          // CRITICAL FIX: Only notify if current user is directly involved in this transaction (Buyer or Seller)
+          const isMyTransaction = (m.sellerEmail === currentUser.email || m.buyerEmail === currentUser.email);
+          if (!isMyTransaction) return;
+
+          // Check if thread was created by someone else for current user
+          if (m.sellerEmail === currentUser.email && m.buyerEmail !== currentUser.email && !notifiedSet.has(m.id)) {
+            hasTrulyNewIncoming = true;
+            notifiedSet.add(m.id);
           }
-          // Check replies sent by someone else
+          // Check replies sent by the other participant
           (m.replies || []).forEach((r: any) => {
             if (r.senderEmail !== currentUser.email && !notifiedSet.has(r.id)) {
               hasTrulyNewIncoming = true;
@@ -563,6 +565,45 @@ export function saveDirectMessages(messages: any[]) {
 
 export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerName, productId, productName, productPrice, proposedPrice, messageText, type = 'inquiry', status = 'chat', codLocation = '' }: any) {
   const messages = getDirectMessages();
+  
+  // Check if an existing thread exists between this buyer, seller, and product
+  const existingIndex = messages.findIndex((m: any) =>
+    (m.buyerEmail === buyerEmail && m.sellerEmail === sellerEmail && m.productId === productId) ||
+    (m.sellerEmail === buyerEmail && m.buyerEmail === sellerEmail && m.productId === productId)
+  );
+
+  if (existingIndex >= 0) {
+    const existing = messages[existingIndex];
+    // Revive deleted thread if user previously deleted it
+    existing.deleted = false;
+    existing.deletedByBuyer = false;
+    existing.deletedBySeller = false;
+
+    if (sellerEmail === existing.sellerEmail) {
+      existing.unreadBySeller = true;
+    } else {
+      existing.unreadByBuyer = true;
+    }
+
+    if (messageText && messageText.trim() && messageText !== existing.messageText) {
+      if (!existing.replies) existing.replies = [];
+      existing.replies.push({
+        id: generateId(),
+        senderEmail: buyerEmail,
+        senderName: sanitizeInput(buyerName),
+        text: sanitizeInput(messageText.trim()),
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    messages[existingIndex] = existing;
+    saveDirectMessages(messages);
+    playOrderSound();
+    speakVoice('Pesan terkirim!');
+    notifyChatSync();
+    return existing;
+  }
+
   const initialStatus = status || (type === 'order' ? 'pending' : (type === 'nego' ? 'pending' : 'chat'));
   const newMsg = {
     id: generateId(),
@@ -594,9 +635,7 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
   } else {
     speakVoice('Pesan terkirim!');
   }
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('messages-updated'));
-  }
+  notifyChatSync();
   return newMsg;
 }
 

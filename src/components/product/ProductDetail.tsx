@@ -372,30 +372,19 @@ export default function ProductDetail() {
                       return;
                     }
 
-                    // Check if chat thread already exists
-                    const existingMsgs = getDirectMessages();
-                    const found = existingMsgs.find(
-                      (m: any) =>
-                        (m.buyerEmail === u.email && m.sellerEmail === product.sellerEmail && m.productId === product.id) ||
-                        (m.sellerEmail === u.email && m.buyerEmail === product.sellerEmail && m.productId === product.id)
-                    );
-
-                    if (!found) {
-                      // Initialize a new direct message thread for this seller/product
-                      sendDirectMessage({
-                        sellerEmail: product.sellerEmail,
-                        sellerName: product.seller,
-                        buyerEmail: u.email,
-                        buyerName: u.name,
-                        productId: product.id,
-                        productName: product.name,
-                        productPrice: product.price,
-                        proposedPrice: null,
-                        messageText: `Halo ${product.seller}, saya mau tanya-tanya mengenai produk ${product.name}.`,
-                        type: 'inquiry',
-                        status: 'chat',
-                      });
-                    }
+                    sendDirectMessage({
+                      sellerEmail: product.sellerEmail,
+                      sellerName: product.seller,
+                      buyerEmail: u.email,
+                      buyerName: u.name,
+                      productId: product.id,
+                      productName: product.name,
+                      productPrice: product.price,
+                      proposedPrice: null,
+                      messageText: `Halo ${product.seller}, saya mau tanya-tanya mengenai produk ${product.name}.`,
+                      type: 'inquiry',
+                      status: 'chat',
+                    });
 
                     window.dispatchEvent(new CustomEvent('open-direct-chat'));
                   }}
