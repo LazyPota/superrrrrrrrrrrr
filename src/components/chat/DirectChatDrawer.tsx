@@ -182,11 +182,11 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     refreshMessages(user);
   }
 
-  const [drawerWidth, setDrawerWidth] = useState<number | string>(380);
+  const [drawerWidth, setDrawerWidth] = useState<number | string>(480);
 
   useEffect(() => {
     function handleResize() {
-      setDrawerWidth(typeof window !== 'undefined' && window.innerWidth < 480 ? '100%' : 380);
+      setDrawerWidth(typeof window !== 'undefined' && window.innerWidth < 576 ? '100%' : 480);
     }
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -344,9 +344,9 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                   if (allBubbles.length === 0) return null;
 
                   return (
-                    <div style={{ marginTop: 12, background: '#f8fafc', padding: 12, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 260, overflowY: 'auto', border: '1px solid #e2e8f0' }}>
+                    <div style={{ marginTop: 12, background: '#f8fafc', padding: 14, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 160, maxHeight: 380, overflowY: 'auto', border: '1px solid #e2e8f0' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <Text strong style={{ fontSize: 11, color: '#003399' }}>💬 Percakapan Obrolan (Urutan Waktu Waktu):</Text>
+                        <Text strong style={{ fontSize: 12, color: '#003399' }}>💬 Percakapan Obrolan (Urutan Waktu):</Text>
                         <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>Real-time 0ms</Tag>
                       </div>
                       {allBubbles.map((b: any) => {
@@ -360,23 +360,24 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                               maxWidth: '85%',
                               background: isMe ? 'linear-gradient(135deg, #003399 0%, #001a40 100%)' : '#ffffff',
                               color: isMe ? '#ffffff' : '#0f172a',
-                              padding: '9px 13px',
+                              padding: '10px 14px',
                               borderRadius: isMe ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
-                              fontSize: 13,
+                              fontSize: 14,
+                              lineHeight: 1.5,
                               boxShadow: '0 2px 8px rgba(0,26,64,0.06)',
                               border: isMe ? 'none' : '1px solid #cbd5e1',
                             }}
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontSize: 10, opacity: 0.85, marginBottom: 4 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontSize: 11, opacity: 0.85, marginBottom: 4 }}>
                               <span style={{ fontWeight: 700 }}>{b.senderName} {b.isInitial ? '(Pesan Awal Pembeli)' : ''}</span>
-                              <span style={{ fontSize: 9, opacity: 0.8 }}>{timeStr}</span>
+                              <span style={{ fontSize: 10, opacity: 0.8 }}>{timeStr}</span>
                               {isMe && !b.isInitial && (
                                 <Popconfirm title="Hapus pesan ini?" onConfirm={() => handleDeleteReply(item.id, b.id)} okText="Ya" cancelText="Batal">
-                                  <DeleteOutlined style={{ cursor: 'pointer', fontSize: 11, color: '#fca5a5' }} title="Hapus Pesan" />
+                                  <DeleteOutlined style={{ cursor: 'pointer', fontSize: 12, color: '#fca5a5' }} title="Hapus Pesan" />
                                 </Popconfirm>
                               )}
                             </div>
-                            <div style={{ wordBreak: 'break-word', lineHeight: 1.45 }}>{b.text}</div>
+                            <div style={{ wordBreak: 'break-word', lineHeight: 1.5 }}>{b.text}</div>
                           </div>
                         );
                       })}
@@ -384,20 +385,22 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                   );
                 })()}
 
-                {/* Chat Input Box - always visible */}
-                <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
+                {/* Chat Input Box - Spacious & Clear */}
+                <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
                   <Input
                     placeholder="Ketik balasan pesan..."
-                    size="small"
+                    size="middle"
                     value={replyTextMap[item.id] || ''}
                     onChange={e => setReplyTextMap(prev => ({ ...prev, [item.id]: e.target.value }))}
                     onPressEnter={() => handleSendReply(item.id)}
+                    style={{ borderRadius: 20, fontSize: 14, padding: '6px 14px' }}
                   />
                   <Button
                     type="primary"
-                    size="small"
+                    size="middle"
                     icon={<SendOutlined />}
                     onClick={() => handleSendReply(item.id)}
+                    style={{ borderRadius: 20, padding: '0 18px', fontWeight: 600 }}
                   >
                     Kirim
                   </Button>
