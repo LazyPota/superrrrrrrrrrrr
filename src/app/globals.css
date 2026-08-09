@@ -55,7 +55,7 @@ html, body {
 
 @media (max-width: 767px) {
   .pwa-install-prompt {
-    bottom: 74px !important;
+    bottom: 140px !important;
     left: 12px !important;
     right: 12px !important;
   }

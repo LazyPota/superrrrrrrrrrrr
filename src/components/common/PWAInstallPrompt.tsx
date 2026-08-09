@@ -121,22 +121,24 @@ export default function PWAInstallPrompt() {
               </div>
             </div>
 
-            <Space size={4}>
+            <Space size={6} align="center">
               <Button
                 type="primary"
                 size="small"
                 icon={<DownloadOutlined style={{ fontSize: 12 }} />}
-                style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', fontWeight: 600, borderRadius: 16, height: 28, fontSize: 12, padding: '0 12px' }}
+                style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', fontWeight: 700, borderRadius: 16, height: 30, fontSize: 12, padding: '0 14px', boxShadow: '0 2px 6px rgba(0,184,217,0.4)' }}
                 onClick={handleInstallClick}
               >
                 Install
               </Button>
               <Button
                 type="text"
+                shape="circle"
                 size="small"
-                icon={<CloseOutlined style={{ color: '#94a3b8', fontSize: 12 }} />}
+                icon={<CloseOutlined style={{ color: '#ffffff', fontSize: 13 }} />}
                 onClick={() => setShowBanner(false)}
-                style={{ width: 24, height: 24 }}
+                title="Tutup Banner"
+                style={{ width: 28, height: 28, background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               />
             </Space>
           </div>
