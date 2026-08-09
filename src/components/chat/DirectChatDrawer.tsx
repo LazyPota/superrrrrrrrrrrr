@@ -278,120 +278,71 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                   </div>
                 </div>
 
-                {item.messageText && (
-                  <Paragraph style={{ background: '#f8fafc', padding: 8, borderRadius: 6, fontSize: 12, margin: '8px 0', border: '1px solid #e2e8f0' }}>
-                    &quot;{item.messageText}&quot;
-                  </Paragraph>                
-                )}
-                {/* Status & Actions Bar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, paddingTop: 8, borderTop: '1px dashed #e2e8f0', flexWrap: 'wrap', gap: 6 }}>
-                  <div>
-                    {item.status === 'chat' && <Tag color="blue">💬 Chat Tanya Jawab</Tag>}
-                    {item.status === 'offered' && <Tag color="gold" icon={<ShopOutlined />}>📦 Produk Ditawarkan Penjual</Tag>}
-                    {item.status === 'pending' && <Tag color="processing" icon={<EnvironmentOutlined />}>📍 COD di: {item.codLocation || 'Kampus PresUniv'}</Tag>}
-                    {item.status === 'accepted' && <Tag color="success" icon={<CheckCircleOutlined />}>Disetujui (Siap COD)</Tag>}
-                    {item.status === 'rejected' && <Tag color="error" icon={<CloseCircleOutlined />}>Ditolak</Tag>}
-                    {(item.status === 'completed' || item.status === 'sold') && <Tag color="green" icon={<CheckCircleOutlined />}>🎉 Transaksi Selesai & Terjual</Tag>}
-                  </div>
-
-                  {/* Step 2 Action: Seller sends product card offer */}
-                  {isSeller && item.status === 'chat' && (
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<ShopOutlined />}
-                      onClick={() => handleSendOffer(item)}
-                      style={{ background: '#0052cc' }}
-                    >
-                      Kirim Produk ke Pembeli
-                    </Button>
-                  )}
-
-                  {/* Step 3 Action: Buyer orders & chooses COD Campus Location */}
-                  {!isSeller && item.status === 'offered' && (
-                    <Button
-                      type="primary"
-                      size="small"
-                      icon={<ShoppingCartOutlined />}
-                      onClick={() => {
-                        setCodModalMsg(item);
-                        setSelectedCodLoc(CAMPUS_LOCATIONS[0]);
-                      }}
-                      style={{ background: '#36b37e', borderColor: '#36b37e' }}
-                    >
-                      Pesan & Tentukan Lokasi COD
-                    </Button>
-                  )}
-
-                  {/* Step 4 Actions: Finalization after COD */}
-                  {item.status === 'pending' && (
-                    <Space size="small" wrap>
-                      {!isSeller && (
-                        item.reviewed ? (
-                          <Tag color="green" icon={<StarOutlined />}>Barang Diterima & Diulas ⭐</Tag>
-                        ) : (
-                          <Button
-                            type="primary"
-                            size="small"
-                            icon={<CheckCircleOutlined />}
-                            style={{ background: '#36b37e', borderColor: '#36b37e' }}
-                            onClick={() => setReviewModalMsg(item)}
-                          >
-                            Barang Sudah Diterima
-                          </Button>
-                        )
-                      )}
-
-                      {isSeller && (
-                        <Popconfirm title="Konfirmasi barang sudah terjual & COD selesai?" onConfirm={() => handleMarkAsSold(item)} okText="Ya" cancelText="Batal">
-                          <Button
-                            type="primary"
-                            size="small"
-                            icon={<TagOutlined />}
-                            style={{ background: '#faad14', borderColor: '#faad14' }}
-                          >
-                            Barang Sudah Terjual
-                          </Button>
-                        </Popconfirm>
-                      )}
-                    </Space>
-                  )}
-                </div>
-
                 {/* Live Chat History */}
-                {item.replies && item.replies.length > 0 && (
-                  <div style={{ marginTop: 12, background: '#f1f5f9', padding: 8, borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
-                    <Text strong style={{ fontSize: 11, color: '#64748b' }}>Percakapan Obrolan:</Text>
-                    {item.replies.map((r: any) => {
-                      const isMe = r.senderEmail === user.email;
-                      return (
-                        <div
-                          key={r.id}
-                          style={{
-                            alignSelf: isMe ? 'flex-end' : 'flex-start',
-                            maxWidth: '85%',
-                            background: isMe ? '#0052cc' : '#ffffff',
-                            color: isMe ? '#ffffff' : '#0f172a',
-                            padding: '6px 10px',
-                            borderRadius: isMe ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                            fontSize: 12,
-                            border: isMe ? 'none' : '1px solid #cbd5e1',
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, fontSize: 10, opacity: 0.85, marginBottom: 2 }}>
-                            <span>{r.senderName}</span>
-                            {isMe && (
-                              <Popconfirm title="Hapus pesan ini?" onConfirm={() => handleDeleteReply(item.id, r.id)} okText="Ya" cancelText="Batal">
-                                <DeleteOutlined style={{ cursor: 'pointer', fontSize: 11, color: '#fca5a5' }} title="Hapus Pesan" />
-                              </Popconfirm>
-                            )}
+                {(() => {
+                  const initialBubble = item.messageText ? [{
+                    id: `init-${item.id}`,
+                    senderEmail: item.buyerEmail,
+                    senderName: item.buyerName,
+                    text: item.messageText,
+                    timestamp: item.createdAt,
+                    isInitial: true,
+                  }] : [];
+
+                  const replyBubbles = (item.replies || []).map((r: any) => ({
+                    id: r.id,
+                    senderEmail: r.senderEmail,
+                    senderName: r.senderName,
+                    text: r.text,
+                    timestamp: r.timestamp,
+                    isInitial: false,
+                  }));
+
+                  const allBubbles = [...initialBubble, ...replyBubbles].sort((a: any, b: any) => {
+                    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+                    return timeA - timeB;
+                  });
+
+                  if (allBubbles.length === 0) return null;
+
+                  return (
+                    <div style={{ marginTop: 12, background: '#f1f5f9', padding: 10, borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
+                      <Text strong style={{ fontSize: 11, color: '#64748b' }}>Percakapan Obrolan (Urut Waktu):</Text>
+                      {allBubbles.map((b: any) => {
+                        const isMe = b.senderEmail === user.email;
+                        const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
+                        return (
+                          <div
+                            key={b.id}
+                            style={{
+                              alignSelf: isMe ? 'flex-end' : 'flex-start',
+                              maxWidth: '82%',
+                              background: isMe ? 'linear-gradient(135deg, #003399 0%, #001a40 100%)' : '#ffffff',
+                              color: isMe ? '#ffffff' : '#0f172a',
+                              padding: '8px 12px',
+                              borderRadius: isMe ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                              fontSize: 13,
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                              border: isMe ? 'none' : '1px solid #cbd5e1',
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontSize: 10, opacity: 0.85, marginBottom: 3 }}>
+                              <span style={{ fontWeight: 700 }}>{b.senderName} {b.isInitial ? '(Pesan Awal)' : ''}</span>
+                              <span style={{ fontSize: 9 }}>{timeStr}</span>
+                              {isMe && !b.isInitial && (
+                                <Popconfirm title="Hapus pesan ini?" onConfirm={() => handleDeleteReply(item.id, b.id)} okText="Ya" cancelText="Batal">
+                                  <DeleteOutlined style={{ cursor: 'pointer', fontSize: 11, color: '#fca5a5' }} title="Hapus Pesan" />
+                                </Popconfirm>
+                              )}
+                            </div>
+                            <div style={{ wordBreak: 'break-word', lineHeight: 1.4 }}>{b.text}</div>
                           </div>
-                          <div>{r.text}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
 
                 {/* Chat Input Box - always visible */}
                 <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>

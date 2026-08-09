@@ -184,12 +184,35 @@ export async function syncWithServer() {
       if (JSON.stringify(mergedMsgs) !== JSON.stringify(localMsgs)) {
         localStorage.setItem(STORAGE_KEYS.DIRECT_MESSAGES, JSON.stringify(mergedMsgs));
         updated = true;
+      }
 
-        if (currentUser) {
-          const newUnread = mergedMsgs.filter(m => (m.sellerEmail === currentUser.email && m.unreadBySeller) || (m.buyerEmail === currentUser.email && m.unreadByBuyer)).length;
-          const newRepliesCount = mergedMsgs.reduce((acc, m) => acc + (m.replies ? m.replies.length : 0), 0);
+      if (currentUser) {
+        const notifiedIdsStr = typeof window !== 'undefined' ? (localStorage.getItem('presumart_notified_ids') || '[]') : '[]';
+        let notifiedIds: string[] = [];
+        try { notifiedIds = JSON.parse(notifiedIdsStr); } catch (e) { notifiedIds = []; }
+        const notifiedSet = new Set(notifiedIds);
+        let hasTrulyNewIncoming = false;
 
-          if (newUnread > localUnread || newRepliesCount > localRepliesCount) {
+        mergedMsgs.forEach(m => {
+          // Check if thread is sent to current user by someone else
+          if (m.sellerEmail === currentUser.email && m.buyerEmail !== currentUser.email) {
+            if (!notifiedSet.has(m.id)) {
+              hasTrulyNewIncoming = true;
+              notifiedSet.add(m.id);
+            }
+          }
+          // Check replies sent by someone else
+          (m.replies || []).forEach((r: any) => {
+            if (r.senderEmail !== currentUser.email && !notifiedSet.has(r.id)) {
+              hasTrulyNewIncoming = true;
+              notifiedSet.add(r.id);
+            }
+          });
+        });
+
+        if (hasTrulyNewIncoming) {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('presumart_notified_ids', JSON.stringify(Array.from(notifiedSet).slice(-200)));
             window.dispatchEvent(new CustomEvent('new-incoming-message'));
           }
         }
