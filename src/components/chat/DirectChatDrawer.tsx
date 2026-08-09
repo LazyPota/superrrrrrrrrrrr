@@ -117,35 +117,41 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
   useEffect(() => {
     let interval: any;
     if (open) {
-      setShouldScrollBottom(true);
       const u = getUser();
       setUser(u);
       if (u) {
         refreshMessages(u);
         markMessagesAsRead(u.email);
       }
-      if (typeof document !== 'undefined') {
-        document.body.style.overflow = 'hidden';
+
+      const handleUpdate = () => {
+        const currentUser = getUser();
+        if (currentUser) {
+          refreshMessages(currentUser);
+        }
+      };
+
+      if (typeof window !== 'undefined') {
+        window.addEventListener('messages-updated', handleUpdate);
+        window.addEventListener('storage', handleUpdate);
       }
 
-      // Fast live sync interval while drawer is open (600ms for instant real-time chat)
+      // Smooth background sync every 2.5 seconds without aggressive DOM re-layouts
       interval = setInterval(() => {
         const currentUser = getUser();
         if (currentUser) {
           syncWithServer().then(() => refreshMessages(currentUser));
         }
-      }, 600);
-    } else {
-      if (typeof document !== 'undefined') {
-        document.body.style.overflow = '';
-      }
+      }, 2500);
+
+      return () => {
+        if (interval) clearInterval(interval);
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('messages-updated', handleUpdate);
+          window.removeEventListener('storage', handleUpdate);
+        }
+      };
     }
-    return () => {
-      if (interval) clearInterval(interval);
-      if (typeof document !== 'undefined') {
-        document.body.style.overflow = '';
-      }
-    };
   }, [open]);
 
   function refreshMessages(currentUser?: any) {
@@ -182,16 +188,8 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     refreshMessages(user);
   }
 
-  const [drawerWidth, setDrawerWidth] = useState<number | string>(480);
-
-  useEffect(() => {
-    function handleResize() {
-      setDrawerWidth(typeof window !== 'undefined' && window.innerWidth < 576 ? '100%' : 480);
-    }
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 576;
+  const drawerWidth = isMobileDevice ? '100%' : 480;
 
   if (!user) {
     return (
