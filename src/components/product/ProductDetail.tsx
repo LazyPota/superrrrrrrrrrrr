@@ -287,7 +287,7 @@ export default function ProductDetail() {
                 </Flex>
               </Card>
 
-              <Space size="small" style={{ marginBottom: 28, width: '100%' }} wrap>
+              <Space size="small" className="product-detail-actions" style={{ marginBottom: 28, width: '100%' }} wrap>
                 <Button
                   type="primary"
                   size="large"

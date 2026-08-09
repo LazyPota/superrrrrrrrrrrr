@@ -382,4 +382,46 @@ img {
   .product-card .ant-card-body {
     padding: 10px 12px !important;
   }
+
+  .product-card .ant-card-actions {
+    display: flex !important;
+    justify-content: space-around !important;
+  }
+
+  .product-card .ant-card-actions > li {
+    margin: 4px 0 !important;
+    width: auto !important;
+  }
+
+  .product-card .action-button .anticon {
+    font-size: 16px !important;
+  }
+
+  /* Product Detail Action Bar Mobile Polish */
+  .product-detail-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .product-detail-actions .ant-btn {
+    flex: 1 1 calc(50% - 8px) !important;
+    min-width: 130px !important;
+    height: 42px !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Mobile Navbar Header Adjustments */
+  .navbar-main {
+    padding: 8px 12px !important;
+  }
+
+  /* Mobile Drawer Adjustments */
+  .ant-drawer-content-wrapper {
+    max-width: 100vw !important;
+  }
 }
