@@ -70,6 +70,11 @@ export default function CartPage() {
 
     messageApi.success('Pesanan COD berhasil dibuat & dikirimkan ke Penjual!');
     setCart(clearCart());
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('open-direct-chat'));
+      }
+    }, 400);
   }
 
   const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);

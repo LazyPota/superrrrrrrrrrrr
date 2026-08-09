@@ -74,11 +74,7 @@ export default function SellPage() {
     setUser(u);
     if (!u) return;
     const stored = getProducts();
-    const merged = new Map();
-    SEED_PRODUCTS.forEach(p => merged.set(p.id, p));
-    stored.forEach(p => merged.set(p.id, p));
-    const all = Array.from(merged.values());
-    const mine = all.filter(p => p.sellerEmail === u.email);
+    const mine = stored.filter(p => p.sellerEmail === u.email);
     setProducts(mine);
   }, []);
 

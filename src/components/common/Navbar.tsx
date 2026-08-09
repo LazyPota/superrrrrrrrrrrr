@@ -32,9 +32,12 @@ export default function Navbar() {
     setCartCount(cart.reduce((acc, i) => acc + i.qty, 0));
     if (u) {
       const msgs = getDirectMessages();
-      const unread = msgs.filter(
-        m => (m.sellerEmail === u.email && m.unreadBySeller) || (m.buyerEmail === u.email && m.unreadByBuyer)
-      ).length;
+      const unread = msgs.filter(m => {
+        if (m.deleted) return false;
+        if (m.sellerEmail === u.email && m.deletedBySeller) return false;
+        if (m.buyerEmail === u.email && m.deletedByBuyer) return false;
+        return (m.sellerEmail === u.email && m.unreadBySeller) || (m.buyerEmail === u.email && m.unreadByBuyer);
+      }).length;
       setUnreadCount(unread);
     }
   }
