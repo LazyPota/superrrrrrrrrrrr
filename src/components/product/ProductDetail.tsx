@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Card, Row, Col, Typography, Tag, Button, Breadcrumb, Descriptions, Space, Image, message, Spin, Empty, Flex, Modal, InputNumber, Input, Rate, Avatar, List } from 'antd';
-import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined, HeartOutlined, HeartFilled, ShareAltOutlined } from '@ant-design/icons';
 import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating, getDirectMessages, toggleWishlist, isWishlisted } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 
@@ -33,6 +33,31 @@ export default function ProductDetail() {
       setFavored(isWishlisted(product.id));
     }
   }, [product]);
+
+  function handleShareProduct() {
+    if (!product) return;
+    const url = typeof window !== 'undefined'
+      ? `${window.location.origin}/product?id=${product.id}`
+      : `https://presumart.netlify.app/product?id=${product.id}`;
+
+    const shareData = {
+      title: product.name,
+      text: `Cek ${product.name} (${formatPrice(product.price)}) di PresUMart!`,
+      url: url,
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        messageApi.success('Link produk berhasil disalin ke clipboard!');
+      }).catch(() => {
+        messageApi.info(`Link produk: ${url}`);
+      });
+    } else {
+      messageApi.info(`Link produk: ${url}`);
+    }
+  }
 
   function handleToggleWishlist() {
     if (!product) return;
@@ -352,6 +377,15 @@ export default function ProductDetail() {
                   style={{ height: 44, padding: '0 16px', fontSize: 15 }}
                 >
                   {favored ? 'Favorit' : 'Simpan'}
+                </Button>
+
+                <Button
+                  size="large"
+                  icon={<ShareAltOutlined style={{ color: '#0052cc' }} />}
+                  onClick={handleShareProduct}
+                  style={{ height: 44, padding: '0 16px', fontSize: 15 }}
+                >
+                  Bagikan Link
                 </Button>
 
                 <Link href="/cart">

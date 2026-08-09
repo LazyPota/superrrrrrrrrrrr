@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, Tag, Button, Typography, Space, message, Badge, Avatar } from 'antd';
-import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons';
+import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined, HeartOutlined, HeartFilled, ShareAltOutlined } from '@ant-design/icons';
 import { addToCart, getUser, getDirectMessages, sendDirectMessage, toggleWishlist, isWishlisted } from '../../lib/store';
 
 const { Title, Text } = Typography;
@@ -21,6 +21,32 @@ export default function ProductCard({ product }: { product: any }) {
   useEffect(() => {
     setFavored(isWishlisted(product.id));
   }, [product.id]);
+
+  function handleShareProduct(e: React.MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    const url = typeof window !== 'undefined'
+      ? `${window.location.origin}/product?id=${product.id}`
+      : `https://presumart.netlify.app/product?id=${product.id}`;
+
+    const shareData = {
+      title: product.name,
+      text: `Cek ${product.name} (${formatPrice(product.price)}) di PresUMart!`,
+      url: url,
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        messageApi.success('Link produk berhasil disalin!');
+      }).catch(() => {
+        messageApi.info(`Link produk: ${url}`);
+      });
+    } else {
+      messageApi.info(`Link produk: ${url}`);
+    }
+  }
 
   function handleToggleWishlist(e: React.MouseEvent) {
     e.stopPropagation();
@@ -168,6 +194,13 @@ export default function ProductCard({ product }: { product: any }) {
               key="cart"
               disabled={isOutOfStock}
             />,
+            <Button
+              type="text"
+              className="action-button"
+              icon={<ShareAltOutlined style={{ fontSize: 20, color: '#0052cc' }} />}
+              onClick={handleShareProduct}
+              key="share"
+            />,
           ]}
           cover={
             <div className="img-wrapper" style={{ height: 220, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -181,6 +214,26 @@ export default function ProductCard({ product }: { product: any }) {
                   position: 'absolute',
                   top: 12,
                   left: 12,
+                  zIndex: 10,
+                  background: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(8px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 36,
+                  height: 36
+                }}
+              />
+              <Button
+                type="text"
+                shape="circle"
+                icon={<ShareAltOutlined style={{ color: '#0052cc', fontSize: 18 }} />}
+                onClick={handleShareProduct}
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
                   zIndex: 10,
                   background: 'rgba(255, 255, 255, 0.85)',
                   backdropFilter: 'blur(8px)',
