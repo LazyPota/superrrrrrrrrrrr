@@ -171,10 +171,20 @@ export default function ChatWidget() {
     <>
       {contextHolder}
       <FloatButton
-        icon={<RobotOutlined style={{ color: '#0052cc', fontSize: 22 }} />}
+        icon={<RobotOutlined style={{ color: '#003399', fontSize: 24 }} />}
         type="primary"
         tooltip="Tanya Asisten AI PresUMart"
-        style={{ right: 24, bottom: 24, width: 56, height: 56, background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}
+        className="ai-float-button"
+        style={{ 
+          right: 20, 
+          bottom: 96, 
+          width: 52, 
+          height: 52, 
+          background: '#ffffff', 
+          boxShadow: '0 6px 20px rgba(0,26,64,0.25)',
+          border: '2px solid #00e5ff',
+          zIndex: 9999
+        }}
         onClick={() => setOpen(true)}
       />
 

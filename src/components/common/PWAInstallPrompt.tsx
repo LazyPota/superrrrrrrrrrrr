@@ -68,70 +68,75 @@ export default function PWAInstallPrompt() {
   return (
     <>
       <div
+        className="pwa-install-prompt"
         style={{
           position: 'fixed',
-          bottom: 20,
-          left: 20,
-          right: 20,
-          maxWidth: 460,
+          bottom: 76,
+          left: 16,
+          right: 16,
+          maxWidth: 420,
           margin: '0 auto',
-          zIndex: 9999,
+          zIndex: 9990,
         }}
       >
         <Card
           size="small"
           style={{
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, #0052cc 0%, #0f172a 100%)',
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, #001a40 0%, #003399 100%)',
             color: '#ffffff',
-            boxShadow: '0 12px 32px rgba(0, 82, 204, 0.35)',
-            border: 'none',
+            boxShadow: '0 8px 24px rgba(0, 26, 64, 0.3)',
+            border: '1px solid rgba(0, 229, 255, 0.3)',
+            padding: '4px 8px'
           }}
+          styles={{ body: { padding: '8px 12px' } }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div
                 style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: '#ffffff',
+                  width: 34,
+                  height: 34,
+                  borderRadius: 10,
+                  background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 900,
-                  fontSize: 22,
-                  color: '#0052cc',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  fontSize: 18,
+                  color: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  flexShrink: 0
                 }}
               >
                 P
               </div>
-              <div>
-                <Text strong style={{ color: '#ffffff', fontSize: 14, display: 'block' }}>
+              <div style={{ lineHeight: 1.2 }}>
+                <Text strong style={{ color: '#ffffff', fontSize: 13, display: 'block' }}>
                   Install Aplikasi PresUMart
                 </Text>
-                <Text style={{ color: '#cbd5e1', fontSize: 11 }}>
-                  Akses Cepat di Android & iOS • COD Kampus
+                <Text style={{ color: '#00e5ff', fontSize: 10, fontWeight: 500 }}>
+                  Akses Cepat Android & iPhone
                 </Text>
               </div>
             </div>
 
-            <Space size={6}>
+            <Space size={4}>
               <Button
                 type="primary"
                 size="small"
-                icon={<DownloadOutlined />}
-                style={{ background: '#36b37e', borderColor: '#36b37e', fontWeight: 600, borderRadius: 8, height: 32 }}
+                icon={<DownloadOutlined style={{ fontSize: 12 }} />}
+                style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', fontWeight: 600, borderRadius: 16, height: 28, fontSize: 12, padding: '0 12px' }}
                 onClick={handleInstallClick}
               >
-                Download
+                Install
               </Button>
               <Button
                 type="text"
                 size="small"
-                icon={<CloseOutlined style={{ color: '#ffffff', fontSize: 14 }} />}
+                icon={<CloseOutlined style={{ color: '#94a3b8', fontSize: 12 }} />}
                 onClick={() => setShowBanner(false)}
+                style={{ width: 24, height: 24 }}
               />
             </Space>
           </div>
