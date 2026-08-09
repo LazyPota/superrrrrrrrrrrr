@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input, Modal, Rate, message, Select } from 'antd';
 import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined, EnvironmentOutlined, ShopOutlined, TagOutlined, DeleteOutlined } from '@ant-design/icons';
 import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview, reduceProductStock, deleteDirectMessageThread, deleteMessageReply, markProductAsSold } from '../../lib/store';
@@ -269,15 +270,17 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                   </Space>
                 </div>
 
-                <div style={{ background: '#f8fafc', padding: 10, borderRadius: 8, margin: '8px 0', border: '1px solid #f1f5f9' }}>
-                  <Text strong style={{ fontSize: 13, display: 'block', color: '#0f172a' }}>{item.productName}</Text>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                    <Text type="secondary" style={{ fontSize: 12 }}>Total Transaksi COD:</Text>
-                    <Text strong style={{ color: '#0052cc', fontSize: 14 }}>
-                      {formatPrice(item.type === 'nego' && item.proposedPrice ? item.proposedPrice : item.productPrice)}
-                    </Text>
+                <Link href={`/product?id=${item.productId}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: '#f8fafc', padding: 10, borderRadius: 8, margin: '8px 0', border: '1px solid #e2e8f0', cursor: 'pointer', transition: 'all 0.2s' }}>
+                    <Text strong style={{ fontSize: 13, display: 'block', color: '#0052cc' }}>🛒 {item.productName} ↗</Text>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+                      <Text type="secondary" style={{ fontSize: 12 }}>Total Transaksi COD:</Text>
+                      <Text strong style={{ color: '#0052cc', fontSize: 14 }}>
+                        {formatPrice(item.type === 'nego' && item.proposedPrice ? item.proposedPrice : item.productPrice)}
+                      </Text>
+                    </div>
                   </div>
-                </div>
+                </Link>
 
                 {/* Seller Confirmation Action Card: "Konfirmasi Barang Terjual ke Pembeli Ini" */}
                 {isSeller && item.status !== 'completed' && item.status !== 'sold' && (

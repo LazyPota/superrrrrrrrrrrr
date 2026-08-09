@@ -122,7 +122,7 @@ export default function ProductDetail() {
     }
   }, [productId]);
 
-  const isOutOfStock = product?.stock !== undefined && product?.stock <= 0;
+  const isOutOfStock = (product?.stock !== undefined && product?.stock <= 0) || product?.status === 'sold';
 
   function handleAddToCart() {
     const user = getUser();
@@ -267,6 +267,16 @@ export default function ProductDetail() {
 
             {/* Info Side */}
             <Col xs={24} md={14}>
+              {isOutOfStock && (
+                <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', padding: '12px 16px', borderRadius: 10, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Tag color="red" style={{ fontSize: 13, fontWeight: 800, padding: '4px 12px', margin: 0 }}>
+                    ❌ SOLD OUT / TERJUAL
+                  </Tag>
+                  <Text strong style={{ color: '#991b1b', fontSize: 13 }}>
+                    Maaf, produk ini telah TERJUAL dan tidak dapat dibeli lagi.
+                  </Text>
+                </div>
+              )}
               <Space size="small" style={{ marginBottom: 12 }} wrap>
                 <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
                   {product.category}

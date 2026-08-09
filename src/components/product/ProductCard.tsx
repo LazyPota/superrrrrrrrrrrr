@@ -16,7 +16,7 @@ export default function ProductCard({ product }: { product: any }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [favored, setFavored] = useState(false);
   const [pulse, setPulse] = useState(false);
-  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+  const isOutOfStock = (product.stock !== undefined && product.stock <= 0) || product.status === 'sold';
 
   useEffect(() => {
     setFavored(isWishlisted(product.id));
@@ -76,7 +76,7 @@ export default function ProductCard({ product }: { product: any }) {
       return;
     }
     if (isOutOfStock) {
-      messageApi.error('Maaf, stok produk ini telah habis.');
+      messageApi.error('Maaf, produk ini telah TERJUAL / Stok Habis.');
       return;
     }
     addToCart(product);
@@ -157,14 +157,14 @@ export default function ProductCard({ product }: { product: any }) {
       `}</style>
       {contextHolder}
       <Badge.Ribbon 
-        text={isOutOfStock ? 'STOK HABIS' : product.category} 
+        text={isOutOfStock ? 'SOLD OUT' : product.category} 
         color={isOutOfStock ? '#ef4444' : '#e0e7ff'}
-        style={{ color: isOutOfStock ? '#fff' : '#4338ca', fontWeight: 600, fontSize: 12 }}
+        style={{ color: isOutOfStock ? '#fff' : '#4338ca', fontWeight: 700, fontSize: 12 }}
       >
         <Card
           hoverable
           className="product-card"
-          style={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: isOutOfStock ? 0.75 : 1 }}
+          style={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: isOutOfStock ? 0.8 : 1 }}
           styles={{ body: { padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column' } }}
           actions={[
             <Link href={`/product?id=${product.id}`} key="detail">
@@ -194,7 +194,7 @@ export default function ProductCard({ product }: { product: any }) {
             />,
           ]}
           cover={
-            <div className="img-wrapper" style={{ height: 220, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="img-wrapper" style={{ height: 220, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
               <Button
                 type="text"
                 shape="circle"
@@ -236,30 +236,52 @@ export default function ProductCard({ product }: { product: any }) {
                   height: 36
                 }}
               />
-              {coverImg ? (
-                <>
-                  <img
-                    alt={product.name}
-                    src={coverImg}
-                    className="product-img"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '40%',
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
-                    pointerEvents: 'none'
-                  }} />
-                </>
-              ) : (
-                <div style={{ textAlign: 'center', color: '#cbd5e1' }}>
-                  <PictureOutlined style={{ fontSize: 48, marginBottom: 12 }} />
-                  <div style={{ fontSize: 13, fontWeight: 500 }}>Tidak ada foto</div>
-                </div>
-              )}
+              
+              {/* Product Cover Image clickable to Product Detail page */}
+              <Link href={`/product?id=${product.id}`} style={{ width: '100%', height: '100%', display: 'block' }}>
+                {coverImg ? (
+                  <>
+                    <img
+                      alt={product.name}
+                      src={coverImg}
+                      className="product-img"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', filter: isOutOfStock ? 'grayscale(70%)' : 'none' }}
+                    />
+                    {isOutOfStock && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(15, 23, 42, 0.6)',
+                        backdropFilter: 'blur(2px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 5,
+                      }}>
+                        <Tag color="red" style={{ fontSize: 15, padding: '4px 14px', borderRadius: 16, fontWeight: 800, letterSpacing: 1 }}>
+                          ❌ SOLD OUT
+                        </Tag>
+                        <span style={{ color: '#ffffff', fontSize: 11, marginTop: 4, fontWeight: 600 }}>Stok Habis / Terjual</span>
+                      </div>
+                    )}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '40%',
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
+                      pointerEvents: 'none'
+                    }} />
+                  </>
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#cbd5e1', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <PictureOutlined style={{ fontSize: 48, marginBottom: 12 }} />
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>Tidak ada foto</div>
+                  </div>
+                )}
+              </Link>
             </div>
           }
         >
