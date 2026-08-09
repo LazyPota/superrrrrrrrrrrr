@@ -31,6 +31,40 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product?.id) {
       setFavored(isWishlisted(product.id));
+
+      // Dynamic Open Graph & Twitter Meta Tags for WhatsApp/Telegram Share Preview
+      if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+        const titleStr = `${product.name} (Rp${Number(product.price).toLocaleString('id-ID')}) - PresUMart`;
+        document.title = titleStr;
+
+        const setMetaTag = (property: string, content: string, isName = false) => {
+          const attr = isName ? 'name' : 'property';
+          let element = document.querySelector(`meta[${attr}="${property}"]`);
+          if (!element) {
+            element = document.createElement('meta');
+            element.setAttribute(attr, property);
+            document.head.appendChild(element);
+          }
+          element.setAttribute('content', content);
+        };
+
+        const pageUrl = window.location.href;
+        const formattedPrice = 'Rp' + Number(product.price).toLocaleString('id-ID');
+        const descStr = `${formattedPrice} • ${product.description ? product.description.substring(0, 160) : 'Marketplace Mahasiswa President University Jababeka'}`;
+        const mainImg = product.image
+          ? (product.image.startsWith('http') ? product.image : `${window.location.origin}${product.image}`)
+          : `${window.location.origin}/icon-512.svg`;
+
+        setMetaTag('og:title', `${product.name} - PresUMart`);
+        setMetaTag('og:description', descStr);
+        setMetaTag('og:image', mainImg);
+        setMetaTag('og:url', pageUrl);
+        setMetaTag('og:site_name', 'PresUMart President University');
+        setMetaTag('twitter:card', 'summary_large_image', true);
+        setMetaTag('twitter:title', `${product.name} (${formattedPrice})`, true);
+        setMetaTag('twitter:description', descStr, true);
+        setMetaTag('twitter:image', mainImg, true);
+      }
     }
   }, [product]);
 
@@ -40,9 +74,12 @@ export default function ProductDetail() {
       ? `${window.location.origin}/product?id=${product.id}`
       : `https://presumart.netlify.app/product?id=${product.id}`;
 
+    const formattedPrice = formatPrice(product.price);
+    const shareText = `Cek *${product.name}* (${formattedPrice}) di PresUMart President University!`;
+
     const shareData = {
-      title: product.name,
-      text: `Cek ${product.name} (${formatPrice(product.price)}) di PresUMart!`,
+      title: `${product.name} - PresUMart`,
+      text: shareText,
       url: url,
     };
 
@@ -50,7 +87,7 @@ export default function ProductDetail() {
       navigator.share(shareData).catch(() => {});
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(url).then(() => {
-        messageApi.success('Link produk berhasil disalin ke clipboard!');
+        messageApi.success('Link produk berhasil disalin!');
       }).catch(() => {
         messageApi.info(`Link produk: ${url}`);
       });
