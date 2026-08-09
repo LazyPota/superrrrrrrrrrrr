@@ -263,20 +263,20 @@ export default function Navbar() {
                 </Dropdown>
               </>
             ) : (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                 <Button 
                   type="default" 
-                  size="middle" 
+                  size="small" 
                   onClick={() => router.push('/login')} 
-                  style={{ borderRadius: 20, borderColor: '#003399', color: '#003399', fontWeight: 600 }}
+                  style={{ borderRadius: 16, borderColor: '#003399', color: '#003399', fontWeight: 600, fontSize: 12, padding: '0 10px', height: 32 }}
                 >
                   Masuk
                 </Button>
                 <Button 
                   type="primary" 
-                  size="middle" 
+                  size="small" 
                   onClick={() => router.push('/register')} 
-                  style={{ borderRadius: 20, background: 'linear-gradient(135deg, #003399 0%, #001a40 100%)', border: 'none', fontWeight: 600, boxShadow: '0 4px 10px rgba(0,51,153,0.25)' }}
+                  style={{ borderRadius: 16, background: 'linear-gradient(135deg, #003399 0%, #001a40 100%)', border: 'none', fontWeight: 600, fontSize: 12, padding: '0 10px', height: 32, boxShadow: '0 2px 6px rgba(0,51,153,0.2)' }}
                 >
                   Daftar
                 </Button>

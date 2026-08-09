@@ -417,7 +417,12 @@ img {
 
   /* Mobile Navbar Header Adjustments */
   .navbar-main {
-    padding: 8px 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  .navbar-main button {
+    max-width: 100% !important;
+    white-space: nowrap !important;
   }
 
   /* Mobile Drawer Adjustments */
