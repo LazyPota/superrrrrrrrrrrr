@@ -73,33 +73,7 @@ export default function LoginPage() {
             <Text type="secondary">Selamat datang kembali, Mahasiswa PresUniv!</Text>
           </div>
 
-          {/* Quick Demo Accounts Helper */}
-          <Card size="small" style={{ marginBottom: 24, background: '#f0f9ff', borderColor: '#bae6fd', borderRadius: 12 }}>
-            <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 6, color: '#0369a1' }}>
-              💡 Pilihan Akun Demo Uji Coba:
-            </Text>
-            <Space direction="vertical" size={6} style={{ width: '100%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12 }}>
-                <div>
-                  <Text strong>1. Rina S. (Penjual)</Text>
-                  <div style={{ color: '#0284c7' }}>rina.s@student.president.ac.id</div>
-                </div>
-                <Button size="small" type="primary" ghost onClick={() => handleQuickLogin('rina.s@student.president.ac.id', 'password123')}>
-                  Masuk Penjual
-                </Button>
-              </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, borderTop: '1px dashed #cbd5e1', paddingTop: 6 }}>
-                <div>
-                  <Text strong>2. Ahmad R. (Pembeli IT 2026)</Text>
-                  <div style={{ color: '#0284c7' }}>ahmad.r@student.president.ac.id</div>
-                </div>
-                <Button size="small" type="primary" onClick={() => handleQuickLogin('ahmad.r@student.president.ac.id', 'password123')}>
-                  Masuk Pembeli
-                </Button>
-              </div>
-            </Space>
-          </Card>
 
           {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
 

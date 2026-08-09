@@ -106,34 +106,16 @@ function hashPassword(password: string): string {
   return 'h' + hash.toString(36);
 }
 
-const SEED_USERS = [
-  {
-    name: 'Rina S.',
-    email: 'rina.s@student.president.ac.id',
-    password: hashPassword('password123'),
-    major: 'Actuarial Science',
-    batch: '2023',
-  },
-  {
-    name: 'Ahmad R.',
-    email: 'ahmad.r@student.president.ac.id',
-    password: hashPassword('password123'),
-    major: 'Information Technology',
-    batch: '2026',
-  },
-];
+const SEED_USERS: any[] = [];
 
 function getUsers() {
-  if (typeof window === 'undefined') return SEED_USERS;
+  if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.USERS);
-  if (!data) {
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(SEED_USERS));
-    return SEED_USERS;
-  }
+  if (!data) return [];
   try {
     return JSON.parse(data);
   } catch (e) {
-    return SEED_USERS;
+    return [];
   }
 }
 

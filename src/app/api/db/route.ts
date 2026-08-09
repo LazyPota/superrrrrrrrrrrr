@@ -7,20 +7,7 @@ let serverDb: {
   messages: any[];
   reviews: any[];
 } = {
-  users: [
-    {
-      name: 'Rina S.',
-      email: 'rina.s@student.president.ac.id',
-      major: 'Actuarial Science',
-      batch: '2023',
-    },
-    {
-      name: 'Ahmad R.',
-      email: 'ahmad.r@student.president.ac.id',
-      major: 'Information Technology',
-      batch: '2026',
-    },
-  ],
+  users: [],
   products: [],
   messages: [],
   reviews: [],
