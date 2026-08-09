@@ -512,6 +512,37 @@ export function clearCart() {
 
 /* --- DIRECT MESSAGES & LIVE INTERACTIVE CHAT SYSTEM --- */
 
+let chatChannel: any = null;
+if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+  try {
+    chatChannel = new BroadcastChannel('presumart_chat_channel');
+    chatChannel.onmessage = (event: any) => {
+      if (event.data && event.data.type === 'NEW_MESSAGE') {
+        syncWithServer().then(() => {
+          window.dispatchEvent(new CustomEvent('messages-updated'));
+        });
+      }
+    };
+  } catch (e) {}
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEYS.DIRECT_MESSAGES) {
+      window.dispatchEvent(new CustomEvent('messages-updated'));
+    }
+  });
+}
+
+function notifyChatSync() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('messages-updated'));
+    if (chatChannel) {
+      try { chatChannel.postMessage({ type: 'NEW_MESSAGE' }); } catch (e) {}
+    }
+  }
+}
+
 export function getDirectMessages() {
   if (typeof window === 'undefined') return [];
   const data = localStorage.getItem(STORAGE_KEYS.DIRECT_MESSAGES);
@@ -523,10 +554,11 @@ export function getDirectMessages() {
   }
 }
 
-export function saveDirectMessages(messages) {
+export function saveDirectMessages(messages: any[]) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEYS.DIRECT_MESSAGES, JSON.stringify(messages));
   pushToServer();
+  notifyChatSync();
 }
 
 export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerName, productId, productName, productPrice, proposedPrice, messageText, type = 'inquiry', status = 'chat', codLocation = '' }: any) {

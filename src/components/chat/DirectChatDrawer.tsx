@@ -308,8 +308,11 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                   if (allBubbles.length === 0) return null;
 
                   return (
-                    <div style={{ marginTop: 12, background: '#f1f5f9', padding: 10, borderRadius: 10, display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
-                      <Text strong style={{ fontSize: 11, color: '#64748b' }}>Percakapan Obrolan (Urut Waktu):</Text>
+                    <div style={{ marginTop: 12, background: '#f8fafc', padding: 12, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 260, overflowY: 'auto', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                        <Text strong style={{ fontSize: 11, color: '#003399' }}>💬 Percakapan Obrolan (Urut Dari Pesan Pertama Pembeli):</Text>
+                        <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>Real-time 0ms</Tag>
+                      </div>
                       {allBubbles.map((b: any) => {
                         const isMe = b.senderEmail === user.email;
                         const timeStr = b.timestamp ? new Date(b.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
@@ -318,26 +321,26 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                             key={b.id}
                             style={{
                               alignSelf: isMe ? 'flex-end' : 'flex-start',
-                              maxWidth: '82%',
+                              maxWidth: '85%',
                               background: isMe ? 'linear-gradient(135deg, #003399 0%, #001a40 100%)' : '#ffffff',
                               color: isMe ? '#ffffff' : '#0f172a',
-                              padding: '8px 12px',
-                              borderRadius: isMe ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                              padding: '9px 13px',
+                              borderRadius: isMe ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
                               fontSize: 13,
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                              boxShadow: '0 2px 8px rgba(0,26,64,0.06)',
                               border: isMe ? 'none' : '1px solid #cbd5e1',
                             }}
                           >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontSize: 10, opacity: 0.85, marginBottom: 3 }}>
-                              <span style={{ fontWeight: 700 }}>{b.senderName} {b.isInitial ? '(Pesan Awal)' : ''}</span>
-                              <span style={{ fontSize: 9 }}>{timeStr}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontSize: 10, opacity: 0.85, marginBottom: 4 }}>
+                              <span style={{ fontWeight: 700 }}>{b.senderName} {b.isInitial ? '(Pesan Awal Pembeli)' : ''}</span>
+                              <span style={{ fontSize: 9, opacity: 0.8 }}>{timeStr}</span>
                               {isMe && !b.isInitial && (
                                 <Popconfirm title="Hapus pesan ini?" onConfirm={() => handleDeleteReply(item.id, b.id)} okText="Ya" cancelText="Batal">
                                   <DeleteOutlined style={{ cursor: 'pointer', fontSize: 11, color: '#fca5a5' }} title="Hapus Pesan" />
                                 </Popconfirm>
                               )}
                             </div>
-                            <div style={{ wordBreak: 'break-word', lineHeight: 1.4 }}>{b.text}</div>
+                            <div style={{ wordBreak: 'break-word', lineHeight: 1.45 }}>{b.text}</div>
                           </div>
                         );
                       })}
