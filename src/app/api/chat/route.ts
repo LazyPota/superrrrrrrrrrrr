@@ -15,6 +15,7 @@ function generateSmartFallbackReply(userQuery: string, products: any[]) {
   // Intent & category mappings
   const intentMap: Record<string, string[]> = {
     food: ['makan', 'lapar', 'jajan', 'haus', 'minum', 'kuliner', 'snack', 'mie', 'ayam'],
+    gaming: ['akun', 'game', 'gaming', 'mlbb', 'mobile legends', 'valorant', 'genshin', 'pubg', 'steam', 'rank', 'skin', 'diamond', 'char', 'joki'],
     study: ['buku', 'kuliah', 'belajar', 'kalkulus', 'calculus', 'tulis', 'pen', 'stewart'],
     electronics: ['laptop', 'kalkulator', 'komputer', 'casio', 'elektronik', 'hp', 'gadget', 'koding', 'tugas'],
     apparel: ['jaket', 'hoodie', 'baju', 'pakaian', 'kaos', 'celana', 'fashion'],

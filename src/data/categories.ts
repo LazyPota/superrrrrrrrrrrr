@@ -1,5 +1,6 @@
 const CATEGORIES = [
   'Elektronik',
+  'Akun Game',
   'Buku & Alat Tulis',
   'Pakaian',
   'Makanan & Minuman',
