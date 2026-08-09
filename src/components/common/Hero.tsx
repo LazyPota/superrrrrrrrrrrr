@@ -7,13 +7,20 @@ import {
   ShopOutlined, 
   TeamOutlined, 
   CodeOutlined, 
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  DownloadOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 
 const { Title, Paragraph } = Typography;
 
 export default function Hero() {
+  function handleInstallApp() {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('trigger-pwa-install'));
+    }
+  }
+
   return (
     <div 
       className="hero-container animate-fade-in"
@@ -183,6 +190,26 @@ export default function Hero() {
                   Jelajahi Produk
                 </Button>
               </a>
+              <Button 
+                type="default" 
+                size="large" 
+                icon={<DownloadOutlined style={{ color: '#00e5ff' }} />} 
+                onClick={handleInstallApp}
+                style={{ 
+                  height: 48, 
+                  padding: '0 24px', 
+                  fontSize: 15, 
+                  fontWeight: 600,
+                  background: 'rgba(255, 255, 255, 0.12)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(0, 229, 255, 0.4)', 
+                  color: '#ffffff',
+                  borderRadius: 24,
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
+                }}
+              >
+                Download Aplikasi
+              </Button>
             </Space>
           </Col>
           

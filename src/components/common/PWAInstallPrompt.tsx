@@ -38,14 +38,25 @@ export default function PWAInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
+    const handleTriggerInstall = () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+      } else {
+        setShowIosModal(true);
+      }
+    };
+
+    window.addEventListener('trigger-pwa-install', handleTriggerInstall);
+
     if (iosDevice && !inStandalone) {
       setShowBanner(true);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('trigger-pwa-install', handleTriggerInstall);
     };
-  }, []);
+  }, [deferredPrompt]);
 
   async function handleInstallClick() {
     if (deferredPrompt) {
