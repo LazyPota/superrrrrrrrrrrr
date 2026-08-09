@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Card, Avatar, Statistic, Row, Col, Button, Tag, Typography, Popconfirm, Empty, Space } from 'antd';
-import { UserOutlined, PlusOutlined, LogoutOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, HeartFilled } from '@ant-design/icons';
+import { Card, Avatar, Statistic, Row, Col, Button, Tag, Typography, Popconfirm, Empty, Space, Modal, Form, Input, Select, Alert, message } from 'antd';
+import { UserOutlined, PlusOutlined, LogoutOutlined, CheckCircleOutlined, DeleteOutlined, EditOutlined, HeartFilled, LockOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
-import { getUser, getProducts, removeUser, deleteProduct, getDirectMessages, getWishlist } from '../../lib/store';
+import { getUser, getProducts, removeUser, deleteProduct, getDirectMessages, getWishlist, updateUserProfile } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
+import MAJORS from '../../lib/majors';
 
 const { Title, Text } = Typography;
 
@@ -21,6 +22,13 @@ export default function ProfilePage() {
   const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
   const [orderCount, setOrderCount] = useState(0);
   const [purchaseCount, setPurchaseCount] = useState(0);
+  
+  // Edit Profile & Password Modal states
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     const u = getUser();
@@ -54,6 +62,56 @@ export default function ProfilePage() {
     setMyProducts(prev => prev.filter(p => p.id !== id));
   }
 
+  function handleOpenEditModal() {
+    if (!user) return;
+    setEditError('');
+    form.setFieldsValue({
+      name: user.name,
+      email: user.email,
+      major: user.major,
+      batch: user.batch,
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setEditModalOpen(true);
+  }
+
+  async function handleSaveProfile(values: any) {
+    if (!user) return;
+    setEditError('');
+
+    if (values.newPassword && values.newPassword.length < 6) {
+      setEditError('Password baru minimal 6 karakter!');
+      return;
+    }
+
+    if (values.newPassword && values.newPassword !== values.confirmPassword) {
+      setEditError('Konfirmasi password baru tidak cocok!');
+      return;
+    }
+
+    setEditLoading(true);
+
+    const res = await updateUserProfile(user.email, {
+      name: values.name,
+      email: values.email,
+      major: values.major,
+      batch: values.batch,
+      password: values.newPassword,
+    });
+
+    setEditLoading(false);
+
+    if (!res.ok) {
+      setEditError(res.error || 'Gagal memperbarui profil.');
+      return;
+    }
+
+    setUser(res.user);
+    setEditModalOpen(false);
+    messageApi.success('Profil & Password berhasil diperbarui!');
+  }
+
   if (!user) {
     return (
       <>
@@ -74,22 +132,23 @@ export default function ProfilePage() {
 
   return (
     <>
+      {contextHolder}
       <Navbar />
       <main style={{ maxWidth: 1240, margin: '24px auto', padding: '0 16px 48px 16px', minHeight: '60vh' }}>
         <Title level={2} style={{ fontWeight: 800, marginBottom: 20 }}>
-          Profil <span style={{ color: '#0052cc' }}>Saya</span>
+          Profil <span style={{ color: '#003399' }}>Saya</span>
         </Title>
 
         <Row gutter={[20, 20]}>
           {/* User Info Card */}
           <Col xs={24} md={8}>
-            <Card style={{ borderRadius: 16, textAlign: 'center', padding: 8 }}>
+            <Card style={{ borderRadius: 16, textAlign: 'center', padding: 8, boxShadow: '0 4px 16px rgba(0,26,64,0.06)' }}>
               <Avatar
-                size={72}
-                style={{ backgroundColor: '#0052cc', fontSize: 32, marginBottom: 12 }}
+                size={76}
+                style={{ backgroundColor: '#003399', fontSize: 32, marginBottom: 12, border: '3px solid #00e5ff' }}
                 icon={<UserOutlined />}
               >
-                {user.name.charAt(0).toUpperCase()}
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
               </Avatar>
               <Title level={3} style={{ margin: '0 0 4px 0', fontSize: 20 }}>{user.name}</Title>
               <Text type="secondary" style={{ display: 'block', marginBottom: 12, fontSize: 13 }}>{user.email}</Text>
@@ -100,10 +159,17 @@ export default function ProfilePage() {
               </Space>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <Button icon={<SettingOutlined />} block onClick={handleOpenEditModal} style={{ borderRadius: 20, borderColor: '#003399', color: '#003399', fontWeight: 600 }}>
+                  Ubah Email & Password
+                </Button>
                 <Link href="/sell">
-                  <Button type="primary" icon={<PlusOutlined />} block size="large">Jual Barang Baru</Button>
+                  <Button type="primary" icon={<PlusOutlined />} block size="large" style={{ background: 'linear-gradient(135deg, #003399 0%, #001a40 100%)', border: 'none', borderRadius: 20 }}>
+                    Jual Barang Baru
+                  </Button>
                 </Link>
-                <Button danger icon={<LogoutOutlined />} block onClick={handleLogout}>Keluar Akun</Button>
+                <Button danger icon={<LogoutOutlined />} block onClick={handleLogout} style={{ borderRadius: 20 }}>
+                  Keluar Akun
+                </Button>
               </div>
             </Card>
           </Col>
@@ -116,7 +182,7 @@ export default function ProfilePage() {
                   <Statistic
                     title={<span style={{ fontSize: 11, color: '#64748b' }}>Produk Dijual</span>}
                     value={myProducts.length}
-                    styles={{ content: { color: '#0052cc', fontSize: 18, fontWeight: 800 } }}
+                    styles={{ content: { color: '#003399', fontSize: 18, fontWeight: 800 } }}
                   />
                 </Card>
               </Col>
@@ -249,6 +315,80 @@ export default function ProfilePage() {
             </Card>
           </Col>
         </Row>
+
+        {/* Modal Ubah Email & Password */}
+        <Modal
+          title={
+            <Space>
+              <SettingOutlined style={{ color: '#003399' }} />
+              <span>Pengaturan Profil & Ubah Password</span>
+            </Space>
+          }
+          open={editModalOpen}
+          onCancel={() => setEditModalOpen(false)}
+          footer={null}
+          destroyOnClose
+        >
+          {editError && <Alert message={editError} type="error" showIcon style={{ marginBottom: 16, borderRadius: 8 }} />}
+
+          <Form form={form} layout="vertical" onFinish={handleSaveProfile} size="middle">
+            <Form.Item
+              label="Nama Lengkap"
+              name="name"
+              rules={[{ required: true, message: 'Nama wajib diisi!' }]}
+            >
+              <Input prefix={<UserOutlined style={{ color: '#94a3b8' }} />} />
+            </Form.Item>
+
+            <Form.Item
+              label="Email Kampus (@student.president.ac.id)"
+              name="email"
+              rules={[
+                { required: true, message: 'Email kampus wajib diisi!' },
+                { type: 'email', message: 'Format email tidak valid!' }
+              ]}
+              extra="Perubahan email akan digunakan untuk login berikutnya."
+            >
+              <Input prefix={<MailOutlined style={{ color: '#94a3b8' }} />} />
+            </Form.Item>
+
+            <Row gutter={16}>
+              <Col span={14}>
+                <Form.Item label="Major / Program Studi" name="major" rules={[{ required: true }]}>
+                  <Select options={MAJORS.map(m => ({ label: m, value: m }))} />
+                </Form.Item>
+              </Col>
+              <Col span={10}>
+                <Form.Item label="Angkatan" name="batch" rules={[{ required: true }]}>
+                  <Select
+                    options={['2021', '2022', '2023', '2024', '2025', '2026'].map(b => ({ label: `Angkatan ${b}`, value: b }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Card size="small" style={{ background: '#f8fafc', marginBottom: 20, borderRadius: 10, border: '1px solid #e2e8f0' }}>
+              <Text strong style={{ fontSize: 13, display: 'block', marginBottom: 10, color: '#003399' }}>
+                🔒 Ubah Password (Kosongkan jika tidak ingin diubah):
+              </Text>
+              
+              <Form.Item label="Password Baru" name="newPassword" style={{ marginBottom: 12 }}>
+                <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Password baru minimal 6 karakter" />
+              </Form.Item>
+
+              <Form.Item label="Konfirmasi Password Baru" name="confirmPassword" style={{ marginBottom: 0 }}>
+                <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Ulangi password baru" />
+              </Form.Item>
+            </Card>
+
+            <div style={{ display: 'flex', justifySelf: 'flex-end', gap: 8 }}>
+              <Button onClick={() => setEditModalOpen(false)}>Batal</Button>
+              <Button type="primary" htmlType="submit" loading={editLoading} style={{ background: '#003399', border: 'none' }}>
+                Simpan Perubahan
+              </Button>
+            </div>
+          </Form>
+        </Modal>
       </main>
       <Footer />
     </>

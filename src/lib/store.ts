@@ -267,6 +267,44 @@ export async function loginUser(email: string, password: string) {
   return { ok: true, user };
 }
 
+export async function updateUserProfile(currentEmail: string, updatedFields: { name?: string; email?: string; password?: string; major?: string; batch?: string }) {
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.email === currentEmail);
+  if (userIndex === -1) return { ok: false, error: 'User tidak ditemukan.' };
+
+  const currentUser = { ...users[userIndex] };
+
+  // If email is changing, validate domain and uniqueness
+  if (updatedFields.email && updatedFields.email !== currentEmail) {
+    const newEmail = updatedFields.email.trim().toLowerCase();
+    if (!newEmail.endsWith('@student.president.ac.id') && !newEmail.endsWith('@president.ac.id')) {
+      return { ok: false, error: 'Email harus menggunakan domain resmi @student.president.ac.id atau @president.ac.id' };
+    }
+    const emailExists = users.some(u => u.email === newEmail && u.email !== currentEmail);
+    if (emailExists) {
+      return { ok: false, error: 'Email tersebut sudah digunakan oleh akun lain.' };
+    }
+    currentUser.email = newEmail;
+  }
+
+  if (updatedFields.name) currentUser.name = sanitizeInput(updatedFields.name);
+  if (updatedFields.major) currentUser.major = updatedFields.major;
+  if (updatedFields.batch) currentUser.batch = updatedFields.batch;
+
+  if (updatedFields.password && updatedFields.password.trim() !== '') {
+    currentUser.password = await hashPasswordAsync(updatedFields.password);
+  }
+
+  users[userIndex] = currentUser;
+  saveUsers(users);
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(currentUser));
+  }
+
+  return { ok: true, user: currentUser };
+}
+
 export function getUser() {
   if (typeof window === 'undefined') return null;
   const data = localStorage.getItem(STORAGE_KEYS.USER);
