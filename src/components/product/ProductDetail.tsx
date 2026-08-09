@@ -70,29 +70,36 @@ export default function ProductDetail() {
 
   function handleShareProduct() {
     if (!product) return;
-    const url = typeof window !== 'undefined'
-      ? `${window.location.origin}/product?id=${product.id}`
-      : `https://presumart.netlify.app/product?id=${product.id}`;
 
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://presumart.netlify.app';
+    const imgPath = (product.images && product.images.length > 0) ? product.images[0] : (product.image || '');
+    
+    const params = new URLSearchParams({
+      id: product.id,
+      title: product.name || '',
+      price: String(product.price || 0),
+      img: imgPath,
+      desc: (product.description || '').substring(0, 140)
+    });
+
+    const richUrl = `${origin}/product?${params.toString()}`;
     const formattedPrice = formatPrice(product.price);
-    const shareText = `Cek *${product.name}* (${formattedPrice}) di PresUMart President University!`;
-
-    const shareData = {
-      title: `${product.name} - PresUMart`,
-      text: shareText,
-      url: url,
-    };
+    const shareText = `🛒 *${product.name}* (${formattedPrice})\nBeli di PresUMart President University: ${richUrl}`;
 
     if (typeof navigator !== 'undefined' && navigator.share) {
-      navigator.share(shareData).catch(() => {});
+      navigator.share({
+        title: `${product.name} - PresUMart`,
+        text: shareText,
+        url: richUrl,
+      }).catch(() => {});
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => {
-        messageApi.success('Link produk berhasil disalin!');
+      navigator.clipboard.writeText(richUrl).then(() => {
+        messageApi.success('Link produk dengan gambar berhasil disalin!');
       }).catch(() => {
-        messageApi.info(`Link produk: ${url}`);
+        messageApi.info(`Link produk: ${richUrl}`);
       });
     } else {
-      messageApi.info(`Link produk: ${url}`);
+      messageApi.info(`Link produk: ${richUrl}`);
     }
   }
 

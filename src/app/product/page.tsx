@@ -5,36 +5,66 @@ import Footer from '../../components/common/Footer';
 import ProductDetail from '../../components/product/ProductDetail';
 
 type Props = {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{ id?: string; title?: string; price?: string; img?: string; desc?: string }>;
 };
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const params = await searchParams;
-  const id = params.id;
   const baseUrl = 'https://presumart.netlify.app';
 
-  if (!id) {
-    return {
-      title: 'Detail Produk - PresUMart',
-      description: 'Platform Jual Beli COD Khusus Mahasiswa President University Jababeka.',
-    };
+  const rawTitle = params.title ? decodeURIComponent(params.title) : '';
+  const rawPrice = params.price ? Number(params.price) : 0;
+  const formattedPrice = rawPrice > 0 ? `Rp${rawPrice.toLocaleString('id-ID')}` : '';
+  const rawImg = params.img ? decodeURIComponent(params.img) : '';
+  const rawDesc = params.desc ? decodeURIComponent(params.desc) : '';
+
+  const displayTitle = rawTitle
+    ? `${rawTitle} ${formattedPrice ? `(${formattedPrice})` : ''} - PresUMart`
+    : 'PresUMart - President University Marketplace';
+
+  const displayDesc = rawDesc
+    ? `${formattedPrice ? `${formattedPrice} • ` : ''}${rawDesc.substring(0, 160)}`
+    : `${formattedPrice ? `Beli ${rawTitle} seharga ${formattedPrice} di PresUMart. ` : ''}Platform Jual Beli COD Khusus Mahasiswa President University Jababeka.`;
+
+  let fullImageUrl = `${baseUrl}/icon-512.svg`;
+  if (rawImg) {
+    if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) {
+      fullImageUrl = rawImg;
+    } else if (rawImg.startsWith('/')) {
+      fullImageUrl = `${baseUrl}${rawImg}`;
+    } else {
+      fullImageUrl = `${baseUrl}/${rawImg}`;
+    }
   }
 
+  const shareUrl = params.id 
+    ? `${baseUrl}/product?id=${params.id}`
+    : baseUrl;
+
   return {
-    title: 'Detail Produk - PresUMart',
-    description: 'Beli barang bekas & baru berkualitas dari mahasiswa President University Jababeka di PresUMart.',
+    title: displayTitle,
+    description: displayDesc,
     openGraph: {
-      title: 'Detail Produk | PresUMart President University',
-      description: 'Beli barang bekas & baru berkualitas dari mahasiswa President University Jababeka di PresUMart.',
-      url: `${baseUrl}/product?id=${id}`,
-      siteName: 'PresUMart',
+      title: displayTitle,
+      description: displayDesc,
+      url: shareUrl,
+      siteName: 'PresUMart President University',
       locale: 'id_ID',
       type: 'website',
+      images: [
+        {
+          url: fullImageUrl,
+          width: 1200,
+          height: 630,
+          alt: rawTitle || 'Foto Produk PresUMart',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Detail Produk | PresUMart President University',
-      description: 'Beli barang bekas & baru berkualitas dari mahasiswa President University Jababeka di PresUMart.',
+      title: displayTitle,
+      description: displayDesc,
+      images: [fullImageUrl],
     },
   };
 }
