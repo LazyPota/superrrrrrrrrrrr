@@ -24,11 +24,9 @@ export default function HomeContent() {
 
   useEffect(() => {
     const stored = getProducts();
-    // Purge old prototype items and update to authentic PresUMart product catalog
-    const userCreatedProducts = stored.filter((p: any) => p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
-    const updatedProducts = [...SEED_PRODUCTS, ...userCreatedProducts];
-    saveProducts(updatedProducts);
-    setProducts(updatedProducts);
+    const cleanUserProducts = stored.filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
+    saveProducts(cleanUserProducts);
+    setProducts(cleanUserProducts);
   }, []);
 
   useEffect(() => {

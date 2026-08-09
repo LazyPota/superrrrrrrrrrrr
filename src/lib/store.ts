@@ -286,7 +286,14 @@ export function getProducts() {
   const data = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
   if (!data) return [];
   try {
-    return JSON.parse(data);
+    const list = JSON.parse(data);
+    if (!Array.isArray(list)) return [];
+    // Force purge any old seed / prototype items
+    const userOnly = list.filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
+    if (userOnly.length !== list.length) {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(userOnly));
+    }
+    return userOnly;
   } catch (e) {
     return [];
   }
