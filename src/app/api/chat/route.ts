@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 const API_URL = 'https://api.gutstore.my.id/v1/chat/completions';
 const API_KEY = process.env.CHAT_API_KEY || '';
-const MODEL = 'gemini-3.5-flash';
+const MODEL = 'nemotron-3-ultra';
 
 const DEFAULT_FRIENDLY_REPLY = 'Waduh, produk yang kamu cari belum ada yang menjual saat ini di PresUMart 😅. Kamu bisa berkala cek lagi nanti, atau kamu bisa pasang iklan jual barang ini di menu Jual Barang!';
 
