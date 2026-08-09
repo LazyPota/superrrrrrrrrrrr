@@ -148,14 +148,6 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     };
   }, [open]);
 
-  // Scroll to bottom ONLY on initial open or when explicitly triggered (e.g. sending a message)
-  useEffect(() => {
-    if (shouldScrollBottom && chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      setShouldScrollBottom(false);
-    }
-  }, [shouldScrollBottom]);
-
   function refreshMessages(currentUser?: any) {
     const u = currentUser || getUser();
     if (u) {
@@ -179,7 +171,6 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
 
   function handleStatusChange(id: string, newStatus: any) {
     updateMessageStatus(id, newStatus);
-    setShouldScrollBottom(true);
     refreshMessages(user);
   }
 
@@ -188,7 +179,6 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     if (!text || !text.trim()) return;
     addReplyToMessage(msgId, user.email, user.name, text.trim());
     setReplyTextMap(prev => ({ ...prev, [msgId]: '' }));
-    setShouldScrollBottom(true);
     refreshMessages(user);
   }
 
