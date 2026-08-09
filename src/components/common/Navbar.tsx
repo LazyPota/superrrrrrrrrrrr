@@ -204,7 +204,7 @@ export default function Navbar() {
               <div style={{ fontSize: '20px', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.02em', color: '#001a40' }}>
                 Pres<span style={{ color: '#003399' }}>U</span><span style={{ color: '#00b8d9' }}>Mart</span>
               </div>
-              <span style={{ fontSize: '9px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <span className="hide-mobile" style={{ fontSize: '9px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 President University
               </span>
             </div>
