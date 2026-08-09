@@ -3,11 +3,18 @@ import { User, Product, DirectMessage, Reply } from '../types';
 const STORAGE_KEYS = {
   USER: 'presumart_user',
   USERS: 'presumart_users',
-  PRODUCTS: 'presumart_products',
+  PRODUCTS: 'presumart_products_v3',
   DIRECT_MESSAGES: 'presumart_direct_messages',
   REVIEWS: 'presumart_reviews',
   WISHLIST: 'presumart_wishlist',
 };
+
+if (typeof window !== 'undefined') {
+  try {
+    localStorage.removeItem('presumart_products');
+    localStorage.removeItem('presumart_products_v2');
+  } catch(e) {}
+}
 
 export function speakVoice(text: string): void {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
