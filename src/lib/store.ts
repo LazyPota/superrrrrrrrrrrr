@@ -134,13 +134,13 @@ export async function syncWithServer() {
     
     let updated = false;
 
-    if (serverDb.products && serverDb.products.length > 0) {
+    if (serverDb.products) {
       const localProds = getProducts();
       const mergedMap = new Map();
       localProds.forEach(p => mergedMap.set(p.id, p));
-      serverDb.products.forEach(p => mergedMap.set(p.id, p));
-      const mergedProds = Array.from(mergedMap.values());
-      if (mergedProds.length !== localProds.length) {
+      serverDb.products.forEach((p: any) => mergedMap.set(p.id, p));
+      const mergedProds = Array.from(mergedMap.values()).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
+      if (JSON.stringify(mergedProds) !== JSON.stringify(localProds)) {
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(mergedProds));
         updated = true;
       }

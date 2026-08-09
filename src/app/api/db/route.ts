@@ -82,7 +82,8 @@ export async function GET() {
         serverDb.users = mergeUsers(serverDb.users, supaUsers);
       }
       if (supaProds && supaProds.length > 0) {
-        serverDb.products = mergeProducts(serverDb.products, supaProds);
+        const cleanProds = supaProds.filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
+        serverDb.products = mergeProducts(serverDb.products, cleanProds);
       }
       if (supaMsgs && supaMsgs.length > 0) {
         serverDb.messages = mergeMessages(serverDb.messages, supaMsgs);
@@ -94,6 +95,9 @@ export async function GET() {
   } catch (e) {
     // Fallback if Supabase tables are not created yet
   }
+
+  // Ensure serverDb products never contain dummy seed items
+  serverDb.products = (serverDb.products || []).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
 
   // SECURITY: Strip passwords from user data before sending to client
   return NextResponse.json({
