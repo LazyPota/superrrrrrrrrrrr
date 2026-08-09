@@ -325,24 +325,31 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                     senderName: item.buyerName,
                     text: item.messageText,
                     timestamp: item.createdAt || new Date(0).toISOString(),
+                    seqIndex: -1,
                     isInitial: true,
                   }] : [];
 
-                  const replyBubbles = (item.replies || []).map((r: any) => ({
+                  const replyBubbles = (item.replies || []).map((r: any, idx: number) => ({
                     id: r.id,
                     senderEmail: r.senderEmail,
                     senderName: r.senderName,
                     text: r.text,
                     timestamp: r.timestamp || new Date().toISOString(),
+                    seqIndex: idx,
                     isInitial: false,
                   }));
 
-                  // STRICT UNIFIED TIMESTAMPS SORTING FROM OLDEST (TOP) TO NEWEST (BOTTOM)
-                  const allBubbles = [...initialBubble, ...replyBubbles].sort((a: any, b: any) => {
+                  // GUARANTEE: Buyer's initial message is ALWAYS Bubble #0 (Top), followed sequentially by all replies!
+                  const sortedReplies = [...replyBubbles].sort((a: any, b: any) => {
                     const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
                     const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-                    return timeA - timeB;
+                    if (Math.abs(timeA - timeB) > 60000) {
+                      return timeA - timeB;
+                    }
+                    return (a.seqIndex || 0) - (b.seqIndex || 0);
                   });
+
+                  const allBubbles = [...initialBubble, ...sortedReplies];
 
                   if (allBubbles.length === 0) return null;
 

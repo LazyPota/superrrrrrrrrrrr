@@ -170,7 +170,14 @@ export async function syncWithServer() {
           const replyMap = new Map();
           (existing.replies || []).forEach(r => replyMap.set(r.id, r));
           (incoming.replies || []).forEach(r => replyMap.set(r.id, r));
-          const mergedReplies = Array.from(replyMap.values()).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+          const mergedReplies = Array.from(replyMap.values()).sort((a: any, b: any) => {
+            const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+            const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+            if (Math.abs(timeA - timeB) > 60000) {
+              return timeA - timeB;
+            }
+            return 0;
+          });
 
           mergedMap.set(incoming.id, {
             ...existing,

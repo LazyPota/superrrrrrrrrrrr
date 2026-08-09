@@ -30,7 +30,14 @@ function mergeMessages(existingList: any[], incomingList: any[]) {
       (existing.replies || []).forEach((r: any) => replyMap.set(r.id, r));
       (incoming.replies || []).forEach((r: any) => replyMap.set(r.id, r));
 
-      const mergedReplies = Array.from(replyMap.values()).sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      const mergedReplies = Array.from(replyMap.values()).sort((a: any, b: any) => {
+        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+        if (Math.abs(timeA - timeB) > 60000) {
+          return timeA - timeB;
+        }
+        return 0;
+      });
       const updatedStatus = incoming.status !== 'pending' ? incoming.status : existing.status;
 
       map.set(incoming.id, {
