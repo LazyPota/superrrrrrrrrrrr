@@ -565,20 +565,21 @@ export function saveDirectMessages(messages: any[]) {
 
 export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerName, productId, productName, productPrice, proposedPrice, messageText, type = 'inquiry', status = 'chat', codLocation = '' }: any) {
   const messages = getDirectMessages();
+  const user = getUser();
   
-  // Check if an existing thread exists between this buyer, seller, and product
-  const existingIndex = messages.findIndex((m: any) =>
-    (m.buyerEmail === buyerEmail && m.sellerEmail === sellerEmail && m.productId === productId) ||
-    (m.sellerEmail === buyerEmail && m.buyerEmail === sellerEmail && m.productId === productId)
-  );
+  // Check if an ACTIVE (non-deleted) thread exists between this buyer, seller, and product
+  const existingIndex = messages.findIndex((m: any) => {
+    if (m.deleted) return false;
+    if (user && m.buyerEmail === user.email && m.deletedByBuyer) return false;
+    if (user && m.sellerEmail === user.email && m.deletedBySeller) return false;
+    return (
+      (m.buyerEmail === buyerEmail && m.sellerEmail === sellerEmail && m.productId === productId) ||
+      (m.sellerEmail === buyerEmail && m.buyerEmail === sellerEmail && m.productId === productId)
+    );
+  });
 
   if (existingIndex >= 0) {
     const existing = messages[existingIndex];
-    // Revive deleted thread if user previously deleted it
-    existing.deleted = false;
-    existing.deletedByBuyer = false;
-    existing.deletedBySeller = false;
-
     if (sellerEmail === existing.sellerEmail) {
       existing.unreadBySeller = true;
     } else {
@@ -604,6 +605,7 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
     return existing;
   }
 
+  // Create a BRAND NEW FRESH CHAT ROOM with new unique ID if deleted or new
   const initialStatus = status || (type === 'order' ? 'pending' : (type === 'nego' ? 'pending' : 'chat'));
   const newMsg = {
     id: generateId(),
@@ -623,6 +625,9 @@ export function sendDirectMessage({ sellerEmail, sellerName, buyerEmail, buyerNa
     createdAt: new Date().toISOString(),
     unreadBySeller: true,
     unreadByBuyer: false,
+    deletedByBuyer: false,
+    deletedBySeller: false,
+    deleted: false,
     replies: [],
   };
   messages.push(newMsg);
