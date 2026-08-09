@@ -262,7 +262,7 @@ export default function ProductDetail() {
                 </Flex>
               </Card>
 
-              <Space size="middle" style={{ marginBottom: 32 }} wrap>
+              <Space size="small" style={{ marginBottom: 28, width: '100%' }} wrap>
                 <Button
                   type="primary"
                   size="large"
@@ -270,7 +270,7 @@ export default function ProductDetail() {
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
                   danger={isOutOfStock}
-                  style={{ height: 48, padding: '0 28px', fontSize: 16 }}
+                  style={{ height: 44, padding: '0 20px', fontSize: 15 }}
                 >
                   {isOutOfStock ? 'Stok Habis' : 'Tambah ke Keranjang'}
                 </Button>
@@ -293,7 +293,7 @@ export default function ProductDetail() {
                       }
                       setNegoModalOpen(true);
                     }}
-                    style={{ height: 48, padding: '0 24px', fontSize: 16, borderColor: isOutOfStock ? '#d1d5db' : '#f59e0b', color: isOutOfStock ? '#94a3b8' : '#b45309' }}
+                    style={{ height: 44, padding: '0 16px', fontSize: 15, borderColor: isOutOfStock ? '#d1d5db' : '#f59e0b', color: isOutOfStock ? '#94a3b8' : '#b45309' }}
                   >
                     Nego Harga
                   </Button>
@@ -340,23 +340,23 @@ export default function ProductDetail() {
 
                     window.dispatchEvent(new CustomEvent('open-direct-chat'));
                   }}
-                  style={{ height: 48, padding: '0 20px', fontSize: 16 }}
+                  style={{ height: 44, padding: '0 16px', fontSize: 15 }}
                 >
-                  Chat Penjual di Web
+                  Chat Penjual
                 </Button>
 
                 <Button
                   size="large"
                   icon={favored ? <HeartFilled style={{ color: '#ef4444' }} /> : <HeartOutlined />}
                   onClick={handleToggleWishlist}
-                  style={{ height: 48, padding: '0 20px', fontSize: 16 }}
+                  style={{ height: 44, padding: '0 16px', fontSize: 15 }}
                 >
                   {favored ? 'Favorit' : 'Simpan'}
                 </Button>
 
                 <Link href="/cart">
-                  <Button size="large" style={{ height: 48, padding: '0 20px', fontSize: 16 }}>
-                    Lihat Keranjang
+                  <Button size="large" style={{ height: 44, padding: '0 16px', fontSize: 15 }}>
+                    Keranjang
                   </Button>
                 </Link>
               </Space>

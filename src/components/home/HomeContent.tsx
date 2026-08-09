@@ -144,9 +144,9 @@ export default function HomeContent() {
           </Empty>
         </div>
       ) : (
-        <Row gutter={[24, 24]}>
+        <Row gutter={[12, 12]}>
           {filtered.map(product => (
-            <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
+            <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
               <ProductCard product={product} />
             </Col>
           ))}

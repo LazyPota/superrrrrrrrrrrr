@@ -220,13 +220,13 @@ export default function ProductCard({ product }: { product: any }) {
           }
         >
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Title level={5} ellipsis={{ rows: 2 }} style={{ margin: 0, minHeight: 44, fontSize: 16, lineHeight: '1.4', fontWeight: 600, color: '#1e293b' }}>
+            <Title level={5} ellipsis={{ rows: 2 }} style={{ margin: 0, minHeight: 38, fontSize: 'clamp(13px, 3.5vw, 16px)', lineHeight: '1.35', fontWeight: 600, color: '#1e293b' }}>
               {product.name}
             </Title>
 
-            <div style={{ margin: '8px 0 12px 0' }}>
+            <div style={{ margin: '6px 0 10px 0' }}>
               <Text style={{ 
-                fontSize: 20, 
+                fontSize: 'clamp(15px, 4vw, 20px)', 
                 fontWeight: 800, 
                 display: 'block',
                 background: 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)',

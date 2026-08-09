@@ -137,16 +137,16 @@ export default function Hero() {
               </Tag>
             </Space>
             
-            <Title level={1} className="gradient-text" style={{ fontSize: '3.5rem', fontWeight: 800, margin: '16px 0 24px', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+            <Title level={1} className="gradient-text hero-title" style={{ fontSize: 'clamp(1.75rem, 5vw, 3.5rem)', fontWeight: 800, margin: '16px 0 24px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               Jual & Beli Barang Kampus Dengan Aman & Cepat
             </Title>
             
-            <Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.25rem', marginBottom: 40, lineHeight: 1.6, maxWidth: 600 }}>
+            <Paragraph className="hero-subtitle" style={{ color: 'rgba(255,255,255,0.85)', fontSize: 'clamp(0.95rem, 2.5vw, 1.25rem)', marginBottom: 32, lineHeight: 1.6, maxWidth: 600 }}>
               Temukan buku perkuliahan, perlengkapan kos, barang elektronik, hingga jasa antar mahasiswa President University Jababeka.
             </Paragraph>
             
-            <Space size="middle" wrap>
-              <Link href="/sell">
+            <Space size="middle" wrap style={{ width: '100%', marginBottom: 16 }}>
+              <Link href="/sell" style={{ display: 'inline-block' }}>
                 <Button 
                   type="primary" 
                   size="large" 
@@ -154,30 +154,30 @@ export default function Hero() {
                   style={{ 
                     background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', 
                     border: 'none', 
-                    height: 54, 
-                    padding: '0 32px', 
-                    fontSize: 16,
+                    height: 48, 
+                    padding: '0 24px', 
+                    fontSize: 15,
                     fontWeight: 600,
-                    borderRadius: 27,
+                    borderRadius: 24,
                     boxShadow: '0 8px 20px rgba(0,184,217,0.3)'
                   }}
                 >
                   Mulai Jualan
                 </Button>
               </Link>
-              <a href="#produk">
+              <a href="#produk" style={{ display: 'inline-block' }}>
                 <Button 
                   ghost 
                   size="large" 
                   icon={<ShopOutlined />} 
                   style={{ 
-                    height: 54, 
-                    padding: '0 32px', 
-                    fontSize: 16, 
+                    height: 48, 
+                    padding: '0 24px', 
+                    fontSize: 15, 
                     fontWeight: 600,
                     borderColor: 'rgba(255,255,255,0.5)', 
                     color: '#fff',
-                    borderRadius: 27
+                    borderRadius: 24
                   }}
                 >
                   Jelajahi Produk

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Input, Badge, Button, Dropdown, Avatar, Tooltip, notification } from 'antd';
 import {
   ShoppingCartOutlined,
@@ -11,6 +11,8 @@ import {
   LogoutOutlined,
   ShopOutlined,
   MessageOutlined,
+  HomeOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
 import DirectChatDrawer from '../chat/DirectChatDrawer';
@@ -21,6 +23,7 @@ export default function Navbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [directDrawerOpen, setDirectDrawerOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   function refreshState() {
     const u = getUser();
@@ -149,15 +152,17 @@ export default function Navbar() {
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          padding: '4px 24px', 
-          fontSize: '12px' 
+          padding: '4px 16px', 
+          fontSize: '11px' 
         }}
       >
-        <div>🎓 Marketplace Mahasiswa President University</div>
-        <div>
+        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          🎓 PresUMart • Kampus President University
+        </div>
+        <div style={{ flexShrink: 0 }}>
           {user ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span>Halo, {user.name}</span>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span>Halo, {user.name.split(' ')[0]}</span>
               <span>|</span>
               <span 
                 onClick={handleLogout} 
@@ -167,7 +172,7 @@ export default function Navbar() {
               </span>
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '6px' }}>
               <Link href="/login" style={{ color: '#e2e8f0' }}>Masuk</Link>
               <span>|</span>
               <Link href="/register" style={{ color: '#e2e8f0' }}>Daftar</Link>
@@ -182,81 +187,126 @@ export default function Navbar() {
         style={{ 
           backgroundColor: 'white', 
           display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          padding: '12px 24px', 
+          flexDirection: 'column',
+          padding: '10px 16px', 
           boxShadow: '0 2px 8px rgba(0,0,0,0.06)' 
         }}
       >
-        {/* LEFT: Brand Logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '20px', fontWeight: 'bold', color: '#1677ff', textDecoration: 'none' }}>
-          <ShopOutlined style={{ fontSize: '24px' }} />
-          <span>PresUMart</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 12 }}>
+          {/* LEFT: Brand Logo */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '18px', fontWeight: 'bold', color: '#1677ff', textDecoration: 'none', flexShrink: 0 }}>
+            <ShopOutlined style={{ fontSize: '22px' }} />
+            <span>PresUMart</span>
+          </Link>
 
-        {/* CENTER: Search Bar */}
-        <div style={{ flex: 1, maxWidth: '600px', margin: '0 32px' }}>
+          {/* DESKTOP SEARCH BAR */}
+          <div className="hide-mobile" style={{ flex: 1, maxWidth: '600px', margin: '0 16px' }}>
+            <Input.Search 
+              placeholder="Cari barang, buku, gadget..." 
+              onSearch={handleSearch}
+              size="middle"
+              style={{ borderRadius: 24, overflow: 'hidden' }}
+              styles={{ input: { borderRadius: '24px 0 0 24px' } }}
+              enterButton
+            />
+          </div>
+
+          {/* RIGHT: Icon Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+            {user ? (
+              <>
+                <Tooltip title="Pesan">
+                  <Badge count={unreadCount} size="small">
+                    <Button 
+                      type="text" 
+                      icon={<MessageOutlined style={{ fontSize: '18px' }} />} 
+                      onClick={() => setDirectDrawerOpen(true)} 
+                    />
+                  </Badge>
+                </Tooltip>
+                <Tooltip title="Keranjang">
+                  <Badge count={cartCount} size="small">
+                    <Button 
+                      type="text" 
+                      icon={<ShoppingCartOutlined style={{ fontSize: '18px' }} />} 
+                      onClick={() => router.push('/cart')} 
+                    />
+                  </Badge>
+                </Tooltip>
+                <Tooltip title="Jual Barang" className="hide-mobile">
+                  <Button 
+                    type="text" 
+                    icon={<PlusCircleOutlined style={{ fontSize: '18px', color: '#52c41a' }} />} 
+                    onClick={() => router.push('/sell')} 
+                  />
+                </Tooltip>
+                <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
+                  <Avatar style={{ backgroundColor: '#1677ff', cursor: 'pointer' }} size="small" icon={<UserOutlined />} />
+                </Dropdown>
+              </>
+            ) : (
+              <>
+                <Tooltip title="Keranjang">
+                  <Badge count={cartCount} size="small">
+                    <Button 
+                      type="text" 
+                      icon={<ShoppingCartOutlined style={{ fontSize: '18px' }} />} 
+                      onClick={() => router.push('/cart')} 
+                    />
+                  </Badge>
+                </Tooltip>
+                <Button type="primary" size="small" onClick={() => router.push('/login')} shape="round">
+                  Masuk
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* MOBILE SEARCH BAR (SHOWS ON SMARTPHONES) */}
+        <div className="show-mobile" style={{ width: '100%', marginTop: 8 }}>
           <Input.Search 
             placeholder="Cari barang, buku, gadget..." 
             onSearch={handleSearch}
-            size="large"
-            style={{ borderRadius: 24, overflow: 'hidden' }}
-            styles={{ input: { borderRadius: '24px 0 0 24px' } }}
+            size="middle"
+            style={{ borderRadius: 20, overflow: 'hidden' }}
+            styles={{ input: { borderRadius: '20px 0 0 20px', fontSize: '13px' } }}
             enterButton
           />
         </div>
-
-        {/* RIGHT: Icon Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {user ? (
-            <>
-              <Tooltip title="Pesan">
-                <Badge count={unreadCount} size="small">
-                  <Button 
-                    type="text" 
-                    icon={<MessageOutlined style={{ fontSize: '20px' }} />} 
-                    onClick={() => setDirectDrawerOpen(true)} 
-                  />
-                </Badge>
-              </Tooltip>
-              <Tooltip title="Keranjang">
-                <Badge count={cartCount} size="small">
-                  <Button 
-                    type="text" 
-                    icon={<ShoppingCartOutlined style={{ fontSize: '20px' }} />} 
-                    onClick={() => router.push('/cart')} 
-                  />
-                </Badge>
-              </Tooltip>
-              <Tooltip title="Jual Barang">
-                <Button 
-                  type="text" 
-                  icon={<PlusCircleOutlined style={{ fontSize: '20px', color: '#52c41a' }} />} 
-                  onClick={() => router.push('/sell')} 
-                />
-              </Tooltip>
-              <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
-                <Avatar style={{ backgroundColor: '#1677ff', cursor: 'pointer' }} icon={<UserOutlined />} />
-              </Dropdown>
-            </>
-          ) : (
-            <>
-              <Tooltip title="Keranjang">
-                <Badge count={cartCount} size="small">
-                  <Button 
-                    type="text" 
-                    icon={<ShoppingCartOutlined style={{ fontSize: '20px' }} />} 
-                    onClick={() => router.push('/cart')} 
-                  />
-                </Badge>
-              </Tooltip>
-              <Button type="primary" onClick={() => router.push('/login')} shape="round">
-                Masuk
-              </Button>
-            </>
-          )}
-        </div>
       </div>
+
+      {/* 3. MOBILE BOTTOM NAVIGATION BAR (PWA NATIVE STYLE) */}
+      <nav className="mobile-bottom-nav">
+        <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
+          <HomeOutlined />
+          <span>Beranda</span>
+        </Link>
+        <Link href="/sell" className={`mobile-nav-item ${pathname === '/sell' ? 'active' : ''}`}>
+          <PlusCircleOutlined style={{ color: '#52c41a' }} />
+          <span>Jual</span>
+        </Link>
+        <div 
+          className="mobile-nav-item" 
+          onClick={() => setDirectDrawerOpen(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          <Badge count={unreadCount} size="small" offset={[4, -2]}>
+            <MessageOutlined style={{ color: '#3b82f6' }} />
+          </Badge>
+          <span>Chat</span>
+        </div>
+        <Link href="/cart" className={`mobile-nav-item ${pathname === '/cart' ? 'active' : ''}`}>
+          <Badge count={cartCount} size="small" offset={[4, -2]}>
+            <ShoppingCartOutlined style={{ color: '#10b981' }} />
+          </Badge>
+          <span>Keranjang</span>
+        </Link>
+        <Link href={user ? '/profile' : '/login'} className={`mobile-nav-item ${pathname === '/profile' || pathname === '/login' ? 'active' : ''}`}>
+          <UserOutlined />
+          <span>{user ? 'Akun' : 'Masuk'}</span>
+        </Link>
+      </nav>
 
       <DirectChatDrawer 
         open={directDrawerOpen}
