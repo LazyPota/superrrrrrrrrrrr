@@ -27,34 +27,24 @@ export default function ProductCard({ product }: { product: any }) {
     e.preventDefault();
 
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://presumart.netlify.app';
-    const imgPath = (product.images && product.images.length > 0) ? product.images[0] : (product.image || '');
-    
-    const params = new URLSearchParams({
-      id: product.id,
-      title: product.name || '',
-      price: String(product.price || 0),
-      img: imgPath,
-      desc: (product.description || '').substring(0, 140)
-    });
-
-    const richUrl = `${origin}/product?${params.toString()}`;
+    const shortUrl = `${origin}/product?id=${product.id}`;
     const formattedPrice = formatPrice(product.price);
-    const shareText = `🛒 *${product.name}* (${formattedPrice})\nBeli di PresUMart President University: ${richUrl}`;
+    const shareText = `🛒 *${product.name}* (${formattedPrice})\nBeli di PresUMart President University: ${shortUrl}`;
 
     if (typeof navigator !== 'undefined' && navigator.share) {
       navigator.share({
         title: `${product.name} - PresUMart`,
         text: shareText,
-        url: richUrl,
+        url: shortUrl,
       }).catch(() => {});
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(richUrl).then(() => {
-        messageApi.success('Link produk dengan gambar berhasil disalin!');
+      navigator.clipboard.writeText(shortUrl).then(() => {
+        messageApi.success('Link produk berhasil disalin!');
       }).catch(() => {
-        messageApi.info(`Link produk: ${richUrl}`);
+        messageApi.info(`Link produk: ${shortUrl}`);
       });
     } else {
-      messageApi.info(`Link produk: ${richUrl}`);
+      messageApi.info(`Link produk: ${shortUrl}`);
     }
   }
 
