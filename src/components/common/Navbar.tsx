@@ -143,40 +143,32 @@ export default function Navbar() {
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
-      {/* 1. TOP UTILITY BAR */}
+      {/* 1. TOP UTILITY BAR (Campus Info Only - No Duplicate Links) */}
       <div 
         className="navbar-top-bar" 
         style={{ 
-          backgroundColor: '#0f172a', 
-          color: '#e2e8f0', 
+          backgroundColor: '#001a40', 
+          color: '#cbd5e1', 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           padding: '4px 16px', 
-          fontSize: '11px' 
+          fontSize: '11px',
+          letterSpacing: '0.01em'
         }}
       >
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          🎓 PresUMart • Kampus President University
+        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>🎓</span>
+          <span style={{ fontWeight: 600, color: '#00e5ff' }}>PresUMart</span>
+          <span>• Marketplace Resmi Mahasiswa President University Jababeka</span>
         </div>
-        <div style={{ flexShrink: 0 }}>
+        <div style={{ flexShrink: 0 }} className="hide-mobile">
           {user ? (
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <span>Halo, {user.name.split(' ')[0]}</span>
-              <span>|</span>
-              <span 
-                onClick={handleLogout} 
-                style={{ cursor: 'pointer', color: '#e2e8f0', textDecoration: 'underline' }}
-              >
-                Keluar
-              </span>
-            </div>
+            <span style={{ color: '#00e5ff', fontWeight: 600 }}>
+              Halo, {user.name} ({user.major || 'Mahasiswa PresUniv'})
+            </span>
           ) : (
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <Link href="/login" style={{ color: '#e2e8f0' }}>Masuk</Link>
-              <span>|</span>
-              <Link href="/register" style={{ color: '#e2e8f0' }}>Daftar</Link>
-            </div>
+            <span>📍 Area COD: Student Center • Rektorat • Asrama PU</span>
           )}
         </div>
       </div>
@@ -185,24 +177,43 @@ export default function Navbar() {
       <div 
         className="navbar-main"
         style={{ 
-          backgroundColor: 'white', 
+          backgroundColor: '#ffffff', 
           display: 'flex', 
           flexDirection: 'column',
-          padding: '10px 16px', 
-          boxShadow: '0 2px 8px rgba(0,0,0,0.06)' 
+          padding: '10px 20px', 
+          boxShadow: '0 4px 12px rgba(0, 26, 64, 0.08)',
+          borderBottom: '1px solid #e6eeff'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 12 }}>
-          {/* LEFT: Brand Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '18px', fontWeight: 'bold', color: '#1677ff', textDecoration: 'none', flexShrink: 0 }}>
-            <ShopOutlined style={{ fontSize: '22px' }} />
-            <span>PresUMart</span>
+          {/* LEFT: Iconic PresUMart Brand Logo */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
+            <div style={{ 
+              width: 36, 
+              height: 36, 
+              borderRadius: 10, 
+              background: 'linear-gradient(135deg, #001a40 0%, #003399 100%)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              boxShadow: '0 4px 10px rgba(0,51,153,0.3)'
+            }}>
+              <ShopOutlined style={{ fontSize: '20px', color: '#00e5ff' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '20px', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.02em', color: '#001a40' }}>
+                Pres<span style={{ color: '#003399' }}>U</span><span style={{ color: '#00b8d9' }}>Mart</span>
+              </div>
+              <span style={{ fontSize: '9px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                President University
+              </span>
+            </div>
           </Link>
 
           {/* DESKTOP SEARCH BAR */}
           <div className="hide-mobile" style={{ flex: 1, maxWidth: '600px', margin: '0 16px' }}>
             <Input.Search 
-              placeholder="Cari barang, buku, gadget..." 
+              placeholder="Cari barang, buku, gadget, jasa..." 
               onSearch={handleSearch}
               size="middle"
               style={{ borderRadius: 24, overflow: 'hidden' }}
@@ -211,54 +222,62 @@ export default function Navbar() {
             />
           </div>
 
-          {/* RIGHT: Icon Buttons */}
+          {/* RIGHT: Icon Buttons & Single Auth Action Group */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+            <Tooltip title="Keranjang">
+              <Badge count={cartCount} size="small" color="#003399">
+                <Button 
+                  type="text" 
+                  icon={<ShoppingCartOutlined style={{ fontSize: '20px', color: '#003399' }} />} 
+                  onClick={() => router.push('/cart')} 
+                />
+              </Badge>
+            </Tooltip>
+
             {user ? (
               <>
                 <Tooltip title="Pesan">
-                  <Badge count={unreadCount} size="small">
+                  <Badge count={unreadCount} size="small" color="#f59e0b">
                     <Button 
                       type="text" 
-                      icon={<MessageOutlined style={{ fontSize: '18px' }} />} 
+                      icon={<MessageOutlined style={{ fontSize: '20px', color: '#00b8d9' }} />} 
                       onClick={() => setDirectDrawerOpen(true)} 
-                    />
-                  </Badge>
-                </Tooltip>
-                <Tooltip title="Keranjang">
-                  <Badge count={cartCount} size="small">
-                    <Button 
-                      type="text" 
-                      icon={<ShoppingCartOutlined style={{ fontSize: '18px' }} />} 
-                      onClick={() => router.push('/cart')} 
                     />
                   </Badge>
                 </Tooltip>
                 <Tooltip title="Jual Barang" className="hide-mobile">
                   <Button 
-                    type="text" 
-                    icon={<PlusCircleOutlined style={{ fontSize: '18px', color: '#52c41a' }} />} 
-                    onClick={() => router.push('/sell')} 
-                  />
+                    type="primary"
+                    icon={<PlusCircleOutlined style={{ fontSize: '16px' }} />} 
+                    onClick={() => router.push('/sell')}
+                    style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', borderRadius: 20 }}
+                  >
+                    Jual
+                  </Button>
                 </Tooltip>
                 <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
-                  <Avatar style={{ backgroundColor: '#1677ff', cursor: 'pointer' }} size="small" icon={<UserOutlined />} />
+                  <Avatar style={{ backgroundColor: '#003399', cursor: 'pointer', border: '2px solid #00e5ff' }} size="medium" icon={<UserOutlined />} />
                 </Dropdown>
               </>
             ) : (
-              <>
-                <Tooltip title="Keranjang">
-                  <Badge count={cartCount} size="small">
-                    <Button 
-                      type="text" 
-                      icon={<ShoppingCartOutlined style={{ fontSize: '18px' }} />} 
-                      onClick={() => router.push('/cart')} 
-                    />
-                  </Badge>
-                </Tooltip>
-                <Button type="primary" size="small" onClick={() => router.push('/login')} shape="round">
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Button 
+                  type="default" 
+                  size="middle" 
+                  onClick={() => router.push('/login')} 
+                  style={{ borderRadius: 20, borderColor: '#003399', color: '#003399', fontWeight: 600 }}
+                >
                   Masuk
                 </Button>
-              </>
+                <Button 
+                  type="primary" 
+                  size="middle" 
+                  onClick={() => router.push('/register')} 
+                  style={{ borderRadius: 20, background: 'linear-gradient(135deg, #003399 0%, #001a40 100%)', border: 'none', fontWeight: 600, boxShadow: '0 4px 10px rgba(0,51,153,0.25)' }}
+                >
+                  Daftar
+                </Button>
+              </div>
             )}
           </div>
         </div>

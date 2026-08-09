@@ -19,14 +19,14 @@ export default function Hero() {
       className="hero-container animate-fade-in"
       style={{ 
         position: 'relative',
-        background: 'linear-gradient(-45deg, #001529, #002b66, #0052cc, #0747a6)',
-        backgroundSize: '400% 400%',
+        background: 'linear-gradient(135deg, #001a40 0%, #003399 45%, #008299 100%)',
+        backgroundSize: '300% 300%',
         color: '#fff', 
         padding: '80px 24px', 
         borderRadius: '0 0 40px 40px', 
         marginBottom: 48,
         overflow: 'hidden',
-        boxShadow: '0 20px 40px rgba(0,43,102,0.2)'
+        boxShadow: '0 20px 40px rgba(0,26,64,0.3)'
       }}
     >
       <style>{`

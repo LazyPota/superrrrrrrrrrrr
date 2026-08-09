@@ -1,14 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --primary-color: #0052cc;
-  --primary-hover: #0747a6;
-  --primary-light: #e6f0ff;
-  --bg-gradient: linear-gradient(135deg, #f4f6fa 0%, #eef2f9 100%);
+  --primary-color: #003399;
+  --primary-hover: #002266;
+  --primary-light: #e6eeff;
+  --presu-cyan: #00b8d9;
+  --presu-cyan-light: #e6f9fc;
+  --presu-gold: #f59e0b;
+  --presu-gold-light: #fef3c7;
+  --presu-navy: #001a40;
+  --bg-gradient: linear-gradient(135deg, #001a40 0%, #003399 50%, #008299 100%);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 51, 153, 0.1);
+  --shadow-lg: 0 10px 25px rgba(0, 51, 153, 0.15);
+  --shadow-hover: 0 20px 30px rgba(0, 51, 153, 0.2);
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
