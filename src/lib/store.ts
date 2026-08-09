@@ -401,6 +401,15 @@ export function updateProduct(id: string, updates: any) {
   return products;
 }
 
+export function markProductAsSold(productId: string) {
+  const products = getProducts().map(p => p.id === productId ? { ...p, stock: 0, status: 'sold' } : p);
+  saveProducts(products);
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('products-updated'));
+  }
+  return products;
+}
+
 export function reduceProductStock(id: string, qtyPurchased: number) {
   const products = getProducts();
   const updated = products.map(p => {

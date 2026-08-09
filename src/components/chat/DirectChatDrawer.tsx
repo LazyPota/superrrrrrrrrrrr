@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Drawer, List, Tag, Button, Typography, Space, Badge, Card, Empty, Popconfirm, Avatar, Input, Modal, Rate, message, Select } from 'antd';
 import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined, ShoppingCartOutlined, UserOutlined, SoundOutlined, SendOutlined, StarOutlined, EnvironmentOutlined, ShopOutlined, TagOutlined, DeleteOutlined } from '@ant-design/icons';
-import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview, reduceProductStock, deleteDirectMessageThread, deleteMessageReply } from '../../lib/store';
+import { getUser, getDirectMessages, updateMessageStatus, markMessagesAsRead, playOrderSound, speakVoice, addReplyToMessage, syncWithServer, addReview, reduceProductStock, deleteDirectMessageThread, deleteMessageReply, markProductAsSold } from '../../lib/store';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -42,6 +42,19 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     deleteMessageReply(threadId, replyId);
     messageApi.success('Pesan berhasil dihapus.');
     refreshMessages();
+  }
+
+  function handleMarkAsSold(item: any) {
+    updateMessageStatus(item.id, 'sold');
+    addReplyToMessage(
+      item.id,
+      item.sellerEmail,
+      item.sellerName,
+      `🎉 Selesai! Penjual mengonfirmasi bahwa produk ${item.productName} telah TERJUAL kepada ${item.buyerName}. Terima kasih telah bertransaksi di PresUMart!`
+    );
+    markProductAsSold(item.productId);
+    messageApi.success(`Barang berhasil dikonfirmasi TERJUAL kepada ${item.buyerName}!`);
+    refreshMessages(user);
   }
 
   function handleSubmitReview() {
@@ -96,19 +109,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
     refreshMessages();
   }
 
-  function handleMarkAsSold(msg: any) {
-    reduceProductStock(msg.productId, 1);
-    updateMessageStatus(msg.id, 'sold');
-    addReplyToMessage(
-      msg.id,
-      user.email,
-      user.name,
-      'Penjual mengonfirmasi barang telah diserahkan & TERJUAL!'
-    );
-    messageApi.success('Barang telah ditandai TERJUAL!');
-    setShouldScrollBottom(true);
-    refreshMessages();
-  }
+
 
   const [shouldScrollBottom, setShouldScrollBottom] = useState(false);
 
@@ -278,6 +279,41 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                   </div>
                 </div>
 
+                {/* Seller Confirmation Action Card: "Konfirmasi Barang Terjual ke Pembeli Ini" */}
+                {isSeller && item.status !== 'completed' && item.status !== 'sold' && (
+                  <div style={{ margin: '8px 0', background: '#eff6ff', padding: '10px 12px', borderRadius: 8, border: '1px solid #bfdbfe', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <div>
+                      <Text strong style={{ fontSize: 12, color: '#1e40af', display: 'block' }}>
+                        🏷️ Konfirmasi Penjualan Produk
+                      </Text>
+                      <Text type="secondary" style={{ fontSize: 11, color: '#3b82f6' }}>
+                        Konfirmasi barang ini telah TERJUAL ke Pembeli (<strong>{item.buyerName}</strong>)
+                      </Text>
+                    </div>
+                    <Popconfirm
+                      title={`Konfirmasi barang TERJUAL kepada ${item.buyerName}?`}
+                      description="Stok produk akan otomatis ditandai habis/terjual."
+                      onConfirm={() => handleMarkAsSold(item)}
+                      okText="Ya, Barang Terjual"
+                      cancelText="Batal"
+                    >
+                      <Button type="primary" size="small" icon={<CheckCircleOutlined />} style={{ background: '#16a34a', borderColor: '#16a34a' }}>
+                        Tandai Terjual ke {item.buyerName.split(' ')[0]}
+                      </Button>
+                    </Popconfirm>
+                  </div>
+                )}
+
+                {/* Status Tag if already sold/completed */}
+                {(item.status === 'completed' || item.status === 'sold') && (
+                  <div style={{ margin: '8px 0', background: '#f0fdf4', padding: '8px 12px', borderRadius: 8, border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CheckCircleOutlined style={{ color: '#16a34a', fontSize: 16 }} />
+                    <Text strong style={{ color: '#15803d', fontSize: 12 }}>
+                      ✅ BARANG TERJUAL KEPADA {item.buyerName.toUpperCase()} (Transaksi COD Selesai)
+                    </Text>
+                  </div>
+                )}
+
                 {/* Live Chat History */}
                 {(() => {
                   const initialBubble = item.messageText ? [{
@@ -296,21 +332,21 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
                     text: r.text,
                     timestamp: r.timestamp || new Date().toISOString(),
                     isInitial: false,
-                  })).sort((a: any, b: any) => {
-                    const timeA = new Date(a.timestamp).getTime();
-                    const timeB = new Date(b.timestamp).getTime();
+                  }));
+
+                  // STRICT UNIFIED TIMESTAMPS SORTING FROM OLDEST (TOP) TO NEWEST (BOTTOM)
+                  const allBubbles = [...initialBubble, ...replyBubbles].sort((a: any, b: any) => {
+                    const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+                    const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
                     return timeA - timeB;
                   });
-
-                  // Buyer's initial message is ALWAYS first at the top of the chat!
-                  const allBubbles = [...initialBubble, ...replyBubbles];
 
                   if (allBubbles.length === 0) return null;
 
                   return (
                     <div style={{ marginTop: 12, background: '#f8fafc', padding: 12, borderRadius: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 260, overflowY: 'auto', border: '1px solid #e2e8f0' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <Text strong style={{ fontSize: 11, color: '#003399' }}>💬 Percakapan Obrolan (Urut Dari Pesan Pertama Pembeli):</Text>
+                        <Text strong style={{ fontSize: 11, color: '#003399' }}>💬 Percakapan Obrolan (Urutan Waktu Waktu):</Text>
                         <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>Real-time 0ms</Tag>
                       </div>
                       {allBubbles.map((b: any) => {
