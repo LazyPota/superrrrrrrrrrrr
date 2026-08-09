@@ -69,13 +69,28 @@ export default function SellPage() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
 
-  useEffect(() => {
+  function refreshMyProducts() {
     const u = getUser();
     setUser(u);
     if (!u) return;
     const stored = getProducts();
     const mine = stored.filter(p => p.sellerEmail === u.email);
     setProducts(mine);
+  }
+
+  useEffect(() => {
+    refreshMyProducts();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('products-updated', refreshMyProducts);
+      window.addEventListener('storage', refreshMyProducts);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('products-updated', refreshMyProducts);
+        window.removeEventListener('storage', refreshMyProducts);
+      }
+    };
   }, []);
 
   const handleUploadChange = async ({ fileList: newFileList }: any) => {
@@ -221,9 +236,9 @@ export default function SellPage() {
       title: 'Stok',
       dataIndex: 'stock',
       key: 'stock',
-      render: (stock: number) => (
-        stock !== undefined && stock <= 0 ? (
-          <Tag color="red">Habis (0)</Tag>
+      render: (stock: number, record: any) => (
+        (stock !== undefined && stock <= 0) || record.status === 'sold' ? (
+          <Tag color="red" style={{ fontWeight: 700 }}>Terjual / Habis (0)</Tag>
         ) : (
           <Tag color="green">{stock ?? 1} unit</Tag>
         )
