@@ -143,8 +143,9 @@ export default function SellPage() {
   function onFinish(values: any) {
     setFormError('');
 
-    if (isProductBlocked(values.name, values.description)) {
-      setFormError(getBlockReason(values.name, values.description));
+    const priceNum = Number(values.price);
+    if (isProductBlocked(values.name, values.description, user?.name, priceNum)) {
+      setFormError(getBlockReason(values.name, values.description, user?.name, priceNum));
       return;
     }
 
@@ -329,13 +330,15 @@ export default function SellPage() {
                   name="price"
                   rules={[
                     { required: true, message: 'Harga wajib diisi!' },
-                    { type: 'number', min: 100, message: 'Minimal Rp 100!' },
+                    { type: 'number', min: 100, max: 500000000, message: 'Harga di antara Rp 100 s/d Rp 500.000.000' },
                   ]}
                 >
                   <InputNumber
+                    min={100}
+                    max={500000000}
                     style={{ width: '100%' }}
                     formatter={val => `Rp ${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                    parser={val => val.replace(/Rp\s?|(\.*)/g, '')}
+                    parser={val => (val ? Number(val.replace(/Rp\s?|(\.*)/g, '')) as any : 0)}
                     placeholder="50000"
                   />
                 </Form.Item>

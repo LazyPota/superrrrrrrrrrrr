@@ -1,4 +1,5 @@
 import { User, Product, DirectMessage, Reply } from '../types';
+import { isProductBlocked } from './blocked';
 
 const STORAGE_KEYS = {
   USER: 'presumart_user',
@@ -160,7 +161,7 @@ export async function syncWithServer() {
           });
         }
       });
-      const mergedProds = Array.from(mergedMap.values()).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
+      const mergedProds = Array.from(mergedMap.values()).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-') && !isProductBlocked(p.name, p.description, p.seller, p.price));
       if (JSON.stringify(mergedProds) !== JSON.stringify(localProds)) {
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(mergedProds));
         updated = true;
@@ -383,7 +384,7 @@ export function getProducts() {
     const list = JSON.parse(data);
     if (!Array.isArray(list)) return [];
     // Force purge any old seed / prototype items
-    const userOnly = list.filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
+    const userOnly = list.filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-') && !isProductBlocked(p.name, p.description, p.seller, p.price));
     if (userOnly.length !== list.length) {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(userOnly));
     }
@@ -399,9 +400,12 @@ export function saveProducts(products) {
   pushToServer();
 }
 
-export function addProduct(product) {
+export function addProduct(product: any) {
+  if (isProductBlocked(product.name, product.description, product.seller, product.price)) {
+    console.warn('[Security] Blocked product attempt rejected:', product.name);
+    return getProducts();
+  }
   const products = getProducts();
-  // SECURITY: Sanitize user input and use secure ID
   products.push({
     ...product,
     id: generateId(),
@@ -413,13 +417,17 @@ export function addProduct(product) {
   return products;
 }
 
-export function deleteProduct(id) {
+export function deleteProduct(id: string) {
   const products = getProducts().filter(p => p.id !== id);
   saveProducts(products);
   return products;
 }
 
 export function updateProduct(id: string, updates: any) {
+  if (isProductBlocked(updates.name, updates.description, updates.seller, updates.price)) {
+    console.warn('[Security] Blocked product update rejected:', updates.name);
+    return getProducts();
+  }
   const products = getProducts().map(p => p.id === id ? { ...p, ...updates } : p);
   saveProducts(products);
   return products;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
+import { isProductBlocked } from '../../../lib/blocked';
 
 let serverDb: {
   users: any[];
@@ -65,9 +66,16 @@ function mergeUsers(existingList: any[], incomingList: any[]) {
 
 function mergeProducts(existingList: any[], incomingList: any[]) {
   const map = new Map();
-  (existingList || []).forEach(p => map.set(p.id, { ...p }));
+  (existingList || []).forEach(p => {
+    if (p && !isProductBlocked(p.name, p.description, p.seller, p.price)) {
+      map.set(p.id, { ...p });
+    }
+  });
 
   (incomingList || []).forEach(incoming => {
+    if (!incoming || isProductBlocked(incoming.name, incoming.description, incoming.seller, incoming.price)) {
+      return;
+    }
     const existing = map.get(incoming.id);
     if (!existing) {
       map.set(incoming.id, { ...incoming });
