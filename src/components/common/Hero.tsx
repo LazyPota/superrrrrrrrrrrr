@@ -216,7 +216,7 @@ export default function Hero() {
           <Col xs={24} md={12} lg={11} className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
-                <Card className="glass-card" bordered={false} styles={{ body: { padding: '24px' } }}>
+                <Card className="glass-card" variant="borderless" styles={{ body: { padding: '24px' } }}>
                   <Row align="middle" gutter={16}>
                     <Col>
                       <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(54, 179, 126, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -232,7 +232,7 @@ export default function Hero() {
               </Col>
               
               <Col span={24}>
-                <Card className="glass-card" bordered={false} styles={{ body: { padding: '24px' } }}>
+                <Card className="glass-card" variant="borderless" styles={{ body: { padding: '24px' } }}>
                   <Row align="middle" gutter={16}>
                     <Col>
                       <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255, 171, 0, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -248,7 +248,7 @@ export default function Hero() {
               </Col>
 
               <Col span={24}>
-                <Card className="glass-card" bordered={false} styles={{ body: { padding: '24px' } }}>
+                <Card className="glass-card" variant="borderless" styles={{ body: { padding: '24px' } }}>
                   <Row align="middle" gutter={16}>
                     <Col>
                       <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(0, 184, 217, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
