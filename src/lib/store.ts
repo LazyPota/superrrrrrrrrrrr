@@ -69,7 +69,6 @@ export function playOrderSound(): void {
   }
 }
 
-// SECURITY: Sanitize user input to prevent XSS
 function sanitizeInput(text: string): string {
   if (!text) return '';
   return text
@@ -80,7 +79,6 @@ function sanitizeInput(text: string): string {
     .replace(/\//g, '&#x2F;');
 }
 
-// SECURITY: Generate cryptographically secure unique IDs
 function generateId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -88,10 +86,8 @@ function generateId(): string {
   return Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 10);
 }
 
-// SECURITY: SHA-256 password hashing (replaces weak Java hashCode)
 async function hashPasswordAsync(password: string): Promise<string> {
   if (typeof window === 'undefined' || !crypto?.subtle) {
-    // Fallback for SSR or old environments — still stronger than old hash
     let hash = 5381;
     for (let i = 0; i < password.length; i++) {
       hash = ((hash << 5) + hash + password.charCodeAt(i)) >>> 0;
@@ -105,7 +101,6 @@ async function hashPasswordAsync(password: string): Promise<string> {
   return 'sha256_' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// SECURITY: Synchronous hash for backward compatibility during migration
 function hashPassword(password: string): string {
   let hash = 0;
   for (let i = 0; i < password.length; i++) {
@@ -221,16 +216,13 @@ export async function syncWithServer() {
         let hasTrulyNewIncoming = false;
 
         mergedMsgs.forEach(m => {
-          // CRITICAL FIX: Only notify if current user is directly involved in this transaction (Buyer or Seller)
           const isMyTransaction = (m.sellerEmail === currentUser.email || m.buyerEmail === currentUser.email);
           if (!isMyTransaction) return;
 
-          // Check if thread was created by someone else for current user
           if (m.sellerEmail === currentUser.email && m.buyerEmail !== currentUser.email && !notifiedSet.has(m.id)) {
             hasTrulyNewIncoming = true;
             notifiedSet.add(m.id);
           }
-          // Check replies sent by the other participant
           (m.replies || []).forEach((r: any) => {
             if (r.senderEmail !== currentUser.email && !notifiedSet.has(r.id)) {
               hasTrulyNewIncoming = true;
@@ -252,7 +244,6 @@ export async function syncWithServer() {
       window.dispatchEvent(new CustomEvent('messages-updated'));
     }
   } catch (e) {
-    // Ignore network errors
   }
 }
 
@@ -263,13 +254,11 @@ export async function pushToServer() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        // SECURITY: Do NOT send user data (contains passwords) to server
         products: getProducts(),
         messages: getDirectMessages(),
       }),
     });
   } catch (e) {
-    // Ignore network errors
   }
 }
 
@@ -420,19 +409,13 @@ export function getProducts() {
 
 export function saveProducts(products) {
   if (typeof window === 'undefined') return;
-  // SECURITY: Re-validate & sanitize every product before persisting
-  // This catches localStorage tampering and DOM manipulation exploits
   const sanitized = (products || []).filter((p: any) => {
     if (!p || typeof p !== 'object') return false;
-    // Enforce price bounds
     const price = Number(p.price);
     if (!Number.isFinite(price) || price < PRICE_MIN || price > PRICE_MAX) return false;
-    // Enforce category whitelist
     if (!p.category || !CATEGORIES.includes(p.category)) return false;
-    // Enforce stock bounds
     const stock = Number(p.stock !== undefined ? p.stock : 1);
     if (!Number.isFinite(stock) || stock < STOCK_MIN || stock > STOCK_MAX) return false;
-    // Enforce condition whitelist
     if (p.condition && !VALID_CONDITIONS.includes(p.condition)) return false;
     return true;
   }).map((p: any) => ({
@@ -445,7 +428,6 @@ export function saveProducts(products) {
 }
 
 export function addProduct(product) {
-  // SECURITY: Full validation before adding — blocks DevTools/localStorage exploits
   const validation = validateProduct(product);
   if (!validation.valid) {
     console.error('[SECURITY] Product rejected:', validation.errors);
@@ -471,7 +453,6 @@ export function deleteProduct(id) {
 }
 
 export function updateProduct(id: string, updates: any) {
-  // SECURITY: Validate updates before applying — prevents price/category manipulation
   const existing = getProducts().find(p => p.id === id);
   if (!existing) {
     console.error('[SECURITY] Product not found for update:', id);
@@ -511,14 +492,11 @@ export function reduceProductStock(id: string, qtyPurchased: number) {
   return updated;
 }
 
-/* --- ISOLATED CART PER USER (BUG FIX #1) --- */
-
 function getCartKey() {
   const user = getUser();
   return user ? `presumart_cart_${user.email}` : 'presumart_cart_guest';
 }
 
-// BUG FIX #1: Migrate guest cart items to user's personal cart after login/register
 function migrateGuestCart(userEmail) {
   if (typeof window === 'undefined') return;
   const guestData = localStorage.getItem('presumart_cart_guest');
@@ -543,7 +521,6 @@ function migrateGuestCart(userEmail) {
     localStorage.setItem(userKey, JSON.stringify(userItems));
     localStorage.removeItem('presumart_cart_guest');
   } catch (e) {
-    // Ignore parse errors
   }
 }
 

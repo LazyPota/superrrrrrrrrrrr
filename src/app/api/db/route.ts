@@ -145,8 +145,6 @@ export async function GET(req: Request) {
   // Ensure serverDb products never contain dummy seed items
   serverDb.products = (serverDb.products || []).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
 
-  // SECURITY: Validate & filter products on GET to purge any existing corrupted data
-  // This removes already-exploited products (negative prices, invalid categories, etc.)
   const { valid: validProducts } = validateProducts(serverDb.products);
   const invalidIds = serverDb.products
     .filter((p: any) => !validProducts.some((v: any) => v.id === p.id))
@@ -154,17 +152,14 @@ export async function GET(req: Request) {
 
   serverDb.products = validProducts as any[];
 
-  // Auto-clean corrupted rows from Supabase if found
   if (invalidIds.length > 0 && supabase) {
     try {
       await supabase.from('products').delete().in('id', invalidIds);
       console.warn(`[SECURITY] Auto-deleted ${invalidIds.length} invalid products from Supabase`);
     } catch (e) {
-      // Ignore cleanup errors
     }
   }
 
-  // SECURITY: Strip passwords from user data before sending to client
   return NextResponse.json({
     ...serverDb,
     users: stripPasswords(serverDb.users),
@@ -180,7 +175,6 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
 
-    // SECURITY: Limit array lengths to prevent payload bomb / buffer overflow
     if (data.products && data.products.length > 100) {
       return NextResponse.json({ error: 'Payload too large: maximum 100 products per request' }, { status: 413 });
     }
@@ -189,21 +183,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payload too large: maximum 200 messages per request' }, { status: 413 });
     }
 
-    // ──── SECURITY: SERVER-SIDE PRODUCT VALIDATION ─────────────────
-    // This is the CRITICAL defense layer. Even if client code is fully
-    // compromised, the server validates every product field:
-    //   - Price: must be integer between 100 and 999,999,999
-    //   - Category: must be in the whitelist (no custom categories)
-    //   - Stock: must be integer between 0 and 9999
-    //   - Condition: must be in the whitelist
-    //   - Content: blocked terms check (drugs, weapons, etc.)
     let validatedProducts: any[] = [];
     let rejectedCount = 0;
     if (data.products && Array.isArray(data.products)) {
       const { valid, rejected } = validateProducts(data.products);
       rejectedCount = rejected.length;
 
-      // Additional server-side check: blocked content filter
       validatedProducts = valid.filter((p: any) => {
         if (isProductBlocked(p.name || '', p.description || '')) {
           rejectedCount++;
@@ -218,8 +203,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // SECURITY: Do NOT accept user data (passwords) from client-side POST
-    // Only merge VALIDATED products — invalid ones are silently dropped
     if (validatedProducts.length > 0) {
       serverDb.products = mergeProducts(serverDb.products, validatedProducts);
     }

@@ -20,13 +20,11 @@ export default function RegisterPage() {
   async function onFinish(values) {
     setFormError('');
     const emailLower = values.email.trim().toLowerCase();
-    // SECURITY V7: Use endsWith() to prevent bypass like hacker@president.ac.id.evil.com
     if (!emailLower.endsWith('@student.president.ac.id') && !emailLower.endsWith('@president.ac.id')) {
       setFormError('Pendaftaran khusus email kampus President University (@student.president.ac.id / @president.ac.id).');
       return;
     }
 
-    // SECURITY: Password strength check
     if (values.password.length < 8) {
       setFormError('Password minimal 8 karakter untuk keamanan akun.');
       return;
@@ -102,7 +100,7 @@ export default function RegisterPage() {
                   name="password"
                   rules={[
                     { required: true, message: 'Password wajib diisi!' },
-                    { min: 8, message: 'Minimal 8 karakter untuk keamanan!' },
+                    { min: 8, message: 'Minimal 8 karakter untuk keamanan' },
                   ]}
                 >
                   <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Minimal 6 karakter" />

@@ -1,18 +1,7 @@
-/**
- * SECURITY: Server-side & client-side product validation.
- * This module is imported by BOTH the API route (server) and store.ts (client)
- * to ensure no invalid data can enter the system from any attack vector:
- *   - Direct POST to /api/db
- *   - localStorage manipulation
- *   - DevTools console injection
- *   - Form bypass via DOM manipulation
- */
-
 import CATEGORIES from '../data/categories';
 
-// ──── Constants ────────────────────────────────────────────────
-export const PRICE_MIN = 100;           // Minimum Rp 100
-export const PRICE_MAX = 999_999_999;   // Maximum ~1 billion Rupiah
+export const PRICE_MIN = 100;
+export const PRICE_MAX = 999_999_999;
 export const STOCK_MIN = 0;
 export const STOCK_MAX = 9999;
 export const NAME_MAX_LENGTH = 200;
@@ -28,14 +17,12 @@ export const VALID_CONDITIONS = [
   'Bekas - Butuh Perbaikan',
 ];
 
-// ──── Validation Result ────────────────────────────────────────
 export interface ValidationResult {
   valid: boolean;
   errors: string[];
   sanitized?: Record<string, unknown>;
 }
 
-// ──── Sanitize text (XSS prevention) ──────────────────────────
 export function sanitizeText(text: string): string {
   if (!text || typeof text !== 'string') return '';
   return text

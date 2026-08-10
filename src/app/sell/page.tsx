@@ -155,7 +155,6 @@ export default function SellPage() {
       return;
     }
 
-    // SECURITY: Pre-flight validation before image upload (saves bandwidth)
     const price = Number(values.price);
     if (!Number.isFinite(price) || price < 100 || price > 999_999_999) {
       setFormError('❌ Harga harus antara Rp 100 - Rp 999.999.999.');
