@@ -22,22 +22,22 @@ const BLOCKED_TERMS = [
   
   // Cheat & Hack Ilegal
   'cheat game', 'hack akun', 'crack software', 'exploit tool',
+
+  // Kata Kasar & Penghinaan (Profanity & Vandalism)
+  'goblok', 'goblog', 'tolol', 'bego', 'anjing', 'babi', 'bangsat', 'kontol', 'memek', 'pepek', 'pantek', 'jancok', 'jancuk', 'asu', 'bajingan', 'kampang', 'somplak', 'idiot', 'sampah', 'sialan', 'keparat', 'silit', 'fuck', 'shit', 'bitch', 'asshole',
+
+  // XSS & Script Injection Vectors
+  '<script', '</script', 'javascript:', 'onerror=', 'onload=', 'eval(', '<iframe', '<svg', 'document.cookie', 'window.location',
 ];
 
 export function isProductBlocked(name: string, description: string) {
-  const text = `${name} ${description}`.toLowerCase();
-  return BLOCKED_TERMS.some(term => {
-    const regex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-    return regex.test(text);
-  });
+  const text = `${name || ''} ${description || ''}`.toLowerCase();
+  return BLOCKED_TERMS.some(term => text.includes(term.toLowerCase()));
 }
 
 export function getBlockReason(name: string, description: string) {
-  const text = `${name} ${description}`.toLowerCase();
-  const found = BLOCKED_TERMS.find(term => {
-    const regex = new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-    return regex.test(text);
-  });
+  const text = `${name || ''} ${description || ''}`.toLowerCase();
+  const found = BLOCKED_TERMS.find(term => text.includes(term.toLowerCase()));
   if (!found) return null;
-  return `❌ Produk Ditolak & Diblokir Otomatis! Mengandung kata/barang terlarang: "${found}". Barang berbahaya seperti judi, alkohol, narkoba, senjata, rokok, atau produk ilegal tidak diizinkan di PresUMart.`;
+  return `❌ Produk Ditolak & Diblokir Otomatis! Mengandung kata terlarang / tidak sopan: "${found}". Produk ilegal, kata kasar, atau skrip berbahaya tidak diizinkan di PresUMart.`;
 }

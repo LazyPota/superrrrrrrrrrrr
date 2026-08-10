@@ -8,6 +8,8 @@ import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutli
 import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating, getDirectMessages, toggleWishlist, isWishlisted } from '../../lib/store';
 import SEED_PRODUCTS from '../../data/seed';
 
+import { isValidMajor, isValidBatch } from '../../lib/validation';
+
 const { Title, Text, Paragraph } = Typography;
 
 function formatPrice(price) {
@@ -337,7 +339,7 @@ export default function ProductDetail() {
                     {product.seller}
                   </Text>
                   <Text type="secondary">
-                    {product.sellerMajor} • Angkatan {product.sellerBatch}
+                    {isValidMajor(product.sellerMajor) ? product.sellerMajor : 'President University'} • Angkatan {isValidBatch(product.sellerBatch) ? product.sellerBatch : '2024'}
                   </Text>
                   <Space wrap>
                     <Tag color="green" icon={<CheckCircleOutlined />}>Terverifikasi Mahasiswa PresUniv</Tag>

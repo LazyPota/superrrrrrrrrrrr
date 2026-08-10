@@ -1,4 +1,5 @@
 import CATEGORIES from '../data/categories';
+import MAJORS from './majors';
 
 export const PRICE_MIN = 100;
 export const PRICE_MAX = 999_999_999;
@@ -26,12 +27,63 @@ export interface ValidationResult {
 export function sanitizeText(text: string): string {
   if (!text || typeof text !== 'string') return '';
   return text
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
     .trim();
+}
+
+export function isValidMajor(major: string): boolean {
+  if (!major || typeof major !== 'string') return false;
+  return MAJORS.includes(major.trim());
+}
+
+export function isValidBatch(batch: string | number): boolean {
+  const b = String(batch || '').trim();
+  const num = parseInt(b, 10);
+  return Number.isInteger(num) && num >= 2015 && num <= 2030;
+}
+
+// ──── Validate User Profile / Account ─────────────────────────
+export function validateUserProfile(userData: Record<string, unknown>): { valid: boolean; errors: string[]; sanitized?: Record<string, any> } {
+  const errors: string[] = [];
+
+  const name = typeof userData.name === 'string' ? sanitizeText(userData.name.trim()) : '';
+  if (!name || name.length < 2) {
+    errors.push('Nama minimal 2 karakter.');
+  } else if (name.length > 50) {
+    errors.push('Nama maksimal 50 karakter.');
+  }
+
+  const email = typeof userData.email === 'string' ? userData.email.trim().toLowerCase() : '';
+  if (!email.endsWith('@student.president.ac.id') && !email.endsWith('@president.ac.id')) {
+    errors.push('Email harus menggunakan domain resmi @student.president.ac.id atau @president.ac.id');
+  }
+
+  const major = typeof userData.major === 'string' ? userData.major.trim() : '';
+  if (!isValidMajor(major)) {
+    errors.push(`Major / Program Studi "${major}" tidak valid. Hanya major resmi President University yang diizinkan.`);
+  }
+
+  const batch = String(userData.batch || '').trim();
+  if (!isValidBatch(batch)) {
+    errors.push(`Angkatan / Batch "${batch}" tidak valid.`);
+  }
+
+  if (errors.length > 0) {
+    return { valid: false, errors };
+  }
+
+  return {
+    valid: true,
+    errors: [],
+    sanitized: {
+      ...userData,
+      name,
+      email,
+      major,
+      batch,
+    },
+  };
 }
 
 // ──── Validate a single product ───────────────────────────────
@@ -102,6 +154,20 @@ export function validateProduct(product: Record<string, unknown>): ValidationRes
     errors.push('Email penjual tidak valid.');
   }
 
+  // --- Seller Major (CRITICAL: Whitelist check) ---
+  let sellerMajor = typeof product.sellerMajor === 'string' ? product.sellerMajor.trim() : '';
+  if (sellerMajor && !isValidMajor(sellerMajor)) {
+    errors.push(`Major penjual "${sellerMajor}" tidak valid. Hanya major resmi yang diizinkan.`);
+  }
+
+  // --- Seller Batch (CRITICAL: Batch check) ---
+  let sellerBatch = String(product.sellerBatch || '').trim();
+  if (sellerBatch && !isValidBatch(sellerBatch)) {
+    errors.push(`Angkatan penjual "${sellerBatch}" tidak valid.`);
+  }
+
+  const sellerName = typeof product.seller === 'string' ? sanitizeText(product.seller.trim()).slice(0, 50) : '';
+
   // If valid, return sanitized data
   if (errors.length === 0) {
     return {
@@ -111,11 +177,14 @@ export function validateProduct(product: Record<string, unknown>): ValidationRes
         ...product,
         name: sanitizeText(name),
         description: sanitizeText(description),
-        price: Math.round(price),               // Force integer
-        category,                                // Whitelisted value
-        stock: Math.round(Math.max(STOCK_MIN, Math.min(STOCK_MAX, stock))), // Clamped integer
+        price: Math.round(price),
+        category,
+        stock: Math.round(Math.max(STOCK_MIN, Math.min(STOCK_MAX, stock))),
         condition,
         sellerEmail,
+        seller: sellerName || product.seller,
+        sellerMajor: sellerMajor || product.sellerMajor || 'Informatics',
+        sellerBatch: sellerBatch || product.sellerBatch || '2024',
         allowNego: product.allowNego === true || product.allowNego === undefined,
       },
     };

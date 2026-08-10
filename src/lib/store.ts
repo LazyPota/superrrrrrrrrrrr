@@ -1,7 +1,8 @@
 import { User, Product, DirectMessage, Reply } from '../types';
 import { registerWithSupabase, loginWithSupabase, logoutWithSupabase } from './auth';
-import { validateProduct, PRICE_MIN, PRICE_MAX, STOCK_MIN, STOCK_MAX, VALID_CONDITIONS } from './validation';
+import { validateProduct, validateUserProfile, isValidMajor, isValidBatch, PRICE_MIN, PRICE_MAX, STOCK_MIN, STOCK_MAX, VALID_CONDITIONS } from './validation';
 import CATEGORIES from '../data/categories';
+import MAJORS from '../data/categories';
 
 const STORAGE_KEYS = {
   USER: 'presumart_user',
@@ -263,32 +264,35 @@ export async function pushToServer() {
 }
 
 export async function registerUser(user) {
-  // 1. Try registering with Supabase Auth first
+  const profileValidation = validateUserProfile(user);
+  if (!profileValidation.valid) {
+    return { ok: false, error: profileValidation.errors.join(', ') };
+  }
+
   const supaResult = await registerWithSupabase({
-    name: sanitizeInput(user.name),
-    email: user.email.trim().toLowerCase(),
+    name: profileValidation.sanitized?.name,
+    email: profileValidation.sanitized?.email,
     password: user.password,
-    major: user.major,
-    batch: user.batch,
+    major: profileValidation.sanitized?.major,
+    batch: profileValidation.sanitized?.batch,
   });
 
   if (!supaResult.ok && supaResult.error && !supaResult.error.includes('not configured')) {
-    // If Supabase returns explicit auth error (e.g. Email already registered), return it
     if (supaResult.error.includes('already registered') || supaResult.error.includes('already exists')) {
       return { ok: false, error: 'Email sudah terdaftar.' };
     }
   }
 
   const users = getUsers();
-  const exists = users.find(u => u.email === user.email);
+  const exists = users.find(u => u.email === profileValidation.sanitized?.email);
   if (exists) return { ok: false, error: 'Email sudah terdaftar.' };
   const hashedPw = await hashPasswordAsync(user.password);
   const newUser = supaResult.user || {
-    name: sanitizeInput(user.name),
-    email: user.email.trim().toLowerCase(),
+    name: profileValidation.sanitized?.name,
+    email: profileValidation.sanitized?.email,
     password: hashedPw,
-    major: user.major,
-    batch: user.batch,
+    major: profileValidation.sanitized?.major,
+    batch: profileValidation.sanitized?.batch,
   };
   users.push(newUser);
   saveUsers(users);
@@ -335,7 +339,6 @@ export async function updateUserProfile(currentEmail: string, updatedFields: { n
 
   const currentUser = { ...users[userIndex] };
 
-  // If email is changing, validate domain and uniqueness
   if (updatedFields.email && updatedFields.email !== currentEmail) {
     const newEmail = updatedFields.email.trim().toLowerCase();
     if (!newEmail.endsWith('@student.president.ac.id') && !newEmail.endsWith('@president.ac.id')) {
@@ -348,9 +351,21 @@ export async function updateUserProfile(currentEmail: string, updatedFields: { n
     currentUser.email = newEmail;
   }
 
+  if (updatedFields.major) {
+    if (!isValidMajor(updatedFields.major)) {
+      return { ok: false, error: `Major "${updatedFields.major}" tidak valid. Pilih dari daftar resmi.` };
+    }
+    currentUser.major = updatedFields.major;
+  }
+
+  if (updatedFields.batch) {
+    if (!isValidBatch(updatedFields.batch)) {
+      return { ok: false, error: `Angkatan / Batch "${updatedFields.batch}" tidak valid.` };
+    }
+    currentUser.batch = String(updatedFields.batch);
+  }
+
   if (updatedFields.name) currentUser.name = sanitizeInput(updatedFields.name);
-  if (updatedFields.major) currentUser.major = updatedFields.major;
-  if (updatedFields.batch) currentUser.batch = updatedFields.batch;
 
   if (updatedFields.password && updatedFields.password.trim() !== '') {
     currentUser.password = await hashPasswordAsync(updatedFields.password);
@@ -371,7 +386,21 @@ export function getUser() {
   const data = localStorage.getItem(STORAGE_KEYS.USER);
   if (!data) return null;
   try {
-    return JSON.parse(data);
+    const user = JSON.parse(data);
+    if (!user) return null;
+    let modified = false;
+    if (user.major && !isValidMajor(user.major)) {
+      user.major = 'Informatics';
+      modified = true;
+    }
+    if (user.batch && !isValidBatch(user.batch)) {
+      user.batch = '2024';
+      modified = true;
+    }
+    if (modified) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    }
+    return user;
   } catch (e) {
     return null;
   }
@@ -417,11 +446,16 @@ export function saveProducts(products) {
     const stock = Number(p.stock !== undefined ? p.stock : 1);
     if (!Number.isFinite(stock) || stock < STOCK_MIN || stock > STOCK_MAX) return false;
     if (p.condition && !VALID_CONDITIONS.includes(p.condition)) return false;
+    if (p.sellerMajor && !isValidMajor(p.sellerMajor)) return false;
+    if (p.sellerBatch && !isValidBatch(p.sellerBatch)) return false;
     return true;
   }).map((p: any) => ({
     ...p,
     price: Math.round(Math.max(PRICE_MIN, Math.min(PRICE_MAX, Number(p.price)))),
     stock: Math.round(Math.max(STOCK_MIN, Math.min(STOCK_MAX, Number(p.stock !== undefined ? p.stock : 1)))),
+    sellerMajor: isValidMajor(p.sellerMajor) ? p.sellerMajor : 'Informatics',
+    sellerBatch: isValidBatch(p.sellerBatch) ? String(p.sellerBatch) : '2024',
+    seller: sanitizeInput(String(p.seller || '')).slice(0, 50),
   }));
   localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(sanitized));
   pushToServer();

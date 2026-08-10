@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, Tag, Button, Typography, Space, message, Badge, Avatar } from 'antd';
 import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined, HeartOutlined, HeartFilled, ShareAltOutlined } from '@ant-design/icons';
 import { addToCart, getUser, getDirectMessages, sendDirectMessage, toggleWishlist, isWishlisted } from '../../lib/store';
+import { isValidMajor } from '../../lib/validation';
 
 const { Title, Text } = Typography;
 
@@ -339,7 +340,7 @@ export default function ProductCard({ product }: { product: any }) {
                 <Text style={{ fontSize: 13, color: '#334155', fontWeight: 500 }} ellipsis>
                   {product.seller}
                 </Text>
-                {product.sellerMajor && (
+                {isValidMajor(product.sellerMajor) && (
                   <Text type="secondary" style={{ fontSize: 11, marginTop: -2 }} ellipsis>
                     {product.sellerMajor}
                   </Text>
