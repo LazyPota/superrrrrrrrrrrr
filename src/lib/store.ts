@@ -1,5 +1,6 @@
 import { User, Product, DirectMessage, Reply } from '../types';
 import { isProductBlocked } from './blocked';
+import MAJORS from './majors';
 
 const STORAGE_KEYS = {
   USER: 'presumart_user',
@@ -272,10 +273,13 @@ export async function pushToServer() {
   }
 }
 
-export async function registerUser(user) {
+export async function registerUser(user: any) {
   const users = getUsers();
   const exists = users.find(u => u.email === user.email);
   if (exists) return { ok: false, error: 'Email sudah terdaftar.' };
+  if (!MAJORS.includes(user.major)) {
+    return { ok: false, error: 'Pilih Major / Program Studi yang valid dari daftar.' };
+  }
   const hashedPw = await hashPasswordAsync(user.password);
   const newUser = {
     name: sanitizeInput(user.name),
@@ -338,8 +342,14 @@ export async function updateUserProfile(currentEmail: string, updatedFields: { n
     currentUser.email = newEmail;
   }
 
+  if (updatedFields.major) {
+    if (!MAJORS.includes(updatedFields.major)) {
+      return { ok: false, error: 'Pilih Major / Program Studi yang valid dari daftar.' };
+    }
+    currentUser.major = updatedFields.major;
+  }
+
   if (updatedFields.name) currentUser.name = sanitizeInput(updatedFields.name);
-  if (updatedFields.major) currentUser.major = updatedFields.major;
   if (updatedFields.batch) currentUser.batch = updatedFields.batch;
 
   if (updatedFields.password && updatedFields.password.trim() !== '') {

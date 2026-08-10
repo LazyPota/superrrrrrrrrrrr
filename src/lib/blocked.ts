@@ -27,7 +27,7 @@ const BLOCKED_TERMS = [
   'anjing', 'kontol', 'ngentod', 'goblok', 'fuck', 'fucking', 'idiot', 'memek', 'pepek', 'babi', 'jancok', 'bangsat', 'biadab', 'perek', 'lonte', 'tolol'
 ];
 
-export function isProductBlocked(name: string = '', description: string = '', sellerName: string = '', price?: number): boolean {
+export function isProductBlocked(name: string = '', description: string = '', sellerName: string = '', price?: number, sellerMajor: string = ''): boolean {
   // 1. Check invalid or negative/unrealistic price
   if (price !== undefined) {
     if (typeof price !== 'number' || isNaN(price) || price < 100 || price > 500000000) {
@@ -36,7 +36,7 @@ export function isProductBlocked(name: string = '', description: string = '', se
   }
 
   // 2. Check for spammy / repeated character patterns (12+ repeated chars)
-  const fullText = `${name} ${description} ${sellerName}`.toLowerCase();
+  const fullText = `${name} ${description} ${sellerName} ${sellerMajor}`.toLowerCase();
   if (/(.)\1{11,}/.test(fullText)) {
     return true;
   }
@@ -48,7 +48,7 @@ export function isProductBlocked(name: string = '', description: string = '', se
   });
 }
 
-export function getBlockReason(name: string = '', description: string = '', sellerName: string = '', price?: number): string | null {
+export function getBlockReason(name: string = '', description: string = '', sellerName: string = '', price?: number, sellerMajor: string = ''): string | null {
   if (price !== undefined) {
     if (typeof price !== 'number' || isNaN(price) || price < 100) {
       return '❌ Harga tidak valid! Harga minimal produk adalah Rp 100 dan tidak boleh bernilai negatif.';
@@ -58,7 +58,7 @@ export function getBlockReason(name: string = '', description: string = '', sell
     }
   }
 
-  const fullText = `${name} ${description} ${sellerName}`.toLowerCase();
+  const fullText = `${name} ${description} ${sellerName} ${sellerMajor}`.toLowerCase();
 
   if (/(.)\1{11,}/.test(fullText)) {
     return '❌ Postingan ditolak! Terdeteksi karakter berulang / spamming.';
