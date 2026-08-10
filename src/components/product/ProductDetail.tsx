@@ -1,0 +1,560 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Card, Row, Col, Typography, Tag, Button, Breadcrumb, Descriptions, Space, Image, message, Spin, Empty, Flex, Modal, InputNumber, Input, Rate, Avatar, List } from 'antd';
+import { ShoppingCartOutlined, ArrowLeftOutlined, CheckCircleOutlined, UserOutlined, PictureOutlined, DollarOutlined, MessageOutlined, StarOutlined, HeartOutlined, HeartFilled, ShareAltOutlined } from '@ant-design/icons';
+import { getProducts, addToCart, getUser, sendDirectMessage, getProductReviews, getSellerRating, getDirectMessages, toggleWishlist, isWishlisted } from '../../lib/store';
+import SEED_PRODUCTS from '../../data/seed';
+
+const { Title, Text, Paragraph } = Typography;
+
+function formatPrice(price) {
+  return 'Rp' + Number(price).toLocaleString('id-ID');
+}
+
+export default function ProductDetail() {
+  const searchParams = useSearchParams();
+  const productId = searchParams.get('id');
+  const [product, setProduct] = useState(null);
+  const [notFound, setNotFound] = useState(false);
+  const [negoModalOpen, setNegoModalOpen] = useState(false);
+  const [negoPrice, setNegoPrice] = useState(0);
+  const [negoNote, setNegoNote] = useState('');
+  const [messageApi, contextHolder] = message.useMessage();
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [sellerRating, setSellerRating] = useState<{ avgRating: number; totalReviews: number }>({ avgRating: 5.0, totalReviews: 0 });
+  const [activeImg, setActiveImg] = useState<string>('');
+  const [favored, setFavored] = useState(false);
+
+  useEffect(() => {
+    if (product?.id) {
+      setFavored(isWishlisted(product.id));
+
+      // Dynamic Open Graph & Twitter Meta Tags for WhatsApp/Telegram Share Preview
+      if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+        const titleStr = `${product.name} (Rp${Number(product.price).toLocaleString('id-ID')}) - PresUMart`;
+        document.title = titleStr;
+
+        const setMetaTag = (property: string, content: string, isName = false) => {
+          const attr = isName ? 'name' : 'property';
+          let element = document.querySelector(`meta[${attr}="${property}"]`);
+          if (!element) {
+            element = document.createElement('meta');
+            element.setAttribute(attr, property);
+            document.head.appendChild(element);
+          }
+          element.setAttribute('content', content);
+        };
+
+        const pageUrl = window.location.href;
+        const formattedPrice = 'Rp' + Number(product.price).toLocaleString('id-ID');
+        const descStr = `${formattedPrice} • ${product.description ? product.description.substring(0, 160) : 'Marketplace Mahasiswa President University Jababeka'}`;
+        const mainImg = product.image
+          ? (product.image.startsWith('http') ? product.image : `${window.location.origin}${product.image}`)
+          : `${window.location.origin}/icon-512.svg`;
+
+        setMetaTag('og:title', `${product.name} - PresUMart`);
+        setMetaTag('og:description', descStr);
+        setMetaTag('og:image', mainImg);
+        setMetaTag('og:url', pageUrl);
+        setMetaTag('og:site_name', 'PresUMart President University');
+        setMetaTag('twitter:card', 'summary_large_image', true);
+        setMetaTag('twitter:title', `${product.name} (${formattedPrice})`, true);
+        setMetaTag('twitter:description', descStr, true);
+        setMetaTag('twitter:image', mainImg, true);
+      }
+    }
+  }, [product]);
+
+  function handleShareProduct() {
+    if (!product) return;
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://presumart.netlify.app';
+    const shortUrl = `${origin}/product?id=${product.id}`;
+    const formattedPrice = formatPrice(product.price);
+    const shareText = `🛒 *${product.name}* (${formattedPrice})\nBeli di PresUMart President University: ${shortUrl}`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: `${product.name} - PresUMart`,
+        text: shareText,
+        url: shortUrl,
+      }).catch(() => {});
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(shortUrl).then(() => {
+        messageApi.success('Link produk berhasil disalin!');
+      }).catch(() => {
+        messageApi.info(`Link produk: ${shortUrl}`);
+      });
+    } else {
+      messageApi.info(`Link produk: ${shortUrl}`);
+    }
+  }
+
+  function handleToggleWishlist() {
+    if (!product) return;
+    const added = toggleWishlist(product.id);
+    setFavored(added);
+    if (added) {
+      messageApi.success('Produk disimpan ke Favorit!');
+    } else {
+      messageApi.info('Dihapus dari Favorit.');
+    }
+  }
+
+  useEffect(() => {
+    function loadProductData() {
+      if (productId) {
+        const all = getProducts();
+        let found = all.find(p => p.id === productId);
+        if (!found) {
+          found = SEED_PRODUCTS.find(p => p.id === productId);
+        }
+        if (found) {
+          setProduct(found);
+          setNegoPrice(found.price);
+          setReviews(getProductReviews(found.id));
+          setSellerRating(getSellerRating(found.sellerEmail));
+        } else {
+          setNotFound(true);
+        }
+      }
+    }
+
+    loadProductData();
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('products-updated', loadProductData);
+      window.addEventListener('storage', loadProductData);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('products-updated', loadProductData);
+        window.removeEventListener('storage', loadProductData);
+      }
+    };
+  }, [productId]);
+
+  const isOutOfStock = (product?.stock !== undefined && product?.stock <= 0) || product?.status === 'sold';
+
+  function handleAddToCart() {
+    const user = getUser();
+    if (user && user.email === product.sellerEmail) {
+      messageApi.warning('Tidak bisa membeli produk sendiri.');
+      return;
+    }
+    if (isOutOfStock) {
+      messageApi.error('Maaf, stok produk ini telah habis.');
+      return;
+    }
+    addToCart(product);
+    messageApi.success('Produk berhasil ditambahkan ke keranjang!');
+  }
+
+  function handleSendNego() {
+    const user = getUser();
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+    if (!negoPrice || negoPrice <= 0) {
+      messageApi.error('Masukkan nominal tawaran harga yang valid!');
+      return;
+    }
+    if (negoPrice >= product.price) {
+      messageApi.warning('Harga nego harus lebih rendah dari harga asli produk.');
+      return;
+    }
+
+    sendDirectMessage({
+      sellerEmail: product.sellerEmail,
+      sellerName: product.seller,
+      buyerEmail: user.email,
+      buyerName: user.name,
+      productId: product.id,
+      productName: product.name,
+      productPrice: product.price,
+      proposedPrice: negoPrice,
+      messageText: negoNote || `Saya mengajukan penawaran harga Rp${Number(negoPrice).toLocaleString('id-ID')}`,
+      type: 'nego',
+    });
+
+    messageApi.success('Penawaran nego berhasil dikirimkan ke Chat Website Penjual!');
+    setNegoModalOpen(false);
+    
+    // Automatically open the Direct Chat Drawer on the website
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('open-direct-chat'));
+    }, 300);
+  }
+
+  if (notFound) {
+    return (
+      <>
+        {contextHolder}
+        <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', minHeight: '60vh' }}>
+          <Card style={{ textAlign: 'center', padding: '48px 24px', borderRadius: 16 }}>
+            <Empty description={<Title level={4}>Produk Tidak Ditemukan</Title>}>
+              <Link href="/">
+                <Button type="primary" icon={<ArrowLeftOutlined />}>Kembali ke Beranda</Button>
+              </Link>
+            </Empty>
+          </Card>
+        </main>
+      </>
+    );
+  }
+
+  if (!product) {
+    return (
+      <>
+        {contextHolder}
+        <main style={{ maxWidth: 1240, margin: '48px auto', padding: '0 24px', textAlign: 'center', minHeight: '60vh' }}>
+          <Spin size="large" description="Memuat detail produk..." />
+        </main>
+      </>
+    );
+  }
+
+  const allImages = product
+    ? (product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []))
+    : [];
+  const currentImage = activeImg || allImages[0] || '';
+
+  return (
+    <>
+      {contextHolder}
+      <main style={{ maxWidth: 1240, margin: '24px auto 48px auto', padding: '0 24px' }}>
+        <Breadcrumb
+          style={{ marginBottom: 24 }}
+          items={[
+            { title: <Link href="/">Beranda</Link> },
+            { title: <Link href={`/?cat=${encodeURIComponent(product.category)}`}>{product.category}</Link> },
+            { title: product.name },
+          ]}
+        />
+
+        <Card style={{ borderRadius: 16, overflow: 'hidden' }}>
+          <Row gutter={[32, 32]}>
+            {/* Image Side */}
+            <Col xs={24} md={10}>
+              <div style={{ borderRadius: 12, overflow: 'hidden', background: '#f1f5f9', minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                {currentImage ? (
+                  <Image
+                    alt={product.name}
+                    src={currentImage}
+                    style={{ width: '100%', maxHeight: 380, objectFit: 'contain' }}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#94a3b8' }}>
+                    <PictureOutlined style={{ fontSize: 48, marginBottom: 8 }} />
+                    <div>Foto tidak tersedia</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Thumbnails Gallery */}
+              {allImages.length > 1 && (
+                <Flex gap="small" justify="center">
+                  {allImages.map((imgUrl: string, idx: number) => (
+                    <div
+                      key={idx}
+                      onClick={() => setActiveImg(imgUrl)}
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        border: currentImage === imgUrl ? '2px solid #0052cc' : '1px solid #cbd5e1',
+                        opacity: currentImage === imgUrl ? 1 : 0.65,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <img src={imgUrl} alt={`Foto ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  ))}
+                </Flex>
+              )}
+            </Col>
+
+            {/* Info Side */}
+            <Col xs={24} md={14}>
+              {isOutOfStock && (
+                <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', padding: '12px 16px', borderRadius: 10, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Tag color="red" style={{ fontSize: 13, fontWeight: 800, padding: '4px 12px', margin: 0 }}>
+                    ❌ SOLD OUT / TERJUAL
+                  </Tag>
+                  <Text strong style={{ color: '#991b1b', fontSize: 13 }}>
+                    Maaf, produk ini telah TERJUAL dan tidak dapat dibeli lagi.
+                  </Text>
+                </div>
+              )}
+              <Space size="small" style={{ marginBottom: 12 }} wrap>
+                <Tag color="blue" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                  {product.category}
+                </Tag>
+                <Tag color="purple" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                  {product.condition || 'Bekas - Like New'}
+                </Tag>
+                {isOutOfStock ? (
+                  <Tag color="red" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                    Stok Habis (0 Unit)
+                  </Tag>
+                ) : (
+                  <Tag color="green" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                    Stok Tersedia: {product.stock ?? 1} Unit
+                  </Tag>
+                )}
+                {product.allowNego !== false ? (
+                  <Tag color="gold" icon={<DollarOutlined />} style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                    Bisa Nego Harga
+                  </Tag>
+                ) : (
+                  <Tag color="default" style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                    Harga Pas (Nego Nonaktif)
+                  </Tag>
+                )}
+                <Tag color="cyan" icon={<DollarOutlined />} style={{ fontSize: 13, padding: '2px 10px', borderRadius: 6 }}>
+                  Pembayaran: COD
+                </Tag>
+              </Space>
+
+              <Title level={2} style={{ margin: '0 0 12px 0', fontWeight: 800 }}>
+                {product.name}
+              </Title>
+              <Text type="danger" style={{ fontSize: 28, fontWeight: 800, display: 'block', marginBottom: 24 }}>
+                {formatPrice(product.price)}
+              </Text>
+
+              <Card style={{ background: '#f8fafc', borderRadius: 12, marginBottom: 24, border: '1px solid #e2e8f0' }}>
+                <Title level={5} style={{ marginTop: 0, marginBottom: 8 }}>Informasi Penjual</Title>
+                <Flex vertical gap="small">
+                  <Text strong style={{ fontSize: 16 }}>
+                    <UserOutlined style={{ marginRight: 8, color: '#0052cc' }} />
+                    {product.seller}
+                  </Text>
+                  <Text type="secondary">
+                    {product.sellerMajor} • Angkatan {product.sellerBatch}
+                  </Text>
+                  <Space wrap>
+                    <Tag color="green" icon={<CheckCircleOutlined />}>Terverifikasi Mahasiswa PresUniv</Tag>
+                    <Tag color="gold" icon={<StarOutlined />}>⭐ {sellerRating.avgRating} / 5.0 ({sellerRating.totalReviews} Ulasan)</Tag>
+                  </Space>
+                </Flex>
+              </Card>
+
+              <Space size="small" className="product-detail-actions" style={{ marginBottom: 28, width: '100%' }} wrap>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<ShoppingCartOutlined />}
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  danger={isOutOfStock}
+                  style={{ height: 44, padding: '0 20px', fontSize: 15 }}
+                >
+                  {isOutOfStock ? 'Stok Habis' : 'Tambah ke Keranjang'}
+                </Button>
+
+                {product.allowNego !== false && (
+                  <Button
+                    type="default"
+                    size="large"
+                    disabled={isOutOfStock}
+                    icon={<DollarOutlined style={{ color: isOutOfStock ? '#94a3b8' : '#d97706' }} />}
+                    onClick={() => {
+                      const u = getUser();
+                      if (!u) {
+                        window.location.href = '/login';
+                        return;
+                      }
+                      if (u.email === product.sellerEmail) {
+                        messageApi.warning('Tidak bisa menawar produk sendiri.');
+                        return;
+                      }
+                      setNegoModalOpen(true);
+                    }}
+                    style={{ height: 44, padding: '0 16px', fontSize: 15, borderColor: isOutOfStock ? '#d1d5db' : '#f59e0b', color: isOutOfStock ? '#94a3b8' : '#b45309' }}
+                  >
+                    Nego Harga
+                  </Button>
+                )}
+
+                <Button
+                  size="large"
+                  icon={<MessageOutlined style={{ color: '#0052cc' }} />}
+                  onClick={() => {
+                    const u = getUser();
+                    if (!u) {
+                      window.location.href = '/login';
+                      return;
+                    }
+                    if (u.email === product.sellerEmail) {
+                      messageApi.warning('Ini adalah produk jualan kamu sendiri.');
+                      return;
+                    }
+
+                    sendDirectMessage({
+                      sellerEmail: product.sellerEmail,
+                      sellerName: product.seller,
+                      buyerEmail: u.email,
+                      buyerName: u.name,
+                      productId: product.id,
+                      productName: product.name,
+                      productPrice: product.price,
+                      proposedPrice: null,
+                      messageText: `Halo ${product.seller}, saya mau tanya-tanya mengenai produk ${product.name}.`,
+                      type: 'inquiry',
+                      status: 'chat',
+                    });
+
+                    window.dispatchEvent(new CustomEvent('open-direct-chat'));
+                  }}
+                  style={{ height: 44, padding: '0 16px', fontSize: 15 }}
+                >
+                  Chat Penjual
+                </Button>
+
+                <Button
+                  size="large"
+                  icon={favored ? <HeartFilled style={{ color: '#ef4444' }} /> : <HeartOutlined />}
+                  onClick={handleToggleWishlist}
+                  style={{ height: 44, padding: '0 16px', fontSize: 15 }}
+                >
+                  {favored ? 'Favorit' : 'Simpan'}
+                </Button>
+
+                <Button
+                  size="large"
+                  icon={<ShareAltOutlined style={{ color: '#0052cc' }} />}
+                  onClick={handleShareProduct}
+                  style={{ height: 44, padding: '0 16px', fontSize: 15 }}
+                >
+                  Bagikan Link
+                </Button>
+
+                <Link href="/cart">
+                  <Button size="large" style={{ height: 44, padding: '0 16px', fontSize: 15 }}>
+                    Keranjang
+                  </Button>
+                </Link>
+              </Space>
+
+              <div>
+                <Title level={4}>Deskripsi Produk</Title>
+                <Paragraph style={{ fontSize: 15, lineHeight: 1.7, color: '#334155', whiteSpace: 'pre-line' }}>
+                  {product.description}
+                </Paragraph>
+              </div>
+
+              {/* Reviews & Rating Section */}
+              <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+                  <Title level={4} style={{ margin: 0 }}>
+                    Ulasan & Rating Pembeli ({reviews.length})
+                  </Title>
+                  {reviews.length > 0 && (
+                    <Space wrap>
+                      <Rate disabled value={Math.round(reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length)} />
+                      <Text strong style={{ fontSize: 16 }}>
+                        {(reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)} / 5.0
+                      </Text>
+                    </Space>
+                  )}
+                </div>
+
+                {reviews.length === 0 ? (
+                  <Empty description="Belum ada ulasan untuk produk ini. Jadilah pembeli pertama yang memberikan ulasan!" />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {reviews.map((item: any) => (
+                      <div key={item.id} style={{ padding: '16px 0', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                        <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#0052cc', flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+                            <Text strong>{item.buyerName}</Text>
+                            <Rate disabled value={item.rating} style={{ fontSize: 13 }} />
+                            <Text type="secondary" style={{ fontSize: 12 }}>
+                              • {new Date(item.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+                            </Text>
+                          </div>
+                          <Text style={{ fontSize: 14, color: '#1e293b' }}>&quot;{item.comment}&quot;</Text>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Col>
+          </Row>
+        </Card>
+
+        {/* Nego Modal */}
+        <Modal
+          title={
+            <Space>
+              <DollarOutlined style={{ color: '#f59e0b', fontSize: 20 }} />
+              <span>Tawar Harga Produk (Sistem Chat Website)</span>
+            </Space>
+          }
+          open={negoModalOpen}
+          onCancel={() => setNegoModalOpen(false)}
+          footer={[
+            <Button key="back" onClick={() => setNegoModalOpen(false)}>
+              Batal
+            </Button>,
+            <Button key="submit" type="primary" icon={<MessageOutlined />} onClick={handleSendNego} style={{ background: '#0052cc', borderColor: '#0052cc' }}>
+              Kirim Nego ke Chat Website Penjual
+            </Button>,
+          ]}
+        >
+          {product && (
+            <div style={{ margin: '16px 0' }}>
+              <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>Produk yang ditawar:</Text>
+              <Text strong style={{ fontSize: 16 }}>{product.name}</Text>
+              
+              <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, margin: '16px 0', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <Text type="secondary">Harga Tertera:</Text>
+                  <Text strong style={{ textDecoration: 'line-through' }}>{formatPrice(product.price)}</Text>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text strong>Tawaran Nego Kamu:</Text>
+                  <Text strong style={{ fontSize: 18, color: '#0052cc' }}>{formatPrice(negoPrice)}</Text>
+                </div>
+                <Tag color="green" style={{ marginTop: 8 }}>Pembayaran: Tunai COD Kampus</Tag>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ fontWeight: 600, display: 'block', marginBottom: 6 }}>Nominal Tawaran (Rp):</label>
+                <InputNumber
+                  style={{ width: '100%' }}
+                  size="large"
+                  min={100}
+                  max={product.price - 1}
+                  value={negoPrice}
+                  onChange={val => setNegoPrice(val || 0)}
+                  formatter={val => `Rp ${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                  parser={val => Number(val ? val.replace(/Rp\s?|(\.*)/g, '') : 0)}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontWeight: 600, display: 'block', marginBottom: 6 }}>Pesan Tambahan ke Penjual (Opsional):</label>
+                <Input.TextArea
+                  rows={3}
+                  placeholder="Contoh: Halo ka, bisa COD di depan student center PU? Nego dikit ya..."
+                  value={negoNote}
+                  onChange={e => setNegoNote(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+        </Modal>
+      </main>
+    </>
+  );
+}
