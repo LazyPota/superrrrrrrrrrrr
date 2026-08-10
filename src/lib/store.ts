@@ -1,5 +1,7 @@
 import { User, Product, DirectMessage, Reply } from '../types';
 import { registerWithSupabase, loginWithSupabase, logoutWithSupabase } from './auth';
+import { validateProduct, PRICE_MIN, PRICE_MAX, STOCK_MIN, STOCK_MAX, VALID_CONDITIONS } from './validation';
+import CATEGORIES from '../data/categories';
 
 const STORAGE_KEYS = {
   USER: 'presumart_user',
@@ -418,18 +420,44 @@ export function getProducts() {
 
 export function saveProducts(products) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+  // SECURITY: Re-validate & sanitize every product before persisting
+  // This catches localStorage tampering and DOM manipulation exploits
+  const sanitized = (products || []).filter((p: any) => {
+    if (!p || typeof p !== 'object') return false;
+    // Enforce price bounds
+    const price = Number(p.price);
+    if (!Number.isFinite(price) || price < PRICE_MIN || price > PRICE_MAX) return false;
+    // Enforce category whitelist
+    if (!p.category || !CATEGORIES.includes(p.category)) return false;
+    // Enforce stock bounds
+    const stock = Number(p.stock !== undefined ? p.stock : 1);
+    if (!Number.isFinite(stock) || stock < STOCK_MIN || stock > STOCK_MAX) return false;
+    // Enforce condition whitelist
+    if (p.condition && !VALID_CONDITIONS.includes(p.condition)) return false;
+    return true;
+  }).map((p: any) => ({
+    ...p,
+    price: Math.round(Math.max(PRICE_MIN, Math.min(PRICE_MAX, Number(p.price)))),
+    stock: Math.round(Math.max(STOCK_MIN, Math.min(STOCK_MAX, Number(p.stock !== undefined ? p.stock : 1)))),
+  }));
+  localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(sanitized));
   pushToServer();
 }
 
 export function addProduct(product) {
+  // SECURITY: Full validation before adding — blocks DevTools/localStorage exploits
+  const validation = validateProduct(product);
+  if (!validation.valid) {
+    console.error('[SECURITY] Product rejected:', validation.errors);
+    throw new Error(`Produk ditolak: ${validation.errors.join(', ')}`);
+  }
+
   const products = getProducts();
-  // SECURITY: Sanitize user input and use secure ID
   products.push({
-    ...product,
+    ...validation.sanitized,
     id: generateId(),
-    name: sanitizeInput(product.name),
-    description: sanitizeInput(product.description),
+    name: sanitizeInput(String(validation.sanitized?.name || '')),
+    description: sanitizeInput(String(validation.sanitized?.description || '')),
     createdAt: new Date().toISOString(),
   });
   saveProducts(products);
@@ -443,7 +471,19 @@ export function deleteProduct(id) {
 }
 
 export function updateProduct(id: string, updates: any) {
-  const products = getProducts().map(p => p.id === id ? { ...p, ...updates } : p);
+  // SECURITY: Validate updates before applying — prevents price/category manipulation
+  const existing = getProducts().find(p => p.id === id);
+  if (!existing) {
+    console.error('[SECURITY] Product not found for update:', id);
+    return getProducts();
+  }
+  const merged = { ...existing, ...updates };
+  const validation = validateProduct(merged);
+  if (!validation.valid) {
+    console.error('[SECURITY] Product update rejected:', validation.errors);
+    throw new Error(`Update ditolak: ${validation.errors.join(', ')}`);
+  }
+  const products = getProducts().map(p => p.id === id ? { ...p, ...validation.sanitized } : p);
   saveProducts(products);
   return products;
 }

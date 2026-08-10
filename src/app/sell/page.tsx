@@ -155,6 +155,22 @@ export default function SellPage() {
       return;
     }
 
+    // SECURITY: Pre-flight validation before image upload (saves bandwidth)
+    const price = Number(values.price);
+    if (!Number.isFinite(price) || price < 100 || price > 999_999_999) {
+      setFormError('❌ Harga harus antara Rp 100 - Rp 999.999.999.');
+      return;
+    }
+    if (!values.category || !CATEGORIES.includes(values.category)) {
+      setFormError('❌ Kategori tidak valid. Silakan pilih kategori yang tersedia.');
+      return;
+    }
+    const stock = Number(values.stock !== undefined ? values.stock : 1);
+    if (!Number.isFinite(stock) || stock < 0 || stock > 9999) {
+      setFormError('❌ Stok harus antara 0 - 9999.');
+      return;
+    }
+
     // Upload raw Base64 images to Supabase Storage Bucket to get lightweight CDN URLs
     const rawImages = fileList.map(f => f.url || f.thumbUrl).filter(Boolean);
     const uploadedImages = await Promise.all(
@@ -166,10 +182,10 @@ export default function SellPage() {
     const productData = {
       name: values.name.trim(),
       description: values.description.trim(),
-      price: Number(values.price),
+      price: Math.round(price),
       category: values.category,
       condition: values.condition || 'Bekas - Like New',
-      stock: Number(values.stock !== undefined ? values.stock : 1),
+      stock: Math.round(Math.max(0, Math.min(9999, stock))),
       allowNego: values.allowNego !== undefined ? values.allowNego : true,
       image: coverImage,
       images: uploadedImages.length > 0 ? uploadedImages : (coverImage ? [coverImage] : []),
@@ -179,17 +195,21 @@ export default function SellPage() {
       sellerBatch: user.batch,
     };
 
-    if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
-      messageApi.success('Produk berhasil diperbarui!');
-    } else {
-      addProduct(productData);
-      messageApi.success('Produk baru berhasil diterbitkan!');
-    }
+    try {
+      if (editingProduct) {
+        updateProduct(editingProduct.id, productData);
+        messageApi.success('Produk berhasil diperbarui!');
+      } else {
+        addProduct(productData);
+        messageApi.success('Produk baru berhasil diterbitkan!');
+      }
 
-    handleCancelEdit();
-    const mine = getProducts().filter(p => p.sellerEmail === user.email);
-    setProducts(mine);
+      handleCancelEdit();
+      const mine = getProducts().filter(p => p.sellerEmail === user.email);
+      setProducts(mine);
+    } catch (err: any) {
+      setFormError(`❌ ${err.message || 'Gagal menyimpan produk. Periksa data Anda.'}`);
+    }
   }
 
   if (!user) {
@@ -344,10 +364,12 @@ export default function SellPage() {
                     { type: 'number', min: 100, message: 'Minimal Rp 100!' },
                   ]}
                 >
-                  <InputNumber
+                <InputNumber<number>
+                    min={100 as number}
+                    max={999999999 as number}
                     style={{ width: '100%' }}
-                    formatter={val => `Rp ${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                    parser={val => val.replace(/Rp\s?|(\.*)/g, '')}
+                    formatter={(val) => `Rp ${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                    parser={(val) => Number(val!.replace(/Rp\s?|(\.*)/g, '')) || 0}
                     placeholder="50000"
                   />
                 </Form.Item>
@@ -386,7 +408,7 @@ export default function SellPage() {
                   initialValue={1}
                   extra="Jika stok habis (0), produk otomatis tidak dapat dibeli oleh pembeli."
                 >
-                  <InputNumber min={0} max={999} style={{ width: '100%' }} placeholder="1" />
+                  <InputNumber min={0} max={9999} style={{ width: '100%' }} placeholder="1" />
                 </Form.Item>
 
                 <Form.Item

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
+import { validateProducts } from '../../../lib/validation';
+import { isProductBlocked } from '../../../lib/blocked';
 
 let serverDb: {
   users: any[];
@@ -143,6 +145,25 @@ export async function GET(req: Request) {
   // Ensure serverDb products never contain dummy seed items
   serverDb.products = (serverDb.products || []).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
 
+  // SECURITY: Validate & filter products on GET to purge any existing corrupted data
+  // This removes already-exploited products (negative prices, invalid categories, etc.)
+  const { valid: validProducts } = validateProducts(serverDb.products);
+  const invalidIds = serverDb.products
+    .filter((p: any) => !validProducts.some((v: any) => v.id === p.id))
+    .map((p: any) => p.id);
+
+  serverDb.products = validProducts as any[];
+
+  // Auto-clean corrupted rows from Supabase if found
+  if (invalidIds.length > 0 && supabase) {
+    try {
+      await supabase.from('products').delete().in('id', invalidIds);
+      console.warn(`[SECURITY] Auto-deleted ${invalidIds.length} invalid products from Supabase`);
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+  }
+
   // SECURITY: Strip passwords from user data before sending to client
   return NextResponse.json({
     ...serverDb,
@@ -168,15 +189,47 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Payload too large: maximum 200 messages per request' }, { status: 413 });
     }
 
+    // ──── SECURITY: SERVER-SIDE PRODUCT VALIDATION ─────────────────
+    // This is the CRITICAL defense layer. Even if client code is fully
+    // compromised, the server validates every product field:
+    //   - Price: must be integer between 100 and 999,999,999
+    //   - Category: must be in the whitelist (no custom categories)
+    //   - Stock: must be integer between 0 and 9999
+    //   - Condition: must be in the whitelist
+    //   - Content: blocked terms check (drugs, weapons, etc.)
+    let validatedProducts: any[] = [];
+    let rejectedCount = 0;
+    if (data.products && Array.isArray(data.products)) {
+      const { valid, rejected } = validateProducts(data.products);
+      rejectedCount = rejected.length;
+
+      // Additional server-side check: blocked content filter
+      validatedProducts = valid.filter((p: any) => {
+        if (isProductBlocked(p.name || '', p.description || '')) {
+          rejectedCount++;
+          return false;
+        }
+        return true;
+      });
+
+      if (rejected.length > 0) {
+        console.warn(`[SECURITY] Rejected ${rejected.length} invalid products from IP: ${clientIp}`, 
+          rejected.map(r => r.errors));
+      }
+    }
+
     // SECURITY: Do NOT accept user data (passwords) from client-side POST
-    if (data.products) serverDb.products = mergeProducts(serverDb.products, data.products);
+    // Only merge VALIDATED products — invalid ones are silently dropped
+    if (validatedProducts.length > 0) {
+      serverDb.products = mergeProducts(serverDb.products, validatedProducts);
+    }
     if (data.messages) serverDb.messages = mergeMessages(serverDb.messages, data.messages);
     if (data.reviews) serverDb.reviews = mergeReviews(serverDb.reviews, data.reviews);
 
-    // Try upserting to Supabase DB
+    // Try upserting to Supabase DB — only validated products
     try {
       if (supabase) {
-        if (data.products?.length) await supabase.from('products').upsert(data.products, { onConflict: 'id' });
+        if (validatedProducts.length > 0) await supabase.from('products').upsert(validatedProducts, { onConflict: 'id' });
         if (data.messages?.length) await supabase.from('messages').upsert(data.messages, { onConflict: 'id' });
         if (data.reviews?.length) await supabase.from('reviews').upsert(data.reviews, { onConflict: 'id' });
       }
@@ -184,7 +237,11 @@ export async function POST(req: Request) {
       // Ignore Supabase sync errors if table doesn't exist
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ 
+      ok: true, 
+      accepted: validatedProducts.length,
+      rejected: rejectedCount,
+    });
   } catch (err) {
     return NextResponse.json({ error: 'Failed to update server DB' }, { status: 400 });
   }
