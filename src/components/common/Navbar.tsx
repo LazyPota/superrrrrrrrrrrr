@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Input, Badge, Button, Dropdown, Avatar, Tooltip, notification } from 'antd';
+import { Input, Badge, Button, Dropdown, Avatar, Tooltip, notification, Space } from 'antd';
 import {
   ShoppingCartOutlined,
   UserOutlined,
@@ -13,6 +13,9 @@ import {
   MessageOutlined,
   HomeOutlined,
   SearchOutlined,
+  HistoryOutlined,
+  SettingOutlined,
+  HeartOutlined
 } from '@ant-design/icons';
 import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
 import DirectChatDrawer from '../chat/DirectChatDrawer';
@@ -47,7 +50,7 @@ export default function Navbar() {
     const interval = setInterval(() => {
       syncWithServer().then(() => refreshState());
     }, 3000);
-    // Auto-request browser/device notification permission if logged in
+
     if (user && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
@@ -63,7 +66,6 @@ export default function Navbar() {
       speakVoice('Ada pesan masuk!');
       refreshState();
       
-      // 1. AntD In-App Toast
       notification.info({
         message: '🔔 Pesan / Orderan Baru Masuk!',
         description: 'Ada aktivitas percakapan baru di PresUMart.',
@@ -72,7 +74,6 @@ export default function Navbar() {
         duration: 5,
       });
 
-      // 2. Native System/OS Device PWA Notification
       if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
         try {
           if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -91,15 +92,14 @@ export default function Navbar() {
               tag: 'presumart-msg-' + Date.now(),
             });
           }
-        } catch (e) {
-          // Fallback if browser blocks popups
-        }
+        } catch (e) {}
       }
     }
     window.addEventListener('open-direct-chat', handleOpenDirectChat);
     window.addEventListener('cart-updated', handleCartUpdated);
     window.addEventListener('messages-updated', handleMessagesUpdated);
     window.addEventListener('new-incoming-message', handleNewIncomingMessage);
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('open-direct-chat', handleOpenDirectChat);
@@ -107,176 +107,191 @@ export default function Navbar() {
       window.removeEventListener('messages-updated', handleMessagesUpdated);
       window.removeEventListener('new-incoming-message', handleNewIncomingMessage);
     };
-  }, [directDrawerOpen]);
-
-  function handleSearch(value: string) {
-    if (!value || !value.trim()) return;
-    router.push(`/?search=${encodeURIComponent(value.trim())}`);
-  }
+  }, [user]);
 
   function handleLogout() {
     removeUser();
-    setUser(null);
-    speakVoice('Berhasil keluar akun.');
-    router.push('/login');
+    refreshState();
+    router.push('/');
+  }
+
+  function handleSearch(value: string) {
+    if (value.trim()) {
+      router.push(`/?search=${encodeURIComponent(value.trim())}`);
+    } else {
+      router.push('/');
+    }
   }
 
   const userMenuItems = [
     {
       key: 'profile',
-      icon: <UserOutlined />,
-      label: <Link href="/profile">Profil Saya</Link>,
+      label: (
+        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+          <UserOutlined style={{ color: '#0052cc' }} />
+          <span>Profil Saya</span>
+        </Link>
+      ),
+    },
+    {
+      key: 'orders',
+      label: (
+        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+          <HistoryOutlined style={{ color: '#06b6d4' }} />
+          <span>Riwayat Pesanan</span>
+        </Link>
+      ),
     },
     {
       key: 'sell',
-      icon: <PlusCircleOutlined style={{ color: '#52c41a' }} />,
-      label: <Link href="/sell">Jual Barang</Link>,
+      label: (
+        <Link href="/sell" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+          <ShopOutlined style={{ color: '#10b981' }} />
+          <span>Kelola Barang Jualan</span>
+        </Link>
+      ),
     },
     {
       type: 'divider',
     },
     {
       key: 'logout',
-      icon: <LogoutOutlined style={{ color: '#ff4d4f' }} />,
-      label: 'Keluar',
-      onClick: handleLogout,
-      danger: true,
+      label: (
+        <div onClick={handleLogout} style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', cursor: 'pointer' }}>
+          <LogoutOutlined />
+          <span>Keluar Akun</span>
+        </div>
+      ),
     },
   ];
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
-      {/* 1. TOP UTILITY BAR (Campus Info Only - No Duplicate Links) */}
-      <div 
-        className="navbar-top-bar" 
-        style={{ 
-          backgroundColor: '#001a40', 
-          color: '#cbd5e1', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          padding: '4px 16px', 
-          fontSize: '11px',
-          letterSpacing: '0.01em'
-        }}
-      >
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span>🎓</span>
-          <span style={{ fontWeight: 600, color: '#00e5ff' }}>PresUMart</span>
-          <span>• Marketplace Resmi Mahasiswa President University Jababeka</span>
-        </div>
-        <div style={{ flexShrink: 0 }} className="hide-mobile">
-          {user ? (
-            <span style={{ color: '#00e5ff', fontWeight: 600 }}>
-              Halo, {user.name} ({user.major || 'Mahasiswa PresUniv'})
-            </span>
-          ) : (
-            <span>📍 Area COD: Student Center • Rektorat • Asrama PU</span>
-          )}
+    <>
+      {/* Top Banner Bar */}
+      <div className="navbar-top-bar" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ maxWidth: 1240, width: '100%', padding: '0 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ color: '#00f2fe', fontWeight: 700, fontSize: 11 }}>● LIVE</span>
+            <span style={{ fontSize: 12, color: '#cbd5e1' }}>PresUMart Campus COD Marketplace • Cikarang Jababeka</span>
+          </div>
+          <div className="hide-mobile" style={{ fontSize: 12, color: '#94a3b8' }}>
+            <span>Verified President University Community</span>
+          </div>
         </div>
       </div>
 
-      {/* 2. MAIN NAVBAR */}
-      <div 
-        className="navbar-main"
+      {/* Main Glass Navbar */}
+      <nav 
+        className="glass-nav"
         style={{ 
-          backgroundColor: '#ffffff', 
-          display: 'flex', 
-          flexDirection: 'column',
-          padding: '10px 20px', 
-          boxShadow: '0 4px 12px rgba(0, 26, 64, 0.08)',
-          borderBottom: '1px solid #e6eeff'
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 1000, 
+          padding: '10px 20px',
+          boxShadow: '0 4px 20px rgba(0, 51, 153, 0.05)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 12 }}>
-          {/* LEFT: Iconic PresUMart Brand Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          {/* Logo */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
             <div style={{ 
-              width: 36, 
-              height: 36, 
-              borderRadius: 10, 
-              background: 'linear-gradient(135deg, #001a40 0%, #003399 100%)', 
+              width: 40, 
+              height: 40, 
+              borderRadius: 12, 
+              background: 'linear-gradient(135deg, #0b192c 0%, #0052cc 100%)', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
-              boxShadow: '0 4px 10px rgba(0,51,153,0.3)'
+              boxShadow: '0 4px 14px rgba(0,82,204,0.35)',
+              border: '1px solid rgba(0, 242, 254, 0.3)'
             }}>
-              <ShopOutlined style={{ fontSize: '20px', color: '#00e5ff' }} />
+              <ShopOutlined style={{ fontSize: 22, color: '#00f2fe' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '20px', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.02em', color: '#001a40' }}>
-                Pres<span style={{ color: '#003399' }}>U</span><span style={{ color: '#00b8d9' }}>Mart</span>
+              <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1, letterSpacing: '-0.02em', color: '#0b192c', fontFamily: 'Outfit' }}>
+                Pres<span style={{ color: '#0052cc' }}>U</span><span style={{ color: '#06b6d4' }}>Mart</span>
               </div>
-              <span className="hide-mobile" style={{ fontSize: '9px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <span className="hide-mobile" style={{ fontSize: 9, fontWeight: 800, color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>
                 President University
               </span>
             </div>
           </Link>
 
-          {/* DESKTOP SEARCH BAR */}
-          <div className="hide-mobile" style={{ flex: 1, maxWidth: '600px', margin: '0 16px' }}>
+          {/* Desktop Search Pill Bar */}
+          <div className="hide-mobile" style={{ flex: 1, maxWidth: 560, margin: '0 16px' }}>
             <Input.Search 
-              placeholder="Cari barang, buku, gadget, jasa..." 
+              placeholder="Cari buku kuliah, barang kost, gadget, jasa..." 
               onSearch={handleSearch}
               size="middle"
               style={{ borderRadius: 24, overflow: 'hidden' }}
-              styles={{ input: { borderRadius: '24px 0 0 24px' } }}
               enterButton
             />
           </div>
 
-          {/* RIGHT: Icon Buttons & Single Auth Action Group */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-            <Tooltip title="Keranjang">
-              <Badge count={cartCount} size="small" color="#003399">
+          {/* Right Action Icons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+            <Tooltip title="Keranjang Belanja">
+              <Badge count={cartCount} size="small" color="#0052cc">
                 <Button 
                   type="text" 
-                  icon={<ShoppingCartOutlined style={{ fontSize: '20px', color: '#003399' }} />} 
+                  shape="circle"
+                  icon={<ShoppingCartOutlined style={{ fontSize: 20, color: '#0b192c' }} />} 
                   onClick={() => router.push('/cart')} 
+                  style={{ width: 40, height: 40 }}
                 />
               </Badge>
             </Tooltip>
 
             {user ? (
               <>
-                <Tooltip title="Pesan">
+                <Tooltip title="Pesan / Chat Direct">
                   <Badge count={unreadCount} size="small" color="#f59e0b">
                     <Button 
                       type="text" 
-                      icon={<MessageOutlined style={{ fontSize: '20px', color: '#00b8d9' }} />} 
+                      shape="circle"
+                      icon={<MessageOutlined style={{ fontSize: 20, color: '#06b6d4' }} />} 
                       onClick={() => setDirectDrawerOpen(true)} 
+                      style={{ width: 40, height: 40 }}
                     />
                   </Badge>
                 </Tooltip>
-                <Tooltip title="Jual Barang" className="hide-mobile">
+
+                <Tooltip title="Jual Barang Baru" className="hide-mobile">
                   <Button 
                     type="primary"
-                    icon={<PlusCircleOutlined style={{ fontSize: '16px' }} />} 
+                    icon={<PlusCircleOutlined style={{ fontSize: 16 }} />} 
                     onClick={() => router.push('/sell')}
-                    style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', borderRadius: 20 }}
+                    className="btn-gradient-primary"
+                    style={{ borderRadius: 20, fontWeight: 700, padding: '0 18px' }}
                   >
-                    Jual
+                    Jual Barang
                   </Button>
                 </Tooltip>
+
                 <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
-                  <Avatar style={{ backgroundColor: '#003399', cursor: 'pointer', border: '2px solid #00e5ff' }} size="medium" icon={<UserOutlined />} />
+                  <Avatar 
+                    style={{ backgroundColor: '#0052cc', cursor: 'pointer', border: '2px solid #00f2fe', boxShadow: '0 2px 8px rgba(0,82,204,0.3)' }} 
+                    size={38} 
+                    icon={<UserOutlined />} 
+                  >
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </Avatar>
                 </Dropdown>
               </>
             ) : (
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
                 <Button 
                   type="default" 
-                  size="small" 
                   onClick={() => router.push('/login')} 
-                  style={{ borderRadius: 16, borderColor: '#003399', color: '#003399', fontWeight: 600, fontSize: 12, padding: '0 10px', height: 32 }}
+                  style={{ borderRadius: 20, borderColor: '#0052cc', color: '#0052cc', fontWeight: 700, fontSize: 13, height: 36 }}
                 >
                   Masuk
                 </Button>
                 <Button 
                   type="primary" 
-                  size="small" 
                   onClick={() => router.push('/register')} 
-                  style={{ borderRadius: 16, background: 'linear-gradient(135deg, #003399 0%, #001a40 100%)', border: 'none', fontWeight: 600, fontSize: 12, padding: '0 10px', height: 32, boxShadow: '0 2px 6px rgba(0,51,153,0.2)' }}
+                  className="btn-gradient-primary"
+                  style={{ borderRadius: 20, fontWeight: 700, fontSize: 13, height: 36 }}
                 >
                   Daftar
                 </Button>
@@ -285,55 +300,46 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* MOBILE SEARCH BAR (SHOWS ON SMARTPHONES) */}
-        <div className="show-mobile" style={{ width: '100%', marginTop: 8 }}>
+        {/* Mobile Search Bar */}
+        <div className="show-mobile" style={{ marginTop: 8 }}>
           <Input.Search 
-            placeholder="Cari barang, buku, gadget..." 
+            placeholder="Cari produk / jasa..." 
             onSearch={handleSearch}
             size="middle"
-            style={{ borderRadius: 20, overflow: 'hidden' }}
-            styles={{ input: { borderRadius: '20px 0 0 20px', fontSize: '13px' } }}
-            enterButton
+            style={{ width: '100%' }}
           />
         </div>
-      </div>
+      </nav>
 
-      {/* 3. MOBILE BOTTOM NAVIGATION BAR (PWA NATIVE STYLE) */}
-      <nav className="mobile-bottom-nav">
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-bottom-nav">
         <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
           <HomeOutlined />
           <span>Beranda</span>
         </Link>
-        <Link href="/sell" className={`mobile-nav-item ${pathname === '/sell' ? 'active' : ''}`}>
-          <PlusCircleOutlined style={{ color: '#52c41a' }} />
-          <span>Jual</span>
-        </Link>
-        <div 
-          className="mobile-nav-item" 
-          onClick={() => setDirectDrawerOpen(true)}
-          style={{ cursor: 'pointer' }}
-        >
-          <Badge count={unreadCount} size="small" offset={[4, -2]}>
-            <MessageOutlined style={{ color: '#3b82f6' }} />
-          </Badge>
-          <span>Chat</span>
-        </div>
         <Link href="/cart" className={`mobile-nav-item ${pathname === '/cart' ? 'active' : ''}`}>
-          <Badge count={cartCount} size="small" offset={[4, -2]}>
-            <ShoppingCartOutlined style={{ color: '#10b981' }} />
+          <Badge count={cartCount} size="small" offset={[6, 0]}>
+            <ShoppingCartOutlined />
           </Badge>
           <span>Keranjang</span>
         </Link>
-        <Link href={user ? '/profile' : '/login'} className={`mobile-nav-item ${pathname === '/profile' || pathname === '/login' ? 'active' : ''}`}>
-          <UserOutlined />
-          <span>{user ? 'Akun' : 'Masuk'}</span>
+        <Link href="/sell" className={`mobile-nav-item ${pathname === '/sell' ? 'active' : ''}`}>
+          <PlusCircleOutlined style={{ color: '#0052cc' }} />
+          <span>Jual</span>
         </Link>
-      </nav>
+        <div onClick={() => setDirectDrawerOpen(true)} className="mobile-nav-item" style={{ cursor: 'pointer' }}>
+          <Badge count={unreadCount} size="small" offset={[6, 0]}>
+            <MessageOutlined />
+          </Badge>
+          <span>Pesan</span>
+        </div>
+        <Link href="/profile" className={`mobile-nav-item ${pathname === '/profile' ? 'active' : ''}`}>
+          <UserOutlined />
+          <span>Profil</span>
+        </Link>
+      </div>
 
-      <DirectChatDrawer 
-        open={directDrawerOpen}
-        onClose={() => setDirectDrawerOpen(false)}
-      />
-    </header>
+      <DirectChatDrawer open={directDrawerOpen} onClose={() => setDirectDrawerOpen(false)} />
+    </>
   );
 }
