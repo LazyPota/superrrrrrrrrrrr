@@ -1,18 +1,16 @@
 'use client';
 
-import { Typography, Card, Tag, Button, Row, Col, Space, Input } from 'antd';
+import { Typography, Card, Tag, Button, Row, Col, Space } from 'antd';
 import { 
   SafetyCertificateOutlined, 
-  RocketOutlined, 
   ShopOutlined, 
-  TeamOutlined, 
-  CodeOutlined, 
-  CheckCircleOutlined,
+  ThunderboltOutlined, 
   DownloadOutlined,
-  SearchOutlined,
-  ThunderboltOutlined,
+  CheckCircleOutlined,
+  UsergroupAddOutlined,
   DollarOutlined,
-  UsergroupAddOutlined
+  RocketOutlined,
+  FireOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 
@@ -30,161 +28,102 @@ export default function Hero() {
       className="hero-container animate-fade-in"
       style={{ 
         position: 'relative',
-        background: 'linear-gradient(135deg, #0b192c 0%, #003399 50%, #06b6d4 100%)',
-        backgroundSize: '250% 250%',
+        background: '#090d16',
         color: '#fff', 
-        padding: '72px 24px', 
+        padding: '60px 20px 48px 20px', 
         borderRadius: '0 0 36px 36px', 
         marginBottom: 40,
         overflow: 'hidden',
-        boxShadow: '0 20px 50px rgba(11,25,44,0.35)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 30px 60px rgba(0, 0, 0, 0.5)'
       }}
     >
       <style>{`
-        @keyframes gradientBG {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes floatSlow {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-12px) rotate(1deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-        .hero-container {
-          animation: gradientBG 12s ease infinite;
-        }
-        .hero-glass-card {
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.16);
-          border-radius: 20px;
-          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .hero-glass-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 16px 36px rgba(0,0,0,0.25);
-          background: rgba(255, 255, 255, 0.12);
-          border-color: rgba(6, 182, 212, 0.4);
-        }
-        .hero-grid-pattern {
+        .cyber-orb-1 {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-          background-size: 32px 32px;
-          z-index: 1;
-          pointer-events: none;
-        }
-        .hero-orb-1 {
-          position: absolute;
-          top: -100px;
-          right: 8%;
-          width: 450px;
-          height: 450px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(6,182,212,0.35) 0%, rgba(6,182,212,0) 70%);
-          filter: blur(40px);
-          animation: floatSlow 8s ease-in-out infinite;
-          z-index: 0;
-        }
-        .hero-orb-2 {
-          position: absolute;
-          bottom: -150px;
-          left: 5%;
+          top: -120px;
+          right: 5%;
           width: 500px;
           height: 500px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(0,82,204,0.4) 0%, rgba(0,82,204,0) 70%);
-          filter: blur(50px);
-          z-index: 0;
+          background: radial-gradient(circle, rgba(0, 242, 254, 0.25) 0%, rgba(0, 82, 204, 0.05) 60%, transparent 80%);
+          filter: blur(60px);
+          pointer-events: none;
+        }
+        .cyber-orb-2 {
+          position: absolute;
+          bottom: -150px;
+          left: 0%;
+          width: 550px;
+          height: 550px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(0, 82, 204, 0.3) 0%, rgba(0, 242, 254, 0.05) 60%, transparent 80%);
+          filter: blur(60px);
+          pointer-events: none;
         }
       `}</style>
 
-      {/* Background ambient pattern & glowing orbs */}
-      <div className="hero-grid-pattern" />
-      <div className="hero-orb-1" />
-      <div className="hero-orb-2" />
+      {/* Cyber Orbs */}
+      <div className="cyber-orb-1" />
+      <div className="cyber-orb-2" />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-        <Row gutter={[40, 32]} align="middle">
-          <Col xs={24} md={12} lg={13} className="animate-slide-up">
-            <Tag 
-              color="cyan" 
-              icon={<SafetyCertificateOutlined style={{ color: '#00f2fe' }} />} 
-              style={{ 
-                marginBottom: 16, 
-                padding: '6px 16px', 
-                borderRadius: 30, 
-                fontSize: 13,
-                fontWeight: 700,
-                background: 'rgba(6, 182, 212, 0.15)',
-                border: '1px solid rgba(6, 182, 212, 0.35)',
-                color: '#ecfeff',
-                backdropFilter: 'blur(8px)',
-                letterSpacing: '0.02em'
-              }}
-            >
-              Marketplace Resmi Mahasiswa President University
-            </Tag>
-            
+        <Row gutter={[32, 32]} align="middle">
+          {/* Main Hero Copy */}
+          <Col xs={24} lg={13} className="animate-slide-up">
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 99, background: 'rgba(0, 242, 254, 0.1)', border: '1px solid rgba(0, 242, 254, 0.3)', marginBottom: 20 }}>
+              <FireOutlined style={{ color: '#00f2fe' }} />
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#00f2fe', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                Platform Jual Beli Resmi President University
+              </span>
+            </div>
+
             <Title 
               level={1} 
-              className="hero-title"
               style={{ 
                 color: '#ffffff', 
-                fontSize: 'clamp(2.1rem, 4vw, 3.2rem)', 
-                fontWeight: 800, 
-                lineHeight: 1.18, 
-                marginBottom: 18,
-                letterSpacing: '-0.02em'
+                fontSize: 'clamp(2.2rem, 4.5vw, 3.5rem)', 
+                fontWeight: 900, 
+                lineHeight: 1.1, 
+                marginBottom: 20,
+                fontFamily: 'Syne, sans-serif'
               }}
             >
-              Jual & Beli Barang Kampus <br className="hide-mobile" />
-              <span style={{ 
-                background: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)', 
-                WebkitBackgroundClip: 'text', 
-                WebkitTextFillColor: 'transparent' 
-              }}>
-                Cepat, Aman & Tanpa Admin
-              </span>
+              Pasar Kampus <br />
+              <span className="glow-text-cyan">Tanpa Potongan Admin</span>
             </Title>
-            
+
             <Paragraph 
-              className="hero-subtitle"
               style={{ 
-                color: 'rgba(241, 245, 249, 0.9)', 
+                color: '#94a3b8', 
                 fontSize: '1.05rem', 
-                marginBottom: 28, 
-                maxWidth: 540,
+                marginBottom: 32, 
+                maxWidth: 520,
                 lineHeight: 1.6
               }}
             >
-              Platform COD khusus mahasiswa Jababeka. Cari buku kuliah, barang kost, gadget, hingga voucher dengan transaksi langsung saat ketemuan di kampus!
+              Jual beli barang kuliah, perlengkapan kost, gadget & jasa antar sesama mahasiswa President University. COD langsung aman di area kampus Jababeka!
             </Paragraph>
 
-            <Space wrap size="middle" style={{ marginBottom: 12 }}>
+            <Space wrap size="middle">
               <Link href="/sell">
                 <Button 
                   type="primary" 
                   size="large" 
                   icon={<ShopOutlined />} 
                   style={{ 
-                    height: 50, 
-                    padding: '0 28px', 
-                    fontSize: 15, 
-                    fontWeight: 700, 
-                    borderRadius: 25,
+                    height: 52, 
+                    padding: '0 32px', 
+                    fontSize: 16, 
+                    fontWeight: 800, 
+                    borderRadius: 99,
                     background: 'linear-gradient(135deg, #00f2fe 0%, #0052cc 100%)',
+                    color: '#090d16',
                     border: 'none',
                     boxShadow: '0 8px 24px rgba(0, 242, 254, 0.35)'
                   }}
                 >
-                  Mulai Jualan Gratis
+                  Pasang Iklan Jualan
                 </Button>
               </Link>
 
@@ -193,70 +132,55 @@ export default function Hero() {
                 icon={<DownloadOutlined />} 
                 onClick={handleInstallApp}
                 style={{ 
-                  height: 50, 
+                  height: 52, 
                   padding: '0 24px', 
                   fontSize: 15, 
-                  fontWeight: 600, 
-                  background: 'rgba(255, 255, 255, 0.1)', 
+                  fontWeight: 700, 
+                  background: 'rgba(255, 255, 255, 0.06)', 
                   backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)', 
+                  border: '1px solid rgba(255, 255, 255, 0.2)', 
                   color: '#ffffff',
-                  borderRadius: 25,
+                  borderRadius: 99,
                 }}
               >
-                Download Aplikasi
+                Download App
               </Button>
             </Space>
           </Col>
-          
-          <Col xs={24} md={12} lg={11} className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+
+          {/* Right Bento Widgets */}
+          <Col xs={24} lg={11} className="animate-slide-up" style={{ animationDelay: '0.15s' }}>
             <Row gutter={[16, 16]}>
               <Col span={24}>
-                <Card className="hero-glass-card" variant="borderless" styles={{ body: { padding: '20px 24px' } }}>
+                <div className="bento-card bento-dark" style={{ padding: '24px' }}>
                   <Row align="middle" gutter={16}>
                     <Col>
-                      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(6, 182, 212, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <UsergroupAddOutlined style={{ fontSize: 26, color: '#00f2fe' }} />
+                      <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(0, 242, 254, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0, 242, 254, 0.3)' }}>
+                        <UsergroupAddOutlined style={{ fontSize: 28, color: '#00f2fe' }} />
                       </div>
                     </Col>
                     <Col flex="auto">
-                      <Title level={4} style={{ color: '#fff', margin: 0, fontWeight: 700, fontSize: 18 }}>100+ Mahasiswa Terverifikasi</Title>
-                      <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, display: 'block', marginTop: 2 }}>Akun khusus domain email @president.ac.id</Text>
+                      <Title level={4} style={{ color: '#fff', margin: 0, fontWeight: 800, fontSize: 18 }}>100% Komunitas Kampus</Title>
+                      <Text style={{ color: '#94a3b8', fontSize: 13, display: 'block', marginTop: 2 }}>Terverifikasi email resmi @student.president.ac.id</Text>
                     </Col>
                   </Row>
-                </Card>
-              </Col>
-              
-              <Col span={24}>
-                <Card className="hero-glass-card" variant="borderless" styles={{ body: { padding: '20px 24px' } }}>
-                  <Row align="middle" gutter={16}>
-                    <Col>
-                      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(245, 158, 11, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <ThunderboltOutlined style={{ fontSize: 26, color: '#fcb900' }} />
-                      </div>
-                    </Col>
-                    <Col flex="auto">
-                      <Title level={4} style={{ color: '#fff', margin: 0, fontWeight: 700, fontSize: 18 }}>COD Langsung di Kampus</Title>
-                      <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, display: 'block', marginTop: 2 }}>Ketemuan aman di Student Center, Dormitory, atau Library</Text>
-                    </Col>
-                  </Row>
-                </Card>
+                </div>
               </Col>
 
-              <Col span={24}>
-                <Card className="hero-glass-card" variant="borderless" styles={{ body: { padding: '20px 24px' } }}>
-                  <Row align="middle" gutter={16}>
-                    <Col>
-                      <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(16, 185, 129, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <DollarOutlined style={{ fontSize: 26, color: '#34d399' }} />
-                      </div>
-                    </Col>
-                    <Col flex="auto">
-                      <Title level={4} style={{ color: '#fff', margin: 0, fontWeight: 700, fontSize: 18 }}>0% Biaya Layanan / Admin</Title>
-                      <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, display: 'block', marginTop: 2 }}>Hasil penjualan 100% utuh milik mahasiswa</Text>
-                    </Col>
-                  </Row>
-                </Card>
+              <Col span={12}>
+                <div className="bento-card bento-dark" style={{ padding: '20px' }}>
+                  <ThunderboltOutlined style={{ fontSize: 28, color: '#f59e0b', marginBottom: 10 }} />
+                  <Title level={5} style={{ color: '#fff', margin: '0 0 4px 0', fontWeight: 800 }}>COD Bebas Ongkir</Title>
+                  <Text style={{ color: '#94a3b8', fontSize: 12 }}>Ketemuan di Student Center atau Dormitory</Text>
+                </div>
+              </Col>
+
+              <Col span={12}>
+                <div className="bento-card bento-dark" style={{ padding: '20px' }}>
+                  <DollarOutlined style={{ fontSize: 28, color: '#10b981', marginBottom: 10 }} />
+                  <Title level={5} style={{ color: '#fff', margin: '0 0 4px 0', fontWeight: 800 }}>0% Potongan</Title>
+                  <Text style={{ color: '#94a3b8', fontSize: 12 }}>Hasil jualan 100% milik mahasiswamu</Text>
+                </div>
               </Col>
             </Row>
           </Col>

@@ -2,21 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Card, Tag, Button, Typography, Space, message, Badge, Avatar } from 'antd';
-import { ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, PictureOutlined, MessageOutlined, HeartOutlined, HeartFilled, ShareAltOutlined } from '@ant-design/icons';
-import { addToCart, getUser, getDirectMessages, sendDirectMessage, toggleWishlist, isWishlisted } from '../../lib/store';
-import { isValidMajor } from '../../lib/validation';
+import { Card, Tag, Button, Typography, Space, message, Badge, Avatar, Tooltip } from 'antd';
+import { 
+  ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, 
+  MessageOutlined, HeartOutlined, HeartFilled, ShareAltOutlined,
+  UserOutlined, ShopOutlined, ThunderboltOutlined
+} from '@ant-design/icons';
+import { addToCart, getUser, sendDirectMessage, toggleWishlist, isWishlisted } from '../../lib/store';
 
 const { Title, Text } = Typography;
 
 function formatPrice(price: number) {
-  return 'Rp' + Number(price).toLocaleString('id-ID');
+  const num = Number(price);
+  if (isNaN(num) || num < 0) return 'Rp0';
+  return 'Rp' + Math.floor(num).toLocaleString('id-ID');
 }
 
 export default function ProductCard({ product }: { product: any }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [favored, setFavored] = useState(false);
-  const [pulse, setPulse] = useState(false);
   const isOutOfStock = (product.stock !== undefined && product.stock <= 0) || product.status === 'sold';
 
   useEffect(() => {
@@ -54,10 +58,6 @@ export default function ProductCard({ product }: { product: any }) {
     e.preventDefault();
     const added = toggleWishlist(product.id);
     setFavored(added);
-    
-    setPulse(true);
-    setTimeout(() => setPulse(false), 300);
-
     if (added) {
       messageApi.success('Produk disimpan ke Favorit!');
     } else {
@@ -116,240 +116,159 @@ export default function ProductCard({ product }: { product: any }) {
   const coverImg = (product.images && product.images.length > 0) ? product.images[0] : product.image;
 
   return (
-    <>
-      <style>{`
-        .product-card {
-          transition: all 0.3s ease;
-          border-radius: 16px;
-          border: 1px solid #f0f0f0;
-          overflow: hidden;
-          background: #ffffff;
-        }
-        .product-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
-          border-color: transparent;
-        }
-        .product-card .img-wrapper {
-          overflow: hidden;
-          position: relative;
-        }
-        .product-card:hover .product-img {
-          transform: scale(1.05);
-        }
-        .product-img {
-          transition: transform 0.4s ease;
-        }
-        .pulse-anim {
-          animation: heartPulse 0.3s ease;
-        }
-        @keyframes heartPulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.3); }
-          100% { transform: scale(1); }
-        }
-        .action-button {
-          transition: all 0.2s;
-        }
-        .action-button:hover {
-          background: #f3f4f6;
-          border-radius: 8px;
-        }
-      `}</style>
+    <div className="bento-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: isOutOfStock ? 0.8 : 1 }}>
       {contextHolder}
-      <Badge.Ribbon 
-        text={isOutOfStock ? 'SOLD OUT' : product.category} 
-        color={isOutOfStock ? '#ef4444' : '#e0e7ff'}
-        style={{ color: isOutOfStock ? '#fff' : '#4338ca', fontWeight: 700, fontSize: 12 }}
-      >
-        <Card
-          hoverable
-          className="product-card"
-          style={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: isOutOfStock ? 0.8 : 1 }}
-          styles={{ body: { padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column' } }}
-          actions={[
-            <Link href={`/product?id=${product.id}`} key="detail">
-              <Button type="text" className="action-button" icon={<EyeOutlined style={{ fontSize: 20, color: '#64748b' }} />} />
-            </Link>,
-            <Button
-              type="text"
-              className="action-button"
-              icon={<MessageOutlined style={{ fontSize: 20, color: '#3b82f6' }} />}
-              onClick={handleStartChat}
-              key="chat"
-            />,
-            <Button
-              type="text"
-              className="action-button"
-              icon={<ShoppingCartOutlined style={{ fontSize: 20, color: isOutOfStock ? '#ef4444' : '#10b981' }} />}
-              onClick={handleAddToCart}
-              key="cart"
-              disabled={isOutOfStock}
-            />,
-            <Button
-              type="text"
-              className="action-button"
-              icon={<ShareAltOutlined style={{ fontSize: 20, color: '#0052cc' }} />}
-              onClick={handleShareProduct}
-              key="share"
-            />,
-          ]}
-          cover={
-            <div className="img-wrapper" style={{ height: 220, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-              <Button
-                type="text"
-                shape="circle"
-                className={pulse ? 'pulse-anim' : ''}
-                icon={favored ? <HeartFilled style={{ color: '#ef4444', fontSize: 20 }} /> : <HeartOutlined style={{ color: '#64748b', fontSize: 20 }} />}
-                onClick={handleToggleWishlist}
-                style={{
-                  position: 'absolute',
-                  top: 12,
-                  left: 12,
-                  zIndex: 10,
-                  background: 'rgba(255, 255, 255, 0.85)',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 36,
-                  height: 36
-                }}
-              />
-              <Button
-                type="text"
-                shape="circle"
-                icon={<ShareAltOutlined style={{ color: '#0052cc', fontSize: 18 }} />}
-                onClick={handleShareProduct}
-                style={{
-                  position: 'absolute',
-                  top: 12,
-                  right: 12,
-                  zIndex: 10,
-                  background: 'rgba(255, 255, 255, 0.85)',
-                  backdropFilter: 'blur(8px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 36,
-                  height: 36
-                }}
-              />
-              
-              {/* Product Cover Image clickable to Product Detail page */}
-              <Link href={`/product?id=${product.id}`} style={{ width: '100%', height: '100%', display: 'block' }}>
-                {coverImg ? (
-                  <>
-                    <img
-                      alt={product.name}
-                      src={coverImg}
-                      className="product-img"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', filter: isOutOfStock ? 'grayscale(70%)' : 'none' }}
-                    />
-                    {isOutOfStock && (
-                      <div style={{
-                        position: 'absolute',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(15, 23, 42, 0.6)',
-                        backdropFilter: 'blur(2px)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 5,
-                      }}>
-                        <Tag color="red" style={{ fontSize: 15, padding: '4px 14px', borderRadius: 16, fontWeight: 800, letterSpacing: 1 }}>
-                          ❌ SOLD OUT
-                        </Tag>
-                        <span style={{ color: '#ffffff', fontSize: 11, marginTop: 4, fontWeight: 600 }}>Stok Habis / Terjual</span>
-                      </div>
-                    )}
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '40%',
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%)',
-                      pointerEvents: 'none'
-                    }} />
-                  </>
-                ) : (
-                  <div style={{ textAlign: 'center', color: '#cbd5e1', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <PictureOutlined style={{ fontSize: 48, marginBottom: 12 }} />
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>Tidak ada foto</div>
-                  </div>
-                )}
-              </Link>
-            </div>
-          }
-        >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Title level={5} ellipsis={{ rows: 2 }} style={{ margin: 0, minHeight: 38, fontSize: 'clamp(13px, 3.5vw, 16px)', lineHeight: '1.35', fontWeight: 600, color: '#1e293b' }}>
-              {product.name}
-            </Title>
 
-            <div style={{ margin: '6px 0 10px 0' }}>
-              <Text style={{ 
-                fontSize: 'clamp(15px, 4vw, 20px)', 
-                fontWeight: 800, 
-                display: 'block',
-                background: 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                color: 'transparent'
-              }}>
-                {formatPrice(product.price)}
-              </Text>
-            </div>
+      {/* Image Preview Container */}
+      <Link href={`/product?id=${product.id}`}>
+        <div className="img-wrapper" style={{ height: 210, background: '#f1f5f9', position: 'relative', overflow: 'hidden' }}>
+          {/* Top Heart Wishlist Button */}
+          <Button
+            type="text"
+            shape="circle"
+            onClick={handleToggleWishlist}
+            style={{
+              position: 'absolute',
+              top: 12,
+              left: 12,
+              zIndex: 10,
+              background: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(10px)',
+              border: 'none',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            icon={
+              favored ? (
+                <HeartFilled style={{ color: '#ef4444', fontSize: 18 }} />
+              ) : (
+                <HeartOutlined style={{ color: '#64748b', fontSize: 18 }} />
+              )
+            }
+          />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 'auto' }}>
-              <Tag color="#f1f5f9" style={{ color: '#475569', border: 'none', fontSize: 11, borderRadius: 6, padding: '2px 8px', margin: 0, fontWeight: 500 }}>
+          {/* Price Pill Badge (Top Right) */}
+          <div style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 10 }}>
+            <span className="price-pill-badge">
+              {formatPrice(product.price)}
+            </span>
+          </div>
+
+          {/* Condition Tag (Top Right Floating) */}
+          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 10 }}>
+            {isOutOfStock ? (
+              <Tag color="red" style={{ fontWeight: 800, borderRadius: 20, padding: '2px 10px', margin: 0 }}>
+                ❌ TERJUAL
+              </Tag>
+            ) : (
+              <Tag color="blue" style={{ fontWeight: 700, borderRadius: 20, padding: '2px 10px', margin: 0 }}>
                 {product.condition || 'Bekas - Like New'}
               </Tag>
-              {isOutOfStock ? (
-                <Tag color="#fee2e2" style={{ color: '#ef4444', border: 'none', fontSize: 11, borderRadius: 6, padding: '2px 8px', margin: 0, fontWeight: 600 }}>Stok Habis</Tag>
-              ) : (
-                <Tag color="#dcfce7" style={{ color: '#16a34a', border: 'none', fontSize: 11, borderRadius: 6, padding: '2px 8px', margin: 0, fontWeight: 500 }}>Stok: {product.stock ?? 1}</Tag>
-              )}
-              {product.allowNego !== false ? (
-                <Tag color="#fef3c7" style={{ color: '#d97706', border: 'none', fontSize: 11, borderRadius: 6, padding: '2px 8px', margin: 0, fontWeight: 500 }}>Nego</Tag>
-              ) : (
-                <Tag color="#f3f4f6" style={{ color: '#6b7280', border: 'none', fontSize: 11, borderRadius: 6, padding: '2px 8px', margin: 0, fontWeight: 500 }}>Harga Pas</Tag>
-              )}
+            )}
+          </div>
+
+          {coverImg ? (
+            <img
+              src={coverImg}
+              alt={product.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+              <ShopOutlined style={{ fontSize: 36, marginBottom: 4 }} />
+              <Text type="secondary" style={{ fontSize: 11 }}>Tidak Ada Foto</Text>
             </div>
-            
-            <div style={{ 
-              marginTop: 16, 
-              paddingTop: 12, 
-              borderTop: '1px solid #f1f5f9', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 8 
-            }}>
-              <Avatar 
-                size={24} 
-                style={{ backgroundColor: '#e2e8f0', color: '#475569', fontSize: 12, fontWeight: 600 }}
-              >
-                {product.seller ? product.seller.charAt(0).toUpperCase() : '?'}
-              </Avatar>
-              <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <Text style={{ fontSize: 13, color: '#334155', fontWeight: 500 }} ellipsis>
-                  {product.seller}
-                </Text>
-                {isValidMajor(product.sellerMajor) && (
-                  <Text type="secondary" style={{ fontSize: 11, marginTop: -2 }} ellipsis>
-                    {product.sellerMajor}
-                  </Text>
-                )}
-              </div>
+          )}
+        </div>
+      </Link>
+
+      {/* Card Content Area */}
+      <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <Tag color="cyan" style={{ margin: 0, fontSize: 11, fontWeight: 700, borderRadius: 6 }}>
+              {product.category}
+            </Tag>
+            {product.allowNego !== false && (
+              <Tag color="gold" style={{ margin: 0, fontSize: 10, fontWeight: 800, borderRadius: 6 }}>
+                Nego
+              </Tag>
+            )}
+          </div>
+
+          <Link href={`/product?id=${product.id}`}>
+            <Title
+              level={5}
+              style={{
+                margin: '4px 0 10px 0',
+                fontWeight: 700,
+                fontSize: 15,
+                lineHeight: 1.35,
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                minHeight: 40,
+                color: '#0f172a'
+              }}
+            >
+              {product.name}
+            </Title>
+          </Link>
+        </div>
+
+        <div>
+          {/* Seller Pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 12, background: '#f8fafc', marginBottom: 12, border: '1px solid #f1f5f9' }}>
+            <Avatar size={24} style={{ backgroundColor: '#0052cc', fontSize: 11 }} icon={<UserOutlined />}>
+              {product.seller ? product.seller.charAt(0).toUpperCase() : 'U'}
+            </Avatar>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <Text strong ellipsis style={{ fontSize: 12, display: 'block', lineHeight: 1.2, color: '#1e293b' }}>
+                {product.seller}
+              </Text>
+              <Text type="secondary" ellipsis style={{ fontSize: 10, display: 'block' }}>
+                {product.sellerMajor || 'President Univ'}
+              </Text>
             </div>
           </div>
-        </Card>
-      </Badge.Ribbon>
-    </>
+
+          {/* Action Bar */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Tooltip title="Tanya Penjual">
+              <Button
+                block
+                icon={<MessageOutlined style={{ color: '#0052cc', fontSize: 16 }} />}
+                onClick={handleStartChat}
+                style={{ borderRadius: 12, borderColor: '#cbd5e1', height: 38 }}
+              />
+            </Tooltip>
+
+            <Button
+              type="primary"
+              block
+              icon={<ShoppingCartOutlined style={{ fontSize: 16 }} />}
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              style={{
+                borderRadius: 12,
+                fontWeight: 800,
+                height: 38,
+                background: isOutOfStock ? '#94a3b8' : 'linear-gradient(135deg, #0052cc 0%, #003399 100%)',
+                border: 'none',
+                boxShadow: isOutOfStock ? 'none' : '0 4px 14px rgba(0, 82, 204, 0.3)'
+              }}
+            >
+              {isOutOfStock ? 'Habis' : '+ Keranjang'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
