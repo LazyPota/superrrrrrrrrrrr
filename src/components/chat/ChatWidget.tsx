@@ -201,8 +201,7 @@ export default function ChatWidget() {
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
-        width={drawerWidth}
-        styles={{ body: { padding: 16, display: 'flex', flexDirection: 'column', height: '100%' } }}
+        styles={{ wrapper: { width: drawerWidth }, body: { padding: 16, display: 'flex', flexDirection: 'column', height: '100%' } }}
       >
         <div style={{ flex: 1, overflowY: 'auto', marginBottom: 16, paddingRight: 4 }} ref={messagesRef}>
           {messages.map((msg, i) => (
