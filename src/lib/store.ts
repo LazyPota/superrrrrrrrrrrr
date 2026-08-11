@@ -7,7 +7,7 @@ import MAJORS from '../data/categories';
 const STORAGE_KEYS = {
   USER: 'presumart_user',
   USERS: 'presumart_users',
-  PRODUCTS: 'presumart_products_v3',
+  PRODUCTS: 'presumart_products_v4',
   DIRECT_MESSAGES: 'presumart_direct_messages',
   REVIEWS: 'presumart_reviews',
   WISHLIST: 'presumart_wishlist',
@@ -17,6 +17,7 @@ if (typeof window !== 'undefined') {
   try {
     localStorage.removeItem('presumart_products');
     localStorage.removeItem('presumart_products_v2');
+    localStorage.removeItem('presumart_products_v3');
   } catch(e) {}
 }
 

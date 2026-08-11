@@ -258,3 +258,13 @@ export async function POST(req: Request) {
   }
 }
 
+export async function DELETE(req: Request) {
+  serverDb.products = [];
+  try {
+    if (supabase) {
+      await supabase.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    }
+  } catch (e) {}
+  return NextResponse.json({ ok: true, message: 'All products wiped successfully.' });
+}
+
