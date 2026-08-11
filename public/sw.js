@@ -1,13 +1,13 @@
-const CACHE_NAME = 'presumart-pwa-v4';
+const CACHE_NAME = 'presumart-pwa-v5';
 const urlsToCache = [
   '/manifest.json',
   '/icon-192.svg',
   '/icon-512.svg',
 ];
 
-// Only cache static assets, never API routes or HTML navigation
-const CACHEABLE_EXTENSIONS = /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json)$/;
-const API_ROUTES = /\/api\//;
+// Only cache static images & fonts, NEVER Next.js internal JS/CSS bundle chunks or API routes
+const CACHEABLE_EXTENSIONS = /\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/;
+const EXCLUDED_PATHS = /(\/api\/|\/_next\/)/;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -38,10 +38,10 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // SECURITY: Never cache API routes or dynamic HTML pages
-  if (API_ROUTES.test(url.pathname) || event.request.mode === 'navigate') return;
+  // SECURITY: Never cache API routes, Next.js JS chunks, or dynamic HTML pages
+  if (EXCLUDED_PATHS.test(url.pathname) || event.request.mode === 'navigate') return;
 
-  // Only cache static assets
+  // Only cache static media assets (images, icons, fonts)
   const isStaticAsset = CACHEABLE_EXTENSIONS.test(url.pathname);
 
   if (isStaticAsset) {
