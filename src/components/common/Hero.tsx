@@ -30,8 +30,8 @@ export default function Hero() {
       style={{ 
         background: '#ffe600',
         borderBottom: '4px solid #000000', 
-        padding: '52px 20px 48px 20px', 
-        marginBottom: 40,
+        padding: '48px 20px 48px 20px', 
+        marginBottom: 36,
         boxShadow: '0 8px 0px #000000'
       }}
     >
@@ -48,46 +48,51 @@ export default function Hero() {
               background: '#ffffff',
               border: '3px solid #000000',
               boxShadow: '3px 3px 0px #000000',
-              marginBottom: 20
+              marginBottom: 18
             }}>
               <FireOutlined style={{ color: '#ff2a85', fontSize: 16 }} />
-              <span style={{ fontSize: 13, fontWeight: 900, color: '#000000', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: '#000000', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 MARKETPLACE RESMI PRESIDENT UNIVERSITY!
               </span>
             </div>
 
-            <Title 
-              level={1} 
-              style={{ 
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ 
                 color: '#000000', 
-                fontSize: 'clamp(2.4rem, 5vw, 3.8rem)', 
+                fontSize: 'clamp(2.2rem, 4.5vw, 3.6rem)', 
                 fontWeight: 900, 
-                lineHeight: 1.1, 
-                marginBottom: 20,
-                fontFamily: 'Syne, sans-serif'
-              }}
-            >
-              JUAL BELI KAMPUS <br />
-              <span style={{ 
-                background: '#ff2a85', 
-                color: '#ffffff', 
-                padding: '2px 14px', 
-                borderRadius: 12,
-                border: '3px solid #000000',
-                boxShadow: '4px 4px 0px #000000',
-                display: 'inline-block',
-                marginTop: 6
+                lineHeight: 1.3,
+                fontFamily: 'Syne, sans-serif',
+                letterSpacing: '-0.03em'
               }}>
-                100% BEBAS ADMIN!
-              </span>
-            </Title>
+                JUAL BELI KAMPUS
+              </div>
+              <div style={{ marginTop: 8 }}>
+                <span style={{ 
+                  background: '#ff2a85', 
+                  color: '#ffffff', 
+                  padding: '6px 16px', 
+                  borderRadius: 12,
+                  border: '3px solid #000000',
+                  boxShadow: '4px 4px 0px #000000',
+                  display: 'inline-block',
+                  fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+                  fontWeight: 900,
+                  fontFamily: 'Syne, sans-serif',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.2
+                }}>
+                  100% BEBAS ADMIN!
+                </span>
+              </div>
+            </div>
 
             <Paragraph 
               style={{ 
                 color: '#000000', 
-                fontSize: '1.1rem', 
+                fontSize: '1.05rem', 
                 fontWeight: 700,
-                marginBottom: 32, 
+                marginBottom: 28, 
                 maxWidth: 540,
                 lineHeight: 1.6
               }}
@@ -99,9 +104,9 @@ export default function Hero() {
               <Link href="/sell">
                 <Button 
                   style={{ 
-                    height: 52, 
-                    padding: '0 32px', 
-                    fontSize: 16, 
+                    height: 50, 
+                    padding: '0 28px', 
+                    fontSize: 15, 
                     fontWeight: 900, 
                     borderRadius: 14,
                     background: '#00f0ff',
@@ -118,9 +123,9 @@ export default function Hero() {
               <Button 
                 onClick={handleInstallApp}
                 style={{ 
-                  height: 52, 
-                  padding: '0 24px', 
-                  fontSize: 15, 
+                  height: 50, 
+                  padding: '0 20px', 
+                  fontSize: 14, 
                   fontWeight: 900, 
                   background: '#ffffff', 
                   border: '3px solid #000000',
@@ -149,8 +154,8 @@ export default function Hero() {
                   <Row align="middle" gutter={16}>
                     <Col>
                       <div style={{
-                        width: 52,
-                        height: 52,
+                        width: 48,
+                        height: 48,
                         borderRadius: 14,
                         background: '#00e676',
                         border: '3px solid #000000',
@@ -159,12 +164,12 @@ export default function Hero() {
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                        <UsergroupAddOutlined style={{ fontSize: 26, color: '#000000' }} />
+                        <UsergroupAddOutlined style={{ fontSize: 24, color: '#000000' }} />
                       </div>
                     </Col>
                     <Col flex="auto">
-                      <Title level={4} style={{ margin: 0, fontWeight: 900, fontSize: 18, color: '#000000' }}>100% Mahasiswa PresUniv</Title>
-                      <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, display: 'block', marginTop: 2 }}>Terverifikasi email @student.president.ac.id</Text>
+                      <Title level={4} style={{ margin: 0, fontWeight: 900, fontSize: 17, color: '#000000' }}>100% Mahasiswa PresUniv</Title>
+                      <Text style={{ fontWeight: 700, color: '#000000', fontSize: 12, display: 'block', marginTop: 2 }}>Terverifikasi email @student.president.ac.id</Text>
                     </Col>
                   </Row>
                 </div>
@@ -176,11 +181,11 @@ export default function Hero() {
                   border: '3px solid #000000',
                   boxShadow: '5px 5px 0px #000000',
                   borderRadius: 16,
-                  padding: '18px'
+                  padding: '16px'
                 }}>
-                  <ThunderboltOutlined style={{ fontSize: 28, color: '#000000', marginBottom: 8 }} />
-                  <Title level={5} style={{ margin: '0 0 4px 0', fontWeight: 900, color: '#000000' }}>COD KAMPUS</Title>
-                  <Text style={{ fontWeight: 700, color: '#000000', fontSize: 12 }}>Bebas Ongkir di Student Center / Dormitory</Text>
+                  <ThunderboltOutlined style={{ fontSize: 26, color: '#000000', marginBottom: 6 }} />
+                  <Title level={5} style={{ margin: '0 0 4px 0', fontWeight: 900, color: '#000000', fontSize: 15 }}>COD KAMPUS</Title>
+                  <Text style={{ fontWeight: 700, color: '#000000', fontSize: 11, lineHeight: 1.4, display: 'block' }}>Bebas Ongkir di Student Center / Dormitory</Text>
                 </div>
               </Col>
 
@@ -191,11 +196,11 @@ export default function Hero() {
                   border: '3px solid #000000',
                   boxShadow: '5px 5px 0px #000000',
                   borderRadius: 16,
-                  padding: '18px'
+                  padding: '16px'
                 }}>
-                  <DollarOutlined style={{ fontSize: 28, color: '#ffffff', marginBottom: 8 }} />
-                  <Title level={5} style={{ margin: '0 0 4px 0', fontWeight: 900, color: '#ffffff' }}>0% ADMIN</Title>
-                  <Text style={{ fontWeight: 700, color: '#ffffff', fontSize: 12 }}>Uang jualan 100% utuh untuk penjual</Text>
+                  <DollarOutlined style={{ fontSize: 26, color: '#ffffff', marginBottom: 6 }} />
+                  <Title level={5} style={{ margin: '0 0 4px 0', fontWeight: 900, color: '#ffffff', fontSize: 15 }}>0% ADMIN</Title>
+                  <Text style={{ fontWeight: 700, color: '#ffffff', fontSize: 11, lineHeight: 1.4, display: 'block' }}>Uang jualan 100% utuh untuk penjual</Text>
                 </div>
               </Col>
             </Row>

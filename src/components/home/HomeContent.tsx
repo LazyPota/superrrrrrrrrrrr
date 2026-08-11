@@ -73,7 +73,7 @@ export default function HomeContent() {
 
     return [...list].sort((a: any, b: any) => {
       if (sortBy === 'price-low') {
-        return (Number(a.price) || 0) - (Number(b.price) || 0);
+        return (Number(a.price) || 0) - (Number(a.price) || 0);
       }
       if (sortBy === 'price-high') {
         return (Number(b.price) || 0) - (Number(a.price) || 0);
@@ -88,7 +88,7 @@ export default function HomeContent() {
     <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 20px 64px 20px' }}>
 
       {/* Neobrutalist Category Pills Bar */}
-      <div style={{ marginBottom: 28, overflowX: 'auto', paddingBottom: 8, display: 'flex', gap: 10 }}>
+      <div style={{ marginBottom: 28, overflowX: 'auto', paddingBottom: 10, display: 'flex', gap: 10 }}>
         {categoriesWithAll.map(cat => {
           const isActive = activeCat === cat;
           return (
@@ -105,12 +105,32 @@ export default function HomeContent() {
       </div>
 
       {/* Catalog Controls Header */}
-      <div id="produk" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+      <div id="produk" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: '2rem', fontFamily: 'Syne, sans-serif', color: '#000000' }}>
-            KATALOG <span style={{ background: '#00f0ff', padding: '2px 10px', border: '3px solid #000', boxShadow: '3px 3px 0px #000' }}>PRODUK</span>
-          </Title>
-          <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13 }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 10, 
+            fontFamily: 'Syne, sans-serif', 
+            fontWeight: 900, 
+            fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)',
+            color: '#000000',
+            lineHeight: 1.3,
+            flexWrap: 'wrap'
+          }}>
+            <span>KATALOG</span>
+            <span style={{ 
+              background: '#00f0ff', 
+              padding: '4px 14px', 
+              border: '3px solid #000', 
+              boxShadow: '3px 3px 0px #000',
+              borderRadius: 10,
+              display: 'inline-block'
+            }}>
+              PRODUK
+            </span>
+          </div>
+          <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, display: 'block', marginTop: 6 }}>
             {search ? `Hasil pencarian "${search}" (${filtered.length} produk)` : `Menampilkan ${filtered.length} barang siap dibeli`}
           </Text>
         </div>
@@ -216,7 +236,7 @@ export default function HomeContent() {
             <div className="neo-card neo-card-yellow" style={{ padding: '24px', textAlign: 'center' }}>
               <SafetyCertificateOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
               <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>100% TERVERIFIKASI</Title>
-              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13 }}>Khusus mahasiswa President University dengan email @student.president.ac.id.</Text>
+              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Khusus mahasiswa President University dengan email @student.president.ac.id.</Text>
             </div>
           </Col>
 
@@ -224,7 +244,7 @@ export default function HomeContent() {
             <div className="neo-card neo-card-cyan" style={{ padding: '24px', textAlign: 'center' }}>
               <ThunderboltOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
               <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>COD KAMPUS JABABEKAN</Title>
-              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13 }}>Ketemuan langsung di Student Center tanpa biaya ongkir.</Text>
+              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Ketemuan langsung di Student Center tanpa biaya ongkir.</Text>
             </div>
           </Col>
 
@@ -232,7 +252,7 @@ export default function HomeContent() {
             <div className="neo-card neo-card-pink" style={{ padding: '24px', textAlign: 'center' }}>
               <CheckCircleOutlined style={{ fontSize: 36, color: '#ffffff', marginBottom: 8 }} />
               <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#ffffff' }}>0% BIAYA ADMIN</Title>
-              <Text style={{ fontWeight: 700, color: '#ffffff', fontSize: 13 }}>Hasil penjualan 100% utuh milik penjual tanpa potongan komisi.</Text>
+              <Text style={{ fontWeight: 700, color: '#ffffff', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Hasil penjualan 100% utuh milik penjual tanpa potongan komisi.</Text>
             </div>
           </Col>
         </Row>
