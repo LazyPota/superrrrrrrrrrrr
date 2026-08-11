@@ -13,6 +13,10 @@ import {
   MessageOutlined,
   HomeOutlined,
   SearchOutlined,
+  HistoryOutlined,
+  ThunderboltOutlined,
+  FireOutlined,
+  SmileOutlined
 } from '@ant-design/icons';
 import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
 import DirectChatDrawer from '../chat/DirectChatDrawer';
@@ -47,10 +51,6 @@ export default function Navbar() {
     const interval = setInterval(() => {
       syncWithServer().then(() => refreshState());
     }, 3000);
-    // Auto-request browser/device notification permission if logged in
-    if (user && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
 
     function handleOpenDirectChat() { setDirectDrawerOpen(true); }
     function handleCartUpdated() {
@@ -63,43 +63,20 @@ export default function Navbar() {
       speakVoice('Ada pesan masuk!');
       refreshState();
       
-      // 1. AntD In-App Toast
       notification.info({
-        message: '🔔 Pesan / Orderan Baru Masuk!',
-        description: 'Ada aktivitas percakapan baru di PresUMart.',
+        message: '⚡ PESAN BARU MASUK!',
+        description: 'Ada transaksi / obrolan baru di PresUMart.',
         placement: 'topRight',
         onClick: () => { setDirectDrawerOpen(true); },
         duration: 5,
       });
-
-      // 2. Native System/OS Device PWA Notification
-      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-        try {
-          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.ready.then(reg => {
-              reg.showNotification('🔔 PresUMart: Pesan / Orderan Baru Masuk!', {
-                body: 'Ada pesan atau pesanan COD baru di aplikasi PresUMart.',
-                icon: '/icon-192.svg',
-                badge: '/icon-192.svg',
-                tag: 'presumart-msg-' + Date.now(),
-              });
-            });
-          } else {
-            new Notification('🔔 PresUMart: Pesan / Orderan Baru Masuk!', {
-              body: 'Ada pesan atau pesanan COD baru di aplikasi PresUMart.',
-              icon: '/icon-192.svg',
-              tag: 'presumart-msg-' + Date.now(),
-            });
-          }
-        } catch (e) {
-          // Fallback if browser blocks popups
-        }
-      }
     }
+
     window.addEventListener('open-direct-chat', handleOpenDirectChat);
     window.addEventListener('cart-updated', handleCartUpdated);
     window.addEventListener('messages-updated', handleMessagesUpdated);
     window.addEventListener('new-incoming-message', handleNewIncomingMessage);
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('open-direct-chat', handleOpenDirectChat);
@@ -107,176 +84,220 @@ export default function Navbar() {
       window.removeEventListener('messages-updated', handleMessagesUpdated);
       window.removeEventListener('new-incoming-message', handleNewIncomingMessage);
     };
-  }, [directDrawerOpen]);
-
-  function handleSearch(value: string) {
-    if (!value || !value.trim()) return;
-    router.push(`/?search=${encodeURIComponent(value.trim())}`);
-  }
+  }, [user]);
 
   function handleLogout() {
     removeUser();
-    setUser(null);
-    speakVoice('Berhasil keluar akun.');
-    router.push('/login');
+    refreshState();
+    router.push('/');
+  }
+
+  function handleSearch(value: string) {
+    if (value.trim()) {
+      router.push(`/?search=${encodeURIComponent(value.trim())}`);
+    } else {
+      router.push('/');
+    }
   }
 
   const userMenuItems = [
     {
       key: 'profile',
-      icon: <UserOutlined />,
-      label: <Link href="/profile">Profil Saya</Link>,
+      label: (
+        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800 }}>
+          <UserOutlined style={{ color: '#ff2a85' }} />
+          <span>PROFIL SAYA</span>
+        </Link>
+      ),
+    },
+    {
+      key: 'orders',
+      label: (
+        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800 }}>
+          <HistoryOutlined style={{ color: '#2563eb' }} />
+          <span>RIWAYAT PESANAN</span>
+        </Link>
+      ),
     },
     {
       key: 'sell',
-      icon: <PlusCircleOutlined style={{ color: '#52c41a' }} />,
-      label: <Link href="/sell">Jual Barang</Link>,
+      label: (
+        <Link href="/sell" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800 }}>
+          <ShopOutlined style={{ color: '#00e676' }} />
+          <span>KELOLA JUALANKU</span>
+        </Link>
+      ),
     },
-    {
-      type: 'divider',
-    },
+    { type: 'divider' },
     {
       key: 'logout',
-      icon: <LogoutOutlined style={{ color: '#ff4d4f' }} />,
-      label: 'Keluar',
-      onClick: handleLogout,
-      danger: true,
+      label: (
+        <div onClick={handleLogout} style={{ color: '#ff2a85', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800, cursor: 'pointer' }}>
+          <LogoutOutlined />
+          <span>KELUAR AKUN</span>
+        </div>
+      ),
     },
   ];
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 1000, width: '100%' }}>
-      {/* 1. TOP UTILITY BAR (Campus Info Only - No Duplicate Links) */}
-      <div 
-        className="navbar-top-bar" 
-        style={{ 
-          backgroundColor: '#001a40', 
-          color: '#cbd5e1', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          padding: '4px 16px', 
-          fontSize: '11px',
-          letterSpacing: '0.01em'
-        }}
-      >
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span>🎓</span>
-          <span style={{ fontWeight: 600, color: '#00e5ff' }}>PresUMart</span>
-          <span>• Marketplace Resmi Mahasiswa President University Jababeka</span>
-        </div>
-        <div style={{ flexShrink: 0 }} className="hide-mobile">
-          {user ? (
-            <span style={{ color: '#00e5ff', fontWeight: 600 }}>
-              Halo, {user.name} ({user.major || 'Mahasiswa PresUniv'})
-            </span>
-          ) : (
-            <span>📍 Area COD: Student Center • Rektorat • Asrama PU</span>
-          )}
+    <>
+      {/* Neobrutalist Marquee Header */}
+      <div className="ticker-wrap-neo">
+        <div className="ticker-move-neo">
+          <span className="ticker-item-neo"><FireOutlined /> MARKETPLACE KAMPUS PRESIDENT UNIVERSITY</span>
+          <span className="ticker-item-neo">⚡ COD BEBAS ONGKIR IN CAMPUS</span>
+          <span className="ticker-item-neo">★ 0% BIAYA ADMIN UNTUK MAHASISWA</span>
+          <span className="ticker-item-neo">💥 TERVERIFIKASI EMAIL KAMPUS @PRESIDENT.AC.ID</span>
+          <span className="ticker-item-neo"><FireOutlined /> MARKETPLACE KAMPUS PRESIDENT UNIVERSITY</span>
+          <span className="ticker-item-neo">⚡ COD BEBAS ONGKIR IN CAMPUS</span>
         </div>
       </div>
 
-      {/* 2. MAIN NAVBAR */}
-      <div 
-        className="navbar-main"
-        style={{ 
-          backgroundColor: '#ffffff', 
-          display: 'flex', 
-          flexDirection: 'column',
-          padding: '10px 20px', 
-          boxShadow: '0 4px 12px rgba(0, 26, 64, 0.08)',
-          borderBottom: '1px solid #e6eeff'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 12 }}>
-          {/* LEFT: Iconic PresUMart Brand Logo */}
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{ 
-              width: 36, 
-              height: 36, 
-              borderRadius: 10, 
-              background: 'linear-gradient(135deg, #001a40 0%, #003399 100%)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              boxShadow: '0 4px 10px rgba(0,51,153,0.3)'
-            }}>
-              <ShopOutlined style={{ fontSize: '20px', color: '#00e5ff' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: '20px', fontWeight: 800, lineHeight: 1, letterSpacing: '-0.02em', color: '#001a40' }}>
-                Pres<span style={{ color: '#003399' }}>U</span><span style={{ color: '#00b8d9' }}>Mart</span>
-              </div>
-              <span className="hide-mobile" style={{ fontSize: '9px', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                President University
-              </span>
-            </div>
+      {/* Main Neobrutalist Navbar */}
+      <header style={{
+        background: '#ffffff',
+        borderBottom: '3px solid #000000',
+        boxShadow: '0 4px 0px #000000',
+        padding: '12px 20px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
+      }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          {/* Logo Neobrutalist Official */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
+            <img 
+              src="/logo.png" 
+              alt="PresUMart Logo" 
+              style={{ 
+                height: 48, 
+                width: 'auto',
+                objectFit: 'contain',
+                borderRadius: 8,
+                filter: 'drop-shadow(3px 3px 0px #000000)'
+              }} 
+            />
           </Link>
 
-          {/* DESKTOP SEARCH BAR */}
-          <div className="hide-mobile" style={{ flex: 1, maxWidth: '600px', margin: '0 16px' }}>
-            <Input.Search 
-              placeholder="Cari barang, buku, gadget, jasa..." 
+          {/* Search Bar Neobrutalist */}
+          <div className="hide-mobile" style={{ flex: 1, maxWidth: 480, margin: '0 16px' }}>
+            <Input.Search
+              placeholder="Cari barang, buku, gadget, jasa..."
               onSearch={handleSearch}
-              size="middle"
-              style={{ borderRadius: 24, overflow: 'hidden' }}
-              styles={{ input: { borderRadius: '24px 0 0 24px' } }}
-              enterButton
+              size="large"
+              style={{ borderRadius: 12 }}
+              enterButton="Cari!"
             />
           </div>
 
-          {/* RIGHT: Icon Buttons & Single Auth Action Group */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-            <Tooltip title="Keranjang">
-              <Badge count={cartCount} size="small" color="#003399">
-                <Button 
-                  type="text" 
-                  icon={<ShoppingCartOutlined style={{ fontSize: '20px', color: '#003399' }} />} 
-                  onClick={() => router.push('/cart')} 
+          {/* Right Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <Tooltip title="Keranjang Belanja">
+              <Badge count={cartCount} size="small" color="#ff2a85">
+                <Button
+                  onClick={() => router.push('/cart')}
+                  style={{
+                    background: '#00f0ff',
+                    border: '3px solid #000000',
+                    boxShadow: '3px 3px 0px #000000',
+                    borderRadius: 12,
+                    width: 42,
+                    height: 42,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  icon={<ShoppingCartOutlined style={{ fontSize: 20, color: '#000000' }} />}
                 />
               </Badge>
             </Tooltip>
 
             {user ? (
               <>
-                <Tooltip title="Pesan">
-                  <Badge count={unreadCount} size="small" color="#f59e0b">
-                    <Button 
-                      type="text" 
-                      icon={<MessageOutlined style={{ fontSize: '20px', color: '#00b8d9' }} />} 
-                      onClick={() => setDirectDrawerOpen(true)} 
+                <Tooltip title="Pesan / Live Chat">
+                  <Badge count={unreadCount} size="small" color="#ff6b00">
+                    <Button
+                      onClick={() => setDirectDrawerOpen(true)}
+                      style={{
+                        background: '#ffe600',
+                        border: '3px solid #000000',
+                        boxShadow: '3px 3px 0px #000000',
+                        borderRadius: 12,
+                        width: 42,
+                        height: 42,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      icon={<MessageOutlined style={{ fontSize: 20, color: '#000000' }} />}
                     />
                   </Badge>
                 </Tooltip>
+
                 <Tooltip title="Jual Barang" className="hide-mobile">
-                  <Button 
-                    type="primary"
-                    icon={<PlusCircleOutlined style={{ fontSize: '16px' }} />} 
+                  <Button
                     onClick={() => router.push('/sell')}
-                    style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', borderRadius: 20 }}
+                    style={{
+                      background: '#00e676',
+                      border: '3px solid #000000',
+                      boxShadow: '3px 3px 0px #000000',
+                      borderRadius: 12,
+                      fontWeight: 900,
+                      color: '#000000',
+                      height: 42,
+                      padding: '0 18px'
+                    }}
+                    icon={<PlusCircleOutlined />}
                   >
-                    Jual
+                    Jual Barang!
                   </Button>
                 </Tooltip>
+
                 <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
-                  <Avatar style={{ backgroundColor: '#003399', cursor: 'pointer', border: '2px solid #00e5ff' }} size="medium" icon={<UserOutlined />} />
+                  <Avatar
+                    style={{
+                      backgroundColor: '#ff2a85',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      border: '3px solid #000000',
+                      boxShadow: '3px 3px 0px #000000',
+                      fontWeight: 900
+                    }}
+                    size={40}
+                    icon={<UserOutlined />}
+                  >
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </Avatar>
                 </Dropdown>
               </>
             ) : (
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
-                <Button 
-                  type="default" 
-                  size="small" 
-                  onClick={() => router.push('/login')} 
-                  style={{ borderRadius: 16, borderColor: '#003399', color: '#003399', fontWeight: 600, fontSize: 12, padding: '0 10px', height: 32 }}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Button
+                  onClick={() => router.push('/login')}
+                  style={{
+                    background: '#ffffff',
+                    border: '3px solid #000000',
+                    boxShadow: '3px 3px 0px #000000',
+                    borderRadius: 12,
+                    fontWeight: 900,
+                    height: 40,
+                    padding: '0 16px'
+                  }}
                 >
                   Masuk
                 </Button>
-                <Button 
-                  type="primary" 
-                  size="small" 
-                  onClick={() => router.push('/register')} 
-                  style={{ borderRadius: 16, background: 'linear-gradient(135deg, #003399 0%, #001a40 100%)', border: 'none', fontWeight: 600, fontSize: 12, padding: '0 10px', height: 32, boxShadow: '0 2px 6px rgba(0,51,153,0.2)' }}
+                <Button
+                  onClick={() => router.push('/register')}
+                  style={{
+                    background: '#ffe600',
+                    border: '3px solid #000000',
+                    boxShadow: '3px 3px 0px #000000',
+                    borderRadius: 12,
+                    fontWeight: 900,
+                    height: 40,
+                    padding: '0 16px'
+                  }}
                 >
                   Daftar
                 </Button>
@@ -284,56 +305,37 @@ export default function Navbar() {
             )}
           </div>
         </div>
+      </header>
 
-        {/* MOBILE SEARCH BAR (SHOWS ON SMARTPHONES) */}
-        <div className="show-mobile" style={{ width: '100%', marginTop: 8 }}>
-          <Input.Search 
-            placeholder="Cari barang, buku, gadget..." 
-            onSearch={handleSearch}
-            size="middle"
-            style={{ borderRadius: 20, overflow: 'hidden' }}
-            styles={{ input: { borderRadius: '20px 0 0 20px', fontSize: '13px' } }}
-            enterButton
-          />
-        </div>
-      </div>
-
-      {/* 3. MOBILE BOTTOM NAVIGATION BAR (PWA NATIVE STYLE) */}
-      <nav className="mobile-bottom-nav">
+      {/* Mobile Bottom Dock Bar */}
+      <div className="mobile-bottom-nav">
         <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
           <HomeOutlined />
-          <span>Beranda</span>
+          <span>BERANDA</span>
+        </Link>
+        <Link href="/cart" className={`mobile-nav-item ${pathname === '/cart' ? 'active' : ''}`}>
+          <Badge count={cartCount} size="small" offset={[4, 0]}>
+            <ShoppingCartOutlined />
+          </Badge>
+          <span>KERANJANG</span>
         </Link>
         <Link href="/sell" className={`mobile-nav-item ${pathname === '/sell' ? 'active' : ''}`}>
-          <PlusCircleOutlined style={{ color: '#52c41a' }} />
-          <span>Jual</span>
+          <PlusCircleOutlined style={{ color: '#ff2a85' }} />
+          <span>JUAL</span>
         </Link>
-        <div 
-          className="mobile-nav-item" 
-          onClick={() => setDirectDrawerOpen(true)}
-          style={{ cursor: 'pointer' }}
-        >
-          <Badge count={unreadCount} size="small" offset={[4, -2]}>
-            <MessageOutlined style={{ color: '#3b82f6' }} />
+        <div onClick={() => setDirectDrawerOpen(true)} className="mobile-nav-item" style={{ cursor: 'pointer' }}>
+          <Badge count={unreadCount} size="small" offset={[4, 0]}>
+            <MessageOutlined />
           </Badge>
-          <span>Chat</span>
+          <span>PESAN</span>
         </div>
-        <Link href="/cart" className={`mobile-nav-item ${pathname === '/cart' ? 'active' : ''}`}>
-          <Badge count={cartCount} size="small" offset={[4, -2]}>
-            <ShoppingCartOutlined style={{ color: '#10b981' }} />
-          </Badge>
-          <span>Keranjang</span>
-        </Link>
-        <Link href={user ? '/profile' : '/login'} className={`mobile-nav-item ${pathname === '/profile' || pathname === '/login' ? 'active' : ''}`}>
+        <Link href="/profile" className={`mobile-nav-item ${pathname === '/profile' ? 'active' : ''}`}>
           <UserOutlined />
-          <span>{user ? 'Akun' : 'Masuk'}</span>
+          <span>PROFIL</span>
         </Link>
-      </nav>
+      </div>
 
-      <DirectChatDrawer 
-        open={directDrawerOpen}
-        onClose={() => setDirectDrawerOpen(false)}
-      />
-    </header>
+      <DirectChatDrawer open={directDrawerOpen} onClose={() => setDirectDrawerOpen(false)} />
+    </>
   );
 }

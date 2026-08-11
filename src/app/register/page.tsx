@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, Form, Input, Select, Button, Alert, Row, Col, Typography, Tag } from 'antd';
-import { UserOutlined, MailOutlined, LockOutlined, UserAddOutlined, IdcardOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Select, Button, Alert, Row, Col, Typography, Tag, Space } from 'antd';
+import { UserOutlined, MailOutlined, LockOutlined, UserAddOutlined, SafetyCertificateOutlined, BookOutlined } from '@ant-design/icons';
 import Navbar from '../../components/common/Navbar';
 import Footer from '../../components/common/Footer';
 import { registerUser } from '../../lib/store';
@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const router = useRouter();
 
-  async function onFinish(values) {
+  async function onFinish(values: any) {
     setFormError('');
 
     // Anti-bot honeypot check
@@ -39,6 +39,7 @@ export default function RegisterPage() {
     setLastSubmitTime(now);
 
     const emailLower = values.email.trim().toLowerCase();
+    
     if (!emailLower.endsWith('@student.president.ac.id') && !emailLower.endsWith('@president.ac.id')) {
       setFormError('Pendaftaran khusus email kampus President University (@student.president.ac.id / @president.ac.id).');
       return;
@@ -77,17 +78,39 @@ export default function RegisterPage() {
   return (
     <>
       <Navbar />
-      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', background: '#f8fafc' }}>
-        <Card style={{ width: '100%', maxWidth: 540, borderRadius: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+      <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 16px' }}>
+        <Card 
+          className="animate-slide-up"
+          style={{ 
+            width: '100%', 
+            maxWidth: 540, 
+            borderRadius: 24, 
+            boxShadow: '0 20px 50px rgba(0, 51, 153, 0.1)',
+            border: '1px solid rgba(226, 232, 240, 0.8)',
+            padding: '12px 8px'
+          }}
+        >
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <Tag color="blue" icon={<SafetyCertificateOutlined />} style={{ marginBottom: 8, padding: '2px 10px', fontSize: 12 }}>
+            <img 
+              src="/logo.png" 
+              alt="PresUMart Logo" 
+              style={{ 
+                height: 64, 
+                width: 'auto',
+                objectFit: 'contain',
+                marginBottom: 12,
+                filter: 'drop-shadow(3px 3px 0px #000000)'
+              }} 
+            />
+            <br />
+            <Tag color="blue" icon={<SafetyCertificateOutlined />} style={{ marginBottom: 10, padding: '4px 14px', borderRadius: 20, fontWeight: 700 }}>
               Khusus Komunitas President University
             </Tag>
-            <Title level={3} style={{ margin: '4px 0 0 0', fontWeight: 800 }}>Daftar Akun PresUMart</Title>
-            <Text type="secondary">Isi data identitas mahasiswamu dengan benar</Text>
+            <Title level={2} style={{ margin: '4px 0 6px 0', fontWeight: 800, fontSize: 26 }}>Daftar Akun PresUMart</Title>
+            <Text type="secondary" style={{ fontSize: 14 }}>Isi identitas mahasiswamu dengan benar untuk mulai jual beli</Text>
           </div>
 
-          {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
+          {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 12 }} />}
 
           <Form layout="vertical" onFinish={onFinish} size="large">
             {/* Anti-bot Honeypot Field (Hidden from human users) */}
@@ -102,26 +125,55 @@ export default function RegisterPage() {
               />
             </div>
             <Form.Item
-              label="Nama Lengkap"
+              label="Nama Lengkap Mahasiswa"
               name="name"
               rules={[
                 { required: true, message: 'Nama lengkap wajib diisi!' },
                 { min: 3, message: 'Nama minimal 3 karakter!' },
               ]}
             >
-              <Input prefix={<UserOutlined style={{ color: '#94a3b8' }} />} placeholder="Contoh: Ahmad Fauzi" />
+              <Input prefix={<UserOutlined style={{ color: '#94a3b8' }} />} placeholder="Contoh: Ahmad Fauzi" style={{ borderRadius: 12 }} />
             </Form.Item>
 
             <Form.Item
-              label="Email Kampus Resmi (@president.ac.id)"
+              label="Email Kampus Resmi (@student.president.ac.id)"
               name="email"
               rules={[
                 { required: true, message: 'Email kampus wajib diisi!' },
                 { type: 'email', message: 'Format email tidak valid!' },
               ]}
             >
-              <Input prefix={<MailOutlined style={{ color: '#94a3b8' }} />} placeholder="nama@student.president.ac.id" />
+              <Input prefix={<MailOutlined style={{ color: '#94a3b8' }} />} placeholder="nama@student.president.ac.id" style={{ borderRadius: 12 }} />
             </Form.Item>
+
+            <Row gutter={16}>
+              <Col xs={24} sm={14}>
+                <Form.Item
+                  label="Major / Program Studi"
+                  name="major"
+                  rules={[{ required: true, message: 'Pilih major!' }]}
+                >
+                  <Select 
+                    placeholder="Pilih Major" 
+                    options={MAJORS.map(m => ({ label: m, value: m }))} 
+                    style={{ borderRadius: 12 }} 
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={10}>
+                <Form.Item
+                  label="Angkatan"
+                  name="batch"
+                  initialValue="2024"
+                  rules={[{ required: true, message: 'Pilih angkatan!' }]}
+                >
+                  <Select 
+                    options={batches.map(b => ({ label: `Angkatan ${b}`, value: String(b) }))} 
+                    style={{ borderRadius: 12 }} 
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Row gutter={16}>
               <Col xs={24} sm={12}>
@@ -130,10 +182,10 @@ export default function RegisterPage() {
                   name="password"
                   rules={[
                     { required: true, message: 'Password wajib diisi!' },
-                    { min: 8, message: 'Minimal 8 karakter untuk keamanan' },
+                    { min: 8, message: 'Minimal 8 karakter!' },
                   ]}
                 >
-                  <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Minimal 6 karakter" />
+                  <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Minimal 8 karakter" style={{ borderRadius: 12 }} />
                 </Form.Item>
               </Col>
               <Col xs={24} sm={12}>
@@ -153,40 +205,28 @@ export default function RegisterPage() {
                     }),
                   ]}
                 >
-                  <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Ulangi password" />
+                  <Input.Password prefix={<LockOutlined style={{ color: '#94a3b8' }} />} placeholder="Ulangi password" style={{ borderRadius: 12 }} />
                 </Form.Item>
               </Col>
             </Row>
 
-            <Row gutter={16}>
-              <Col xs={24} sm={12}>
-                <Form.Item
-                  label="Major / Program Studi"
-                  name="major"
-                  rules={[{ required: true, message: 'Pilih major!' }]}
-                >
-                  <Select placeholder="Pilih Major" options={MAJORS.map(m => ({ label: m, value: m }))} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} sm={12}>
-                <Form.Item
-                  label="Angkatan / Batch"
-                  name="batch"
-                  rules={[{ required: true, message: 'Pilih angkatan!' }]}
-                >
-                  <Select placeholder="Pilih Angkatan" options={batches.map(b => ({ label: `Angkatan ${b}`, value: String(b) }))} />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Button type="primary" htmlType="submit" size="large" block loading={loading} icon={<UserAddOutlined />} style={{ height: 44, fontSize: 16, marginTop: 8 }}>
-              Daftar Sekarang
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              size="large" 
+              block 
+              loading={loading} 
+              icon={<UserAddOutlined />} 
+              className="btn-gradient-primary"
+              style={{ height: 48, fontSize: 16, fontWeight: 700, borderRadius: 14, marginTop: 12 }}
+            >
+              Daftar Akun Kampus
             </Button>
           </Form>
 
           <div style={{ textAlign: 'center', marginTop: 24, fontSize: 14 }}>
             <Text type="secondary">Sudah memiliki akun? </Text>
-            <Link href="/login" style={{ fontWeight: 600, color: '#0052cc' }}>Masuk di sini</Link>
+            <Link href="/login" style={{ fontWeight: 700, color: '#0052cc' }}>Masuk Sekarang</Link>
           </div>
         </Card>
       </main>

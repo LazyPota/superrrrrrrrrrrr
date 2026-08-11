@@ -214,7 +214,7 @@ export default function DirectChatDrawer({ open, onClose }: { open: boolean; onC
       }
       open={open}
       onClose={onClose}
-      size={drawerWidth}
+      styles={{ wrapper: { width: drawerWidth } }}
       extra={
         <Button icon={<SoundOutlined />} size="small" type="text" onClick={() => { playOrderSound(); speakVoice('Ada pesan masuk!'); }} title="Tes Suara Notifikasi">
           Tes Suara

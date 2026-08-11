@@ -3,20 +3,41 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Row, Col, Segmented, Empty, Button, Typography, Alert, Space, Tag } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Row, Col, Empty, Button, Typography, Tag, Select } from 'antd';
+import { 
+  PlusOutlined, 
+  SafetyCertificateOutlined, 
+  ThunderboltOutlined, 
+  CheckCircleOutlined,
+  AppstoreOutlined,
+  BookOutlined,
+  SkinOutlined,
+  HomeOutlined,
+  ToolOutlined,
+  LaptopOutlined,
+  FireOutlined
+} from '@ant-design/icons';
 import ProductCard from '../product/ProductCard';
 import { getProducts, saveProducts } from '../../lib/store';
-import SEED_PRODUCTS from '../../data/seed';
 import CATEGORIES from '../../data/categories';
 
 const { Title, Text } = Typography;
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  'Semua': <AppstoreOutlined />,
+  'Elektronik': <LaptopOutlined />,
+  'Buku & Alat Tulis': <BookOutlined />,
+  'Pakaian': <SkinOutlined />,
+  'Kos & Furniture': <HomeOutlined />,
+  'Lainnya': <ToolOutlined />,
+};
 
 export default function HomeContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [activeCat, setActiveCat] = useState(searchParams.get('cat') || 'Semua');
   const [activeCond, setActiveCond] = useState('Semua');
+  const [sortBy, setSortBy] = useState('newest');
   const [search, setSearch] = useState(searchParams.get('search') || '');
 
   const urlSearch = searchParams.get('search') || '';
@@ -49,96 +70,157 @@ export default function HomeContent() {
         p.description.toLowerCase().includes(q)
       );
     }
-    return [...list].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [products, activeCat, activeCond, search]);
 
-  const segmentedOptions = ['Semua', ...CATEGORIES];
+    return [...list].sort((a: any, b: any) => {
+      if (sortBy === 'price-low') {
+        return (Number(a.price) || 0) - (Number(a.price) || 0);
+      }
+      if (sortBy === 'price-high') {
+        return (Number(b.price) || 0) - (Number(a.price) || 0);
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [products, activeCat, activeCond, search, sortBy]);
+
+  const categoriesWithAll = ['Semua', ...CATEGORIES];
 
   return (
-    <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 24px 48px 24px' }}>
-      <Alert
-        message="Terverifikasi Mahasiswa PresUniv"
-        description="Semua produk dijual langsung oleh mahasiswa aktif President University Jababeka."
-        type="info"
-        showIcon
-        style={{ marginBottom: 28, borderRadius: 12 }}
-      />
+    <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 20px 64px 20px' }}>
 
-      <div id="produk" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
+      {/* Neobrutalist Category Pills Bar */}
+      <div style={{ marginBottom: 28, overflowX: 'auto', paddingBottom: 10, display: 'flex', gap: 10 }}>
+        {categoriesWithAll.map(cat => {
+          const isActive = activeCat === cat;
+          return (
+            <div
+              key={cat}
+              onClick={() => setActiveCat(cat)}
+              className={`neo-pill ${isActive ? 'active' : ''}`}
+            >
+              {CATEGORY_ICONS[cat] || <AppstoreOutlined />}
+              <span>{cat.toUpperCase()}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Catalog Controls Header */}
+      <div id="produk" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <Title level={2} style={{ margin: 0, fontWeight: 800 }}>
-            Produk <span style={{ color: '#0052cc' }}>Tersedia</span>
-          </Title>
-          <Text type="secondary">
-            {search ? `Menampilkan hasil pencarian "${search}" (${filtered.length} produk)` : `Total ${filtered.length} barang siap dibeli`}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 10, 
+            fontFamily: 'Syne, sans-serif', 
+            fontWeight: 900, 
+            fontSize: 'clamp(1.6rem, 3.5vw, 2.2rem)',
+            color: '#000000',
+            lineHeight: 1.3,
+            flexWrap: 'wrap'
+          }}>
+            <span>KATALOG</span>
+            <span style={{ 
+              background: '#00f0ff', 
+              padding: '4px 14px', 
+              border: '3px solid #000', 
+              boxShadow: '3px 3px 0px #000',
+              borderRadius: 10,
+              display: 'inline-block'
+            }}>
+              PRODUK
+            </span>
+          </div>
+          <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, display: 'block', marginTop: 6 }}>
+            {search ? `Hasil pencarian "${search}" (${filtered.length} produk)` : `Menampilkan ${filtered.length} barang siap dibeli`}
           </Text>
         </div>
 
-        <Link href="/sell">
-          <Button type="primary" size="large" icon={<PlusOutlined />}>
-            Jual Barang Baru
-          </Button>
-        </Link>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <Select
+            value={sortBy}
+            onChange={setSortBy}
+            style={{ width: 170 }}
+            options={[
+              { label: '🔥 Terbaru', value: 'newest' },
+              { label: '🏷️ Harga Termurah', value: 'price-low' },
+              { label: '💎 Harga Termahal', value: 'price-high' },
+            ]}
+          />
+
+          <Link href="/sell">
+            <button
+              style={{
+                background: '#ffe600',
+                border: '3px solid #000000',
+                boxShadow: '3px 3px 0px #000000',
+                borderRadius: 12,
+                fontWeight: 900,
+                fontSize: 14,
+                padding: '10px 20px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6
+              }}
+            >
+              <PlusOutlined /> JUAL BARANG!
+            </button>
+          </Link>
+        </div>
       </div>
 
-      {/* Category Segmented Controls */}
-      <div style={{ marginBottom: 16, overflowX: 'auto', paddingBottom: 8 }}>
-        <Segmented
-          options={segmentedOptions}
-          value={activeCat}
-          onChange={val => setActiveCat(val as string)}
-          size="large"
-          style={{ background: '#e2e8f0', padding: 4, borderRadius: 12 }}
-        />
-      </div>
-
-      {/* Condition Filter Tag Bar */}
+      {/* Condition Pills */}
       <div style={{ marginBottom: 28, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Text strong style={{ fontSize: 13, color: '#64748b', marginRight: 4 }}>Filter Kondisi:</Text>
+        <Text strong style={{ fontSize: 12, color: '#000000', marginRight: 4, textTransform: 'uppercase' }}>KONDISI:</Text>
         {[
-          { label: 'Semua Kondisi', value: 'Semua' },
-          { label: '✨ Barang Baru', value: 'Barang Baru' },
-          { label: '🌟 Bekas - Seperti Baru', value: 'Bekas - Like New' },
-          { label: '👍 Bekas - Mulus', value: 'Bekas - Mulus' },
+          { label: 'SEMUA KONDISI', value: 'Semua' },
+          { label: '✨ BARANG BARU', value: 'Barang Baru' },
+          { label: '🌟 BEKAS - LIKE NEW', value: 'Bekas - Like New' },
+          { label: '👍 BEKAS - MULUS', value: 'Bekas - Mulus' },
         ].map(cond => (
-          <Tag.CheckableTag
+          <button
             key={cond.value}
-            checked={activeCond === cond.value}
-            onChange={() => setActiveCond(cond.value)}
+            onClick={() => setActiveCond(cond.value)}
             style={{
               padding: '6px 14px',
-              borderRadius: 20,
-              fontSize: 13,
-              border: activeCond === cond.value ? '1px solid #0052cc' : '1px solid #cbd5e1',
+              borderRadius: 99,
+              fontSize: 11,
+              fontWeight: 800,
+              border: '2px solid #000000',
+              boxShadow: activeCond === cond.value ? '3px 3px 0px #000000' : '2px 2px 0px #000000',
+              background: activeCond === cond.value ? '#ff2a85' : '#ffffff',
+              color: activeCond === cond.value ? '#ffffff' : '#000000',
               cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
             {cond.label}
-          </Tag.CheckableTag>
+          </button>
         ))}
       </div>
 
+      {/* Product Grid */}
       {filtered.length === 0 ? (
-        <div style={{ background: '#fff', borderRadius: 16, padding: '48px 24px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+        <div className="neo-card" style={{ padding: '64px 24px', textAlign: 'center', background: '#ffffff' }}>
           <Empty
             description={
               <div>
-                <Title level={4} style={{ marginBottom: 4 }}>Produk tidak ditemukan</Title>
-                <Text type="secondary">
-                  Belum ada produk di kategori ini, atau kata kunci pencarianmu tidak cocok.
+                <Title level={4} style={{ marginBottom: 4, fontFamily: 'Syne, sans-serif', fontWeight: 900 }}>PRODUK TIDAK DITEMUKAN!</Title>
+                <Text style={{ fontWeight: 700, color: '#666' }}>
+                  Belum ada produk di kategori ini.
                 </Text>
               </div>
             }
           >
             <Link href="/sell">
-              <Button type="primary" size="large" icon={<PlusOutlined />}>
-                Jual Barang Pertamamu
-              </Button>
+              <button style={{ background: '#ffe600', border: '3px solid #000', boxShadow: '4px 4px 0px #000', padding: '12px 24px', fontWeight: 900, borderRadius: 12, cursor: 'pointer' }}>
+                JUAL BARANG PERTAMA!
+              </button>
             </Link>
           </Empty>
         </div>
       ) : (
-        <Row gutter={[12, 12]}>
+        <Row gutter={[16, 16]}>
           {filtered.map(product => (
             <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
               <ProductCard product={product} />
@@ -146,6 +228,36 @@ export default function HomeContent() {
           ))}
         </Row>
       )}
+
+      {/* Trust Grid Neobrutalist */}
+      <div style={{ marginTop: 64 }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
+            <div className="neo-card neo-card-yellow" style={{ padding: '24px', textAlign: 'center' }}>
+              <SafetyCertificateOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>100% TERVERIFIKASI</Title>
+              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Khusus mahasiswa President University dengan email @student.president.ac.id.</Text>
+            </div>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <div className="neo-card neo-card-cyan" style={{ padding: '24px', textAlign: 'center' }}>
+              <ThunderboltOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>COD KAMPUS JABABEKA</Title>
+              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Ketemuan langsung di Student Center tanpa biaya ongkir.</Text>
+            </div>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <div className="neo-card neo-card-pink" style={{ padding: '24px', textAlign: 'center' }}>
+              <CheckCircleOutlined style={{ fontSize: 36, color: '#ffffff', marginBottom: 8 }} />
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#ffffff' }}>0% BIAYA ADMIN</Title>
+              <Text style={{ fontWeight: 700, color: '#ffffff', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Hasil penjualan 100% utuh milik penjual tanpa potongan komisi.</Text>
+            </div>
+          </Col>
+        </Row>
+      </div>
+
     </main>
   );
 }

@@ -6,6 +6,9 @@ import { DownloadOutlined, CloseOutlined, ShareAltOutlined, PlusSquareOutlined }
 
 const { Text, Paragraph } = Typography;
 
+const PWA_SESSION_KEY = 'presumart_pwa_banner_shown_v1';
+const PWA_DISMISSED_KEY = 'presumart_pwa_banner_dismissed_v1';
+
 export default function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isIOS, setIsIOS] = useState(false);
@@ -14,7 +17,7 @@ export default function PWAInstallPrompt() {
   const [showIosModal, setShowIosModal] = useState(false);
 
   useEffect(() => {
-    // Check if app is already running as installed PWA standalone app
+    // Check standalone mode (already installed app)
     const inStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
@@ -24,16 +27,25 @@ export default function PWAInstallPrompt() {
       return;
     }
 
-    // Detect iOS (Safari)
+    // Detect iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
     const iosDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(iosDevice);
 
-    // Android & Chrome Desktop PWA Install Event
+    // Check if user previously closed banner OR banner was already shown once in this session
+    const isDismissed = localStorage.getItem(PWA_DISMISSED_KEY) === 'true';
+    const isSessionShown = sessionStorage.getItem(PWA_SESSION_KEY) === 'true';
+
+    // Only show banner if NOT dismissed and NOT already shown in this session
+    const shouldShow = !isDismissed && !isSessionShown;
+
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowBanner(true);
+      if (shouldShow) {
+        setShowBanner(true);
+        sessionStorage.setItem(PWA_SESSION_KEY, 'true');
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -48,15 +60,21 @@ export default function PWAInstallPrompt() {
 
     window.addEventListener('trigger-pwa-install', handleTriggerInstall);
 
-    if (iosDevice && !inStandalone) {
+    if (iosDevice && !inStandalone && shouldShow) {
       setShowBanner(true);
+      sessionStorage.setItem(PWA_SESSION_KEY, 'true');
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       window.removeEventListener('trigger-pwa-install', handleTriggerInstall);
     };
-  }, [deferredPrompt]);
+  }, []);
+
+  function handleDismiss() {
+    setShowBanner(false);
+    localStorage.setItem(PWA_DISMISSED_KEY, 'true');
+  }
 
   async function handleInstallClick() {
     if (deferredPrompt) {
@@ -66,10 +84,7 @@ export default function PWAInstallPrompt() {
         setShowBanner(false);
       }
       setDeferredPrompt(null);
-    } else if (isIOS) {
-      setShowIosModal(true);
     } else {
-      // Fallback hint
       setShowIosModal(true);
     }
   }
@@ -90,104 +105,97 @@ export default function PWAInstallPrompt() {
           zIndex: 9990,
         }}
       >
-        <Card
-          size="small"
+        <div 
+          className="neo-card neo-card-yellow"
           style={{
-            borderRadius: 14,
-            background: 'linear-gradient(135deg, #001a40 0%, #003399 100%)',
-            color: '#ffffff',
-            boxShadow: '0 8px 24px rgba(0, 26, 64, 0.3)',
-            border: '1px solid rgba(0, 229, 255, 0.3)',
-            padding: '4px 8px'
+            padding: '12px 16px',
+            color: '#000000',
+            boxShadow: '4px 4px 0px #000000',
+            border: '3px solid #000000',
+            borderRadius: 14
           }}
-          styles={{ body: { padding: '8px 12px' } }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 10,
-                  background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: 18,
-                  color: '#ffffff',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                  flexShrink: 0
-                }}
-              >
-                P
-              </div>
-              <div style={{ lineHeight: 1.2 }}>
-                <Text strong style={{ color: '#ffffff', fontSize: 13, display: 'block' }}>
-                  Install Aplikasi PresUMart
-                </Text>
-                <Text style={{ color: '#00e5ff', fontSize: 10, fontWeight: 500 }}>
-                  Akses Cepat Android & iPhone
-                </Text>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <Text strong style={{ color: '#000000', fontSize: 13, display: 'block', fontWeight: 900 }}>
+                📲 Install Aplikasi PresUMart
+              </Text>
+              <Text style={{ color: '#000000', fontSize: 11, fontWeight: 700, display: 'block' }}>
+                Akses cepat Android & iPhone tanpa lewat browser
+              </Text>
             </div>
 
-            <Space size={6} align="center">
+            <Space size="small">
               <Button
                 type="primary"
                 size="small"
-                icon={<DownloadOutlined style={{ fontSize: 12 }} />}
-                style={{ background: 'linear-gradient(135deg, #00b8d9 0%, #008299 100%)', border: 'none', fontWeight: 700, borderRadius: 16, height: 30, fontSize: 12, padding: '0 14px', boxShadow: '0 2px 6px rgba(0,184,217,0.4)' }}
+                icon={<DownloadOutlined />}
                 onClick={handleInstallClick}
+                style={{
+                  background: '#00f0ff',
+                  border: '2px solid #000000',
+                  boxShadow: '2px 2px 0px #000000',
+                  color: '#000000',
+                  fontWeight: 900,
+                  fontSize: 12,
+                  borderRadius: 8,
+                }}
               >
                 Install
               </Button>
               <Button
                 type="text"
-                shape="circle"
                 size="small"
-                icon={<CloseOutlined style={{ color: '#ffffff', fontSize: 13 }} />}
-                onClick={() => setShowBanner(false)}
-                title="Tutup Banner"
-                style={{ width: 28, height: 28, background: 'rgba(255, 255, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                icon={<CloseOutlined style={{ color: '#000000' }} />}
+                onClick={handleDismiss}
               />
             </Space>
           </div>
-        </Card>
+        </div>
       </div>
 
-      {/* Modal Petunjuk Install iOS Safari & Android */}
       <Modal
-        title="📲 Cara Download PresUMart di HP (Android & iPhone)"
+        title="📱 Cara Install Aplikasi PresUMart"
         open={showIosModal}
         onCancel={() => setShowIosModal(false)}
         footer={[
-          <Button key="ok" type="primary" onClick={() => setShowIosModal(false)}>
-            Mengerti
+          <Button 
+            key="close" 
+            onClick={() => setShowIosModal(false)}
+            style={{ background: '#ffe600', border: '2px solid #000', boxShadow: '2px 2px 0px #000', fontWeight: 900, borderRadius: 8 }}
+          >
+            Mengerti!
           </Button>,
         ]}
       >
-        <div style={{ padding: '12px 0' }}>
-          <Paragraph style={{ fontSize: 13, marginBottom: 16 }}>
-            PresUMart adalah aplikasi web modern (PWA) yang bisa diinstal di Android & iPhone tanpa App Store / Play Store:
-          </Paragraph>
-
-          <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 12 }}>
-            <Text strong style={{ color: '#0052cc', display: 'block', marginBottom: 6 }}>🍎 Pengguna iPhone / iPad (iOS Safari):</Text>
-            <ol style={{ paddingLeft: 20, margin: 0, fontSize: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <li>Tekan ikon <b>Bagikan (Share)</b> <ShareAltOutlined style={{ color: '#0052cc' }} /> di bagian bawah browser Safari.</li>
-              <li>Pilih menu <b>&quot;Tambahkan ke Layar Utama&quot;</b> (*Add to Home Screen*) <PlusSquareOutlined style={{ color: '#36b37e' }} />.</li>
-              <li>Tekan <b>&quot;Tambah&quot;</b> di pojok kanan atas.</li>
-            </ol>
-          </div>
-
-          <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0' }}>
-            <Text strong style={{ color: '#36b37e', display: 'block', marginBottom: 6 }}>🤖 Pengguna Android (Chrome):</Text>
-            <ol style={{ paddingLeft: 20, margin: 0, fontSize: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <li>Tekan titik 3 di kanan atas Chrome.</li>
-              <li>Pilih <b>&quot;Install Aplikasi&quot;</b> atau <b>&quot;Tambahkan ke Layar Utama&quot;</b>.</li>
-            </ol>
-          </div>
+        <div style={{ padding: '8px 0' }}>
+          {isIOS ? (
+            <div>
+              <Paragraph style={{ fontWeight: 700 }}>
+                Untuk menginstall PresUMart di <b>iPhone / iPad (Safari)</b>:
+              </Paragraph>
+              <ol style={{ paddingLeft: 20, lineHeight: 1.8, fontWeight: 600 }}>
+                <li>
+                  Buka website di Safari lalu tekan tombol <b>Bagikan / Share</b> (<ShareAltOutlined style={{ color: '#0052cc' }} />).
+                </li>
+                <li>
+                  Gulir ke bawah dan pilih <b>&quot;Tambah ke Layar Utama&quot;</b> / <b>&quot;Add to Home Screen&quot;</b> (<PlusSquareOutlined style={{ color: '#0052cc' }} />).
+                </li>
+                <li>Tekan <b>Tambah</b> di pojok kanan atas.</li>
+              </ol>
+            </div>
+          ) : (
+            <div>
+              <Paragraph style={{ fontWeight: 700 }}>
+                Untuk menginstall PresUMart di <b>Android / Chrome</b>:
+              </Paragraph>
+              <ol style={{ paddingLeft: 20, lineHeight: 1.8, fontWeight: 600 }}>
+                <li>Tekan tombol menu titik tiga (<b>⋮</b>) di pojok kanan atas browser.</li>
+                <li>Pilih <b>&quot;Install Aplikasi&quot;</b> atau <b>&quot;Tambahkan ke Layar Utama&quot;</b>.</li>
+                <li>Ikuti petunjuk di layar untuk memasang ikon aplikasi PresUMart di HP kamu.</li>
+              </ol>
+            </div>
+          )}
         </div>
       </Modal>
     </>

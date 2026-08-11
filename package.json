@@ -24,6 +24,8 @@
     "@types/react-dom": "^19.2.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
     "typescript": "^6.0.3"
   }
 }
