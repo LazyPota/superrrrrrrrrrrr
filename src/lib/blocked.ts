@@ -24,20 +24,72 @@ const BLOCKED_TERMS = [
   'cheat game', 'hack akun', 'crack software', 'exploit tool',
 
   // Kata Kasar & Penghinaan (Profanity & Vandalism)
-  'goblok', 'goblog', 'tolol', 'bego', 'anjing', 'babi', 'bangsat', 'kontol', 'memek', 'pepek', 'pantek', 'jancok', 'jancuk', 'asu', 'bajingan', 'kampang', 'somplak', 'idiot', 'sampah', 'sialan', 'keparat', 'silit', 'fuck', 'shit', 'bitch', 'asshole',
+  'goblok', 'goblog', 'tolol', 'bego', 'blegug',
+  'anjing', 'anjg', 'anjir', 'ajg', 'anying',
+  'babi', 'bangsat', 'bngst', 'bgst',
+  'kontol', 'kntl', 'konthol', 'konthl',
+  'memek', 'mmk', 'pepek', 'ppk',
+  'pantek', 'pntek', 'pantek',
+  'jancok', 'jancuk', 'jnck', 'cok', 'jancik',
+  'asu', 'asw',
+  'bajingan', 'kampang', 'somplak',
+  'idiot', 'sialan', 'keparat',
+  'silit', 'kimak', 'perek', 'sundal', 'celeng', 'monyet',
+  'tai', 'taik', 'tahi',
+  'ngentot', 'ngewe', 'entot', 'ewean',
+  'tetek', 'toket',
+  'biadab', 'keparat',
+  'fuck', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'bastard', 'cunt', 'nigger', 'nigga',
+  'bunuh', 'membunuh', 'dibunuh', 'pembunuh',
 
   // XSS & Script Injection Vectors
   '<script', '</script', 'javascript:', 'onerror=', 'onload=', 'eval(', '<iframe', '<svg', 'document.cookie', 'window.location',
 ];
 
-export function isProductBlocked(name: string, description: string) {
-  const text = `${name || ''} ${description || ''}`.toLowerCase();
-  return BLOCKED_TERMS.some(term => text.includes(term.toLowerCase()));
+function normalizeText(text: string): string {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .replace(/[.\-_\s,;:!?*#@()[\]{}|~`'"]+/g, '')
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/@/g, 'a')
+    .replace(/\$/g, 's')
+    .replace(/€/g, 'e');
 }
 
-export function getBlockReason(name: string, description: string) {
-  const text = `${name || ''} ${description || ''}`.toLowerCase();
-  const found = BLOCKED_TERMS.find(term => text.includes(term.toLowerCase()));
-  if (!found) return null;
-  return `❌ Produk Ditolak & Diblokir Otomatis! Mengandung kata terlarang / tidak sopan: "${found}". Produk ilegal, kata kasar, atau skrip berbahaya tidak diizinkan di PresUMart.`;
+export function isTextBlocked(text: string): boolean {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  const normalized = normalizeText(text);
+  return BLOCKED_TERMS.some(term => {
+    const termLower = term.toLowerCase();
+    if (lower.includes(termLower)) return true;
+    const termNormalized = normalizeText(term);
+    if (termNormalized.length >= 3 && normalized.includes(termNormalized)) return true;
+    return false;
+  });
 }
+
+export function isProductBlocked(name: string, description: string, seller?: string): boolean {
+  return isTextBlocked(name) || isTextBlocked(description) || isTextBlocked(seller || '');
+}
+
+export function getBlockReason(name: string, description: string, seller?: string): string | null {
+  const fields = [
+    { label: 'nama produk', value: name },
+    { label: 'deskripsi', value: description },
+    { label: 'nama penjual', value: seller || '' },
+  ];
+  for (const field of fields) {
+    if (isTextBlocked(field.value)) {
+      return `❌ Produk Ditolak & Diblokir Otomatis! Field "${field.label}" mengandung kata terlarang / tidak sopan. Produk ilegal, kata kasar, atau skrip berbahaya tidak diizinkan di PresUMart.`;
+    }
+  }
+  return null;
+}
+

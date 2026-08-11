@@ -150,8 +150,8 @@ export default function SellPage() {
       return;
     }
 
-    if (isProductBlocked(values.name, values.description)) {
-      setFormError(getBlockReason(values.name, values.description));
+    if (isProductBlocked(values.name, values.description, currentUser.name)) {
+      setFormError(getBlockReason(values.name, values.description, currentUser.name));
       return;
     }
 

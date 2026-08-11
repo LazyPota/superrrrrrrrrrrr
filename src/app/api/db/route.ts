@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
 import { validateProducts } from '../../../lib/validation';
-import { isProductBlocked } from '../../../lib/blocked';
+import { isProductBlocked, isTextBlocked } from '../../../lib/blocked';
 
 let serverDb: {
   users: any[];
@@ -14,6 +14,8 @@ let serverDb: {
   messages: [],
   reviews: [],
 };
+
+const OWNERSHIP_FIELDS = ['seller', 'sellerEmail', 'sellerMajor', 'sellerBatch'] as const;
 
 function stripPasswords(users: any[]): any[] {
   return (users || []).map(({ password, ...rest }) => rest);
@@ -65,20 +67,35 @@ function mergeUsers(existingList: any[], incomingList: any[]) {
   return Array.from(map.values());
 }
 
-function mergeProducts(existingList: any[], incomingList: any[]) {
+function mergeProductsWithOwnership(existingList: any[], incomingList: any[], senderEmail: string) {
   const map = new Map();
   (existingList || []).forEach(p => map.set(p.id, { ...p }));
 
   (incomingList || []).forEach(incoming => {
     const existing = map.get(incoming.id);
+
     if (!existing) {
+      if (incoming.sellerEmail && incoming.sellerEmail !== senderEmail) {
+        return;
+      }
       map.set(incoming.id, { ...incoming });
     } else {
+      if (existing.sellerEmail && existing.sellerEmail !== senderEmail) {
+        return;
+      }
+
+      const preserved: Record<string, any> = {};
+      for (const field of OWNERSHIP_FIELDS) {
+        preserved[field] = existing[field];
+      }
+
       const isSold = existing.status === 'sold' || incoming.status === 'sold' || existing.stock <= 0 || incoming.stock <= 0;
       const minStock = isSold ? 0 : Math.min(existing.stock ?? 1, incoming.stock ?? 1);
+
       map.set(incoming.id, {
         ...existing,
         ...incoming,
+        ...preserved,
         stock: minStock,
         status: isSold ? 'sold' : (incoming.status || existing.status),
       });
@@ -94,7 +111,6 @@ function mergeReviews(existingList: any[], incomingList: any[]) {
   return Array.from(map.values()).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-// In-memory rate limiter for /api/db (max 30 requests per minute per IP)
 const dbRateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 function checkDbRateLimit(ip: string): boolean {
@@ -129,7 +145,7 @@ export async function GET(req: Request) {
       }
       if (supaProds && supaProds.length > 0) {
         const cleanProds = supaProds.filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
-        serverDb.products = mergeProducts(serverDb.products, cleanProds);
+        serverDb.products = mergeProductsWithOwnership(serverDb.products, cleanProds, '__server__');
       }
       if (supaMsgs && supaMsgs.length > 0) {
         serverDb.messages = mergeMessages(serverDb.messages, supaMsgs);
@@ -139,10 +155,8 @@ export async function GET(req: Request) {
       }
     }
   } catch (e) {
-    // Fallback if Supabase tables are not created yet
   }
 
-  // Ensure serverDb products never contain dummy seed items
   serverDb.products = (serverDb.products || []).filter((p: any) => p && p.id && !p.id.startsWith('seed-') && !p.id.startsWith('prod-presu-'));
 
   const { valid: validProducts } = validateProducts(serverDb.products);
@@ -155,7 +169,6 @@ export async function GET(req: Request) {
   if (invalidIds.length > 0 && supabase) {
     try {
       await supabase.from('products').delete().in('id', invalidIds);
-      console.warn(`[SECURITY] Auto-deleted ${invalidIds.length} invalid products from Supabase`);
     } catch (e) {
     }
   }
@@ -175,6 +188,11 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
 
+    const senderEmail = typeof data.senderEmail === 'string' ? data.senderEmail.trim().toLowerCase() : '';
+    if (!senderEmail || !senderEmail.includes('@')) {
+      return NextResponse.json({ error: 'Missing or invalid senderEmail.' }, { status: 403 });
+    }
+
     if (data.products && data.products.length > 100) {
       return NextResponse.json({ error: 'Payload too large: maximum 100 products per request' }, { status: 413 });
     }
@@ -186,11 +204,23 @@ export async function POST(req: Request) {
     let validatedProducts: any[] = [];
     let rejectedCount = 0;
     if (data.products && Array.isArray(data.products)) {
-      const { valid, rejected } = validateProducts(data.products);
-      rejectedCount = rejected.length;
+      const ownProducts = data.products.filter((p: any) => {
+        if (!p.sellerEmail || p.sellerEmail !== senderEmail) {
+          rejectedCount++;
+          return false;
+        }
+        return true;
+      });
+
+      const { valid, rejected } = validateProducts(ownProducts);
+      rejectedCount += rejected.length;
 
       validatedProducts = valid.filter((p: any) => {
-        if (isProductBlocked(p.name || '', p.description || '')) {
+        if (isProductBlocked(p.name || '', p.description || '', p.seller || '')) {
+          rejectedCount++;
+          return false;
+        }
+        if (isTextBlocked(p.seller || '')) {
           rejectedCount++;
           return false;
         }
@@ -198,18 +228,17 @@ export async function POST(req: Request) {
       });
 
       if (rejected.length > 0) {
-        console.warn(`[SECURITY] Rejected ${rejected.length} invalid products from IP: ${clientIp}`, 
+        console.warn(`[SECURITY] Rejected ${rejected.length} invalid products from ${senderEmail} (IP: ${clientIp})`,
           rejected.map(r => r.errors));
       }
     }
 
     if (validatedProducts.length > 0) {
-      serverDb.products = mergeProducts(serverDb.products, validatedProducts);
+      serverDb.products = mergeProductsWithOwnership(serverDb.products, validatedProducts, senderEmail);
     }
     if (data.messages) serverDb.messages = mergeMessages(serverDb.messages, data.messages);
     if (data.reviews) serverDb.reviews = mergeReviews(serverDb.reviews, data.reviews);
 
-    // Try upserting to Supabase DB — only validated products
     try {
       if (supabase) {
         if (validatedProducts.length > 0) await supabase.from('products').upsert(validatedProducts, { onConflict: 'id' });
@@ -217,11 +246,10 @@ export async function POST(req: Request) {
         if (data.reviews?.length) await supabase.from('reviews').upsert(data.reviews, { onConflict: 'id' });
       }
     } catch (e) {
-      // Ignore Supabase sync errors if table doesn't exist
     }
 
-    return NextResponse.json({ 
-      ok: true, 
+    return NextResponse.json({
+      ok: true,
       accepted: validatedProducts.length,
       rejected: rejectedCount,
     });
@@ -229,3 +257,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Failed to update server DB' }, { status: 400 });
   }
 }
+

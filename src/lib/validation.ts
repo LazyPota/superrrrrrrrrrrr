@@ -1,5 +1,6 @@
 import CATEGORIES from '../data/categories';
 import MAJORS from './majors';
+import { isTextBlocked } from './blocked';
 
 export const PRICE_MIN = 100;
 export const PRICE_MAX = 999_999_999;
@@ -52,6 +53,8 @@ export function validateUserProfile(userData: Record<string, unknown>): { valid:
     errors.push('Nama minimal 2 karakter.');
   } else if (name.length > 50) {
     errors.push('Nama maksimal 50 karakter.');
+  } else if (isTextBlocked(name)) {
+    errors.push('Nama mengandung kata tidak sopan / terlarang.');
   }
 
   const email = typeof userData.email === 'string' ? userData.email.trim().toLowerCase() : '';

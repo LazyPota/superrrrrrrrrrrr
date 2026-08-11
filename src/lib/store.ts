@@ -251,11 +251,19 @@ export async function syncWithServer() {
 export async function pushToServer() {
   if (typeof window === 'undefined') return;
   try {
+    const currentUser = getUser();
+    if (!currentUser || !currentUser.email) return;
+
+    const senderEmail = currentUser.email.trim().toLowerCase();
+    const allProducts = getProducts();
+    const ownProducts = allProducts.filter((p: any) => p.sellerEmail === senderEmail);
+
     await fetch('/api/db', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        products: getProducts(),
+        senderEmail,
+        products: ownProducts,
         messages: getDirectMessages(),
       }),
     });
