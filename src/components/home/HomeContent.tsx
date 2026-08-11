@@ -243,7 +243,7 @@ export default function HomeContent() {
           <Col xs={24} md={8}>
             <div className="neo-card neo-card-cyan" style={{ padding: '24px', textAlign: 'center' }}>
               <ThunderboltOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
-              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>COD KAMPUS JABABEKAN</Title>
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>COD KAMPUS JABABEKA</Title>
               <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13, lineHeight: 1.5, display: 'block' }}>Ketemuan langsung di Student Center tanpa biaya ongkir.</Text>
             </div>
           </Col>
