@@ -15,10 +15,29 @@ const { Title, Text } = Typography;
 export default function RegisterPage() {
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const router = useRouter();
 
   async function onFinish(values) {
     setFormError('');
+
+    // Anti-bot honeypot check
+    if (honeypot) {
+      // Bot trapped!
+      setLoading(false);
+      setFormError('Pendaftaran gagal. Terdeteksi aktivitas otomatis.');
+      return;
+    }
+
+    // Rate throttle: max 1 submission every 5 seconds per browser session
+    const now = Date.now();
+    if (now - lastSubmitTime < 5000) {
+      setFormError('Mohon tunggu beberapa detik sebelum mencoba mendaftar lagi.');
+      return;
+    }
+    setLastSubmitTime(now);
+
     const emailLower = values.email.trim().toLowerCase();
     if (!emailLower.endsWith('@student.president.ac.id') && !emailLower.endsWith('@president.ac.id')) {
       setFormError('Pendaftaran khusus email kampus President University (@student.president.ac.id / @president.ac.id).');
@@ -71,6 +90,17 @@ export default function RegisterPage() {
           {formError && <Alert message={formError} type="error" showIcon style={{ marginBottom: 20, borderRadius: 8 }} />}
 
           <Form layout="vertical" onFinish={onFinish} size="large">
+            {/* Anti-bot Honeypot Field (Hidden from human users) */}
+            <div style={{ display: 'none', visibility: 'hidden', position: 'absolute', left: '-9999px' }} aria-hidden="true">
+              <input
+                type="text"
+                name="website_url_verification"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </div>
             <Form.Item
               label="Nama Lengkap"
               name="name"
