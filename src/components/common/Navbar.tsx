@@ -15,7 +15,8 @@ import {
   SearchOutlined,
   HistoryOutlined,
   ThunderboltOutlined,
-  FireOutlined
+  FireOutlined,
+  SmileOutlined
 } from '@ant-design/icons';
 import { getUser, getCart, removeUser, getDirectMessages, syncWithServer, speakVoice, playOrderSound } from '../../lib/store';
 import DirectChatDrawer from '../chat/DirectChatDrawer';
@@ -63,8 +64,8 @@ export default function Navbar() {
       refreshState();
       
       notification.info({
-        message: '🔔 Pesan / Orderan Baru Masuk!',
-        description: 'Ada aktivitas percakapan baru di PresUMart.',
+        message: '⚡ PESAN BARU MASUK!',
+        description: 'Ada transaksi / obrolan baru di PresUMart.',
         placement: 'topRight',
         onClick: () => { setDirectDrawerOpen(true); },
         duration: 5,
@@ -103,27 +104,27 @@ export default function Navbar() {
     {
       key: 'profile',
       label: (
-        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 600 }}>
-          <UserOutlined style={{ color: '#00f2fe' }} />
-          <span>Profil Saya</span>
+        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800 }}>
+          <UserOutlined style={{ color: '#ff2a85' }} />
+          <span>PROFIL SAYA</span>
         </Link>
       ),
     },
     {
       key: 'orders',
       label: (
-        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 600 }}>
-          <HistoryOutlined style={{ color: '#0052cc' }} />
-          <span>Riwayat Pesanan</span>
+        <Link href="/profile" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800 }}>
+          <HistoryOutlined style={{ color: '#2563eb' }} />
+          <span>RIWAYAT PESANAN</span>
         </Link>
       ),
     },
     {
       key: 'sell',
       label: (
-        <Link href="/sell" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 600 }}>
-          <ShopOutlined style={{ color: '#10b981' }} />
-          <span>Kelola Jualanku</span>
+        <Link href="/sell" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800 }}>
+          <ShopOutlined style={{ color: '#00e676' }} />
+          <span>KELOLA JUALANKU</span>
         </Link>
       ),
     },
@@ -131,9 +132,9 @@ export default function Navbar() {
     {
       key: 'logout',
       label: (
-        <div onClick={handleLogout} style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 600, cursor: 'pointer' }}>
+        <div onClick={handleLogout} style={{ color: '#ff2a85', display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0', fontWeight: 800, cursor: 'pointer' }}>
           <LogoutOutlined />
-          <span>Keluar Akun</span>
+          <span>KELUAR AKUN</span>
         </div>
       ),
     },
@@ -141,174 +142,206 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Top Running Live Ticker Bar */}
-      <div className="ticker-wrap">
-        <div className="ticker-move">
-          <span className="ticker-item"><FireOutlined style={{ color: '#f59e0b' }} /> MARKETPLACE RESMI PRESIDENT UNIVERSITY</span>
-          <span className="ticker-item">● COD LANGSUNG KAMPUS JABABEKAN</span>
-          <span className="ticker-item"><ThunderboltOutlined style={{ color: '#00f2fe' }} /> 0% BIAYA ADMIN UNTUK MAHASISWA</span>
-          <span className="ticker-item">● TERVERIFIKASI EMAIL KAMPUS @PRESIDENT.AC.ID</span>
-          <span className="ticker-item"><FireOutlined style={{ color: '#f59e0b' }} /> MARKETPLACE RESMI PRESIDENT UNIVERSITY</span>
-          <span className="ticker-item">● COD LANGSUNG KAMPUS JABABEKAN</span>
-          <span className="ticker-item"><ThunderboltOutlined style={{ color: '#00f2fe' }} /> 0% BIAYA ADMIN UNTUK MAHASISWA</span>
+      {/* Neobrutalist Marquee Header */}
+      <div className="ticker-wrap-neo">
+        <div className="ticker-move-neo">
+          <span className="ticker-item-neo"><FireOutlined /> MARKETPLACE KAMPUS PRESIDENT UNIVERSITY</span>
+          <span className="ticker-item-neo">⚡ COD BEBAS ONGKIR IN CAMPUS</span>
+          <span className="ticker-item-neo">★ 0% BIAYA ADMIN UNTUK MAHASISWA</span>
+          <span className="ticker-item-neo">💥 TERVERIFIKASI EMAIL KAMPUS @PRESIDENT.AC.ID</span>
+          <span className="ticker-item-neo"><FireOutlined /> MARKETPLACE KAMPUS PRESIDENT UNIVERSITY</span>
+          <span className="ticker-item-neo">⚡ COD BEBAS ONGKIR IN CAMPUS</span>
         </div>
       </div>
 
-      {/* Floating macOS Dock / Dynamic Island Nav Bar */}
-      <div style={{ height: 76 }}>
-        <nav className="floating-dock-nav">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 12 }}>
-            {/* Brand Logo */}
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-              <div style={{
-                width: 38,
-                height: 38,
-                borderRadius: 99,
-                background: 'linear-gradient(135deg, #00f2fe 0%, #0052cc 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 20px rgba(0, 242, 254, 0.4)',
-                border: '1px solid rgba(255, 255, 255, 0.4)'
-              }}>
-                <ShopOutlined style={{ fontSize: 20, color: '#090d16' }} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: 20, fontWeight: 900, color: '#ffffff', fontFamily: 'Syne', letterSpacing: '-0.03em', lineHeight: 1 }}>
-                  Pres<span className="glow-text-cyan">U</span>Mart
-                </span>
-                <span className="hide-mobile" style={{ fontSize: 8, fontWeight: 800, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 2 }}>
-                  Campus Store
-                </span>
-              </div>
-            </Link>
-
-            {/* Quick Search Box */}
-            <div className="hide-mobile" style={{ flex: 1, maxWidth: 440, margin: '0 12px' }}>
-              <Input.Search
-                placeholder="Cari buku, barang kost, gadget..."
-                onSearch={handleSearch}
-                size="middle"
-                style={{ borderRadius: 99, overflow: 'hidden' }}
-                enterButton
-              />
+      {/* Main Neobrutalist Navbar */}
+      <header style={{
+        background: '#ffffff',
+        borderBottom: '3px solid #000000',
+        boxShadow: '0 4px 0px #000000',
+        padding: '12px 20px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1000
+      }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          {/* Logo Neobrutalist */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
+            <div style={{
+              width: 42,
+              height: 42,
+              borderRadius: 12,
+              background: '#ffe600',
+              border: '3px solid #000000',
+              boxShadow: '3px 3px 0px #000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <ShopOutlined style={{ fontSize: 24, color: '#000000' }} />
             </div>
-
-            {/* Right Action Icons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-              <Tooltip title="Keranjang Belanja">
-                <Badge count={cartCount} size="small" color="#0052cc">
-                  <Button
-                    type="text"
-                    shape="circle"
-                    icon={<ShoppingCartOutlined style={{ fontSize: 19, color: '#ffffff' }} />}
-                    onClick={() => router.push('/cart')}
-                    style={{ width: 38, height: 38, background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
-                  />
-                </Badge>
-              </Tooltip>
-
-              {user ? (
-                <>
-                  <Tooltip title="Pesan / Live Chat">
-                    <Badge count={unreadCount} size="small" color="#f59e0b">
-                      <Button
-                        type="text"
-                        shape="circle"
-                        icon={<MessageOutlined style={{ fontSize: 19, color: '#00f2fe' }} />}
-                        onClick={() => setDirectDrawerOpen(true)}
-                        style={{ width: 38, height: 38, background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
-                      />
-                    </Badge>
-                  </Tooltip>
-
-                  <Tooltip title="Jual Barang" className="hide-mobile">
-                    <Button
-                      type="primary"
-                      icon={<PlusCircleOutlined />}
-                      onClick={() => router.push('/sell')}
-                      style={{
-                        borderRadius: 99,
-                        fontWeight: 800,
-                        background: 'linear-gradient(135deg, #00f2fe 0%, #0052cc 100%)',
-                        color: '#090d16',
-                        border: 'none',
-                        boxShadow: '0 4px 16px rgba(0, 242, 254, 0.35)',
-                        padding: '0 16px',
-                        height: 38
-                      }}
-                    >
-                      Jual
-                    </Button>
-                  </Tooltip>
-
-                  <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
-                    <Avatar
-                      style={{ backgroundColor: '#0052cc', cursor: 'pointer', border: '2px solid #00f2fe', boxShadow: '0 0 14px rgba(0,242,254,0.4)' }}
-                      size={36}
-                      icon={<UserOutlined />}
-                    >
-                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                    </Avatar>
-                  </Dropdown>
-                </>
-              ) : (
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <Button
-                    type="text"
-                    onClick={() => router.push('/login')}
-                    style={{ borderRadius: 99, color: '#ffffff', fontWeight: 700, fontSize: 12, height: 36 }}
-                  >
-                    Masuk
-                  </Button>
-                  <Button
-                    type="primary"
-                    onClick={() => router.push('/register')}
-                    style={{
-                      borderRadius: 99,
-                      fontWeight: 800,
-                      fontSize: 12,
-                      height: 36,
-                      background: 'linear-gradient(135deg, #00f2fe 0%, #0052cc 100%)',
-                      color: '#090d16',
-                      border: 'none',
-                      boxShadow: '0 4px 14px rgba(0, 242, 254, 0.35)'
-                    }}
-                  >
-                    Daftar
-                  </Button>
-                </div>
-              )}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 24, fontWeight: 900, color: '#000000', fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em', lineHeight: 1 }}>
+                Pres<span style={{ color: '#ff2a85' }}>U</span>Mart!
+              </span>
+              <span className="hide-mobile" style={{ fontSize: 9, fontWeight: 900, color: '#000000', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 2 }}>
+                President Univ Store
+              </span>
             </div>
+          </Link>
+
+          {/* Search Bar Neobrutalist */}
+          <div className="hide-mobile" style={{ flex: 1, maxWidth: 480, margin: '0 16px' }}>
+            <Input.Search
+              placeholder="Cari barang, buku, gadget, jasa..."
+              onSearch={handleSearch}
+              size="large"
+              style={{ borderRadius: 12 }}
+              enterButton="Cari!"
+            />
           </div>
-        </nav>
-      </div>
+
+          {/* Right Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <Tooltip title="Keranjang Belanja">
+              <Badge count={cartCount} size="small" color="#ff2a85">
+                <Button
+                  onClick={() => router.push('/cart')}
+                  style={{
+                    background: '#00f0ff',
+                    border: '3px solid #000000',
+                    boxShadow: '3px 3px 0px #000000',
+                    borderRadius: 12,
+                    width: 42,
+                    height: 42,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  icon={<ShoppingCartOutlined style={{ fontSize: 20, color: '#000000' }} />}
+                />
+              </Badge>
+            </Tooltip>
+
+            {user ? (
+              <>
+                <Tooltip title="Pesan / Live Chat">
+                  <Badge count={unreadCount} size="small" color="#ff6b00">
+                    <Button
+                      onClick={() => setDirectDrawerOpen(true)}
+                      style={{
+                        background: '#ffe600',
+                        border: '3px solid #000000',
+                        boxShadow: '3px 3px 0px #000000',
+                        borderRadius: 12,
+                        width: 42,
+                        height: 42,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      icon={<MessageOutlined style={{ fontSize: 20, color: '#000000' }} />}
+                    />
+                  </Badge>
+                </Tooltip>
+
+                <Tooltip title="Jual Barang" className="hide-mobile">
+                  <Button
+                    onClick={() => router.push('/sell')}
+                    style={{
+                      background: '#00e676',
+                      border: '3px solid #000000',
+                      boxShadow: '3px 3px 0px #000000',
+                      borderRadius: 12,
+                      fontWeight: 900,
+                      color: '#000000',
+                      height: 42,
+                      padding: '0 18px'
+                    }}
+                    icon={<PlusCircleOutlined />}
+                  >
+                    Jual Barang!
+                  </Button>
+                </Tooltip>
+
+                <Dropdown menu={{ items: userMenuItems as any }} placement="bottomRight" trigger={['click']}>
+                  <Avatar
+                    style={{
+                      backgroundColor: '#ff2a85',
+                      color: '#ffffff',
+                      cursor: 'pointer',
+                      border: '3px solid #000000',
+                      boxShadow: '3px 3px 0px #000000',
+                      fontWeight: 900
+                    }}
+                    size={40}
+                    icon={<UserOutlined />}
+                  >
+                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                  </Avatar>
+                </Dropdown>
+              </>
+            ) : (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <Button
+                  onClick={() => router.push('/login')}
+                  style={{
+                    background: '#ffffff',
+                    border: '3px solid #000000',
+                    boxShadow: '3px 3px 0px #000000',
+                    borderRadius: 12,
+                    fontWeight: 900,
+                    height: 40,
+                    padding: '0 16px'
+                  }}
+                >
+                  Masuk
+                </Button>
+                <Button
+                  onClick={() => router.push('/register')}
+                  style={{
+                    background: '#ffe600',
+                    border: '3px solid #000000',
+                    boxShadow: '3px 3px 0px #000000',
+                    borderRadius: 12,
+                    fontWeight: 900,
+                    height: 40,
+                    padding: '0 16px'
+                  }}
+                >
+                  Daftar
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
 
       {/* Mobile Bottom Dock Bar */}
       <div className="mobile-bottom-nav">
         <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
           <HomeOutlined />
-          <span>Beranda</span>
+          <span>BERANDA</span>
         </Link>
         <Link href="/cart" className={`mobile-nav-item ${pathname === '/cart' ? 'active' : ''}`}>
           <Badge count={cartCount} size="small" offset={[4, 0]}>
             <ShoppingCartOutlined />
           </Badge>
-          <span>Keranjang</span>
+          <span>KERANJANG</span>
         </Link>
         <Link href="/sell" className={`mobile-nav-item ${pathname === '/sell' ? 'active' : ''}`}>
-          <PlusCircleOutlined style={{ color: '#00f2fe' }} />
-          <span>Jual</span>
+          <PlusCircleOutlined style={{ color: '#ff2a85' }} />
+          <span>JUAL</span>
         </Link>
         <div onClick={() => setDirectDrawerOpen(true)} className="mobile-nav-item" style={{ cursor: 'pointer' }}>
           <Badge count={unreadCount} size="small" offset={[4, 0]}>
             <MessageOutlined />
           </Badge>
-          <span>Pesan</span>
+          <span>PESAN</span>
         </div>
         <Link href="/profile" className={`mobile-nav-item ${pathname === '/profile' ? 'active' : ''}`}>
           <UserOutlined />
-          <span>Profil</span>
+          <span>PROFIL</span>
         </Link>
       </div>
 

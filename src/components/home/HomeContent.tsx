@@ -14,13 +14,14 @@ import {
   SkinOutlined,
   HomeOutlined,
   ToolOutlined,
-  LaptopOutlined
+  LaptopOutlined,
+  FireOutlined
 } from '@ant-design/icons';
 import ProductCard from '../product/ProductCard';
 import { getProducts, saveProducts } from '../../lib/store';
 import CATEGORIES from '../../data/categories';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Semua': <AppstoreOutlined />,
@@ -86,7 +87,7 @@ export default function HomeContent() {
   return (
     <main style={{ maxWidth: 1240, margin: '0 auto', padding: '0 20px 64px 20px' }}>
 
-      {/* Category Bento Pill Bar */}
+      {/* Neobrutalist Category Pills Bar */}
       <div style={{ marginBottom: 28, overflowX: 'auto', paddingBottom: 8, display: 'flex', gap: 10 }}>
         {categoriesWithAll.map(cat => {
           const isActive = activeCat === cat;
@@ -94,23 +95,23 @@ export default function HomeContent() {
             <div
               key={cat}
               onClick={() => setActiveCat(cat)}
-              className={`cat-bento-pill ${isActive ? 'active' : ''}`}
+              className={`neo-pill ${isActive ? 'active' : ''}`}
             >
               {CATEGORY_ICONS[cat] || <AppstoreOutlined />}
-              <span>{cat}</span>
+              <span>{cat.toUpperCase()}</span>
             </div>
           );
         })}
       </div>
 
-      {/* Catalog Control Header */}
+      {/* Catalog Controls Header */}
       <div id="produk" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: '1.8rem', fontFamily: 'Syne, sans-serif' }}>
-            Katalog <span className="glow-text-primary">Produk Kampus</span>
+          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: '2rem', fontFamily: 'Syne, sans-serif', color: '#000000' }}>
+            KATALOG <span style={{ background: '#00f0ff', padding: '2px 10px', border: '3px solid #000', boxShadow: '3px 3px 0px #000' }}>PRODUK</span>
           </Title>
-          <Text type="secondary" style={{ fontSize: 13 }}>
-            {search ? `Hasil pencarian "${search}" (${filtered.length} barang)` : `Menampilkan ${filtered.length} produk siap dibeli`}
+          <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13 }}>
+            {search ? `Hasil pencarian "${search}" (${filtered.length} produk)` : `Menampilkan ${filtered.length} barang siap dibeli`}
           </Text>
         </div>
 
@@ -127,72 +128,74 @@ export default function HomeContent() {
           />
 
           <Link href="/sell">
-            <Button
-              type="primary"
-              size="large"
-              icon={<PlusOutlined />}
+            <button
               style={{
-                borderRadius: 99,
-                fontWeight: 800,
-                background: 'linear-gradient(135deg, #00f2fe 0%, #0052cc 100%)',
-                color: '#090d16',
-                border: 'none',
-                boxShadow: '0 4px 16px rgba(0, 242, 254, 0.3)'
+                background: '#ffe600',
+                border: '3px solid #000000',
+                boxShadow: '3px 3px 0px #000000',
+                borderRadius: 12,
+                fontWeight: 900,
+                fontSize: 14,
+                padding: '10px 20px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6
               }}
             >
-              Jual Barang
-            </Button>
+              <PlusOutlined /> JUAL BARANG!
+            </button>
           </Link>
         </div>
       </div>
 
-      {/* Condition Filter Checkable Bar */}
+      {/* Condition Pills */}
       <div style={{ marginBottom: 28, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Text strong style={{ fontSize: 12, color: '#64748b', marginRight: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Kondisi:</Text>
+        <Text strong style={{ fontSize: 12, color: '#000000', marginRight: 4, textTransform: 'uppercase' }}>KONDISI:</Text>
         {[
-          { label: 'Semua Kondisi', value: 'Semua' },
-          { label: '✨ Barang Baru', value: 'Barang Baru' },
-          { label: '🌟 Bekas - Like New', value: 'Bekas - Like New' },
-          { label: '👍 Bekas - Mulus', value: 'Bekas - Mulus' },
+          { label: 'SEMUA KONDISI', value: 'Semua' },
+          { label: '✨ BARANG BARU', value: 'Barang Baru' },
+          { label: '🌟 BEKAS - LIKE NEW', value: 'Bekas - Like New' },
+          { label: '👍 BEKAS - MULUS', value: 'Bekas - Mulus' },
         ].map(cond => (
-          <Tag.CheckableTag
+          <button
             key={cond.value}
-            checked={activeCond === cond.value}
-            onChange={() => setActiveCond(cond.value)}
+            onClick={() => setActiveCond(cond.value)}
             style={{
-              padding: '6px 16px',
+              padding: '6px 14px',
               borderRadius: 99,
-              fontSize: 12,
-              fontWeight: 700,
-              border: activeCond === cond.value ? '1px solid #0052cc' : '1px solid #cbd5e1',
-              background: activeCond === cond.value ? '#eff6ff' : '#ffffff',
-              color: activeCond === cond.value ? '#0052cc' : '#475569',
+              fontSize: 11,
+              fontWeight: 800,
+              border: '2px solid #000000',
+              boxShadow: activeCond === cond.value ? '3px 3px 0px #000000' : '2px 2px 0px #000000',
+              background: activeCond === cond.value ? '#ff2a85' : '#ffffff',
+              color: activeCond === cond.value ? '#ffffff' : '#000000',
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.15s ease'
             }}
           >
             {cond.label}
-          </Tag.CheckableTag>
+          </button>
         ))}
       </div>
 
-      {/* Product Bento Grid */}
+      {/* Product Grid */}
       {filtered.length === 0 ? (
-        <div className="bento-card" style={{ padding: '64px 24px', textAlign: 'center' }}>
+        <div className="neo-card" style={{ padding: '64px 24px', textAlign: 'center', background: '#ffffff' }}>
           <Empty
             description={
               <div>
-                <Title level={4} style={{ marginBottom: 4, fontFamily: 'Syne, sans-serif' }}>Produk Tidak Ditemukan</Title>
-                <Text type="secondary" style={{ maxWidth: 400, display: 'block', margin: '0 auto 20px auto' }}>
-                  Belum ada barang untuk kategori atau kata kunci ini.
+                <Title level={4} style={{ marginBottom: 4, fontFamily: 'Syne, sans-serif', fontWeight: 900 }}>PRODUK TIDAK DITEMUKAN!</Title>
+                <Text style={{ fontWeight: 700, color: '#666' }}>
+                  Belum ada produk di kategori ini.
                 </Text>
               </div>
             }
           >
             <Link href="/sell">
-              <Button type="primary" size="large" icon={<PlusOutlined />} style={{ borderRadius: 99, fontWeight: 800, background: '#0052cc', border: 'none' }}>
-                Jual Barang Pertama
-              </Button>
+              <button style={{ background: '#ffe600', border: '3px solid #000', boxShadow: '4px 4px 0px #000', padding: '12px 24px', fontWeight: 900, borderRadius: 12, cursor: 'pointer' }}>
+                JUAL BARANG PERTAMA!
+              </button>
             </Link>
           </Empty>
         </div>
@@ -206,36 +209,30 @@ export default function HomeContent() {
         </Row>
       )}
 
-      {/* Trust Bento Grid */}
+      {/* Trust Grid Neobrutalist */}
       <div style={{ marginTop: 64 }}>
         <Row gutter={[16, 16]}>
           <Col xs={24} md={8}>
-            <div className="bento-card bento-dark" style={{ padding: '28px 24px', textAlign: 'center', height: '100%' }}>
-              <SafetyCertificateOutlined style={{ fontSize: 36, color: '#00f2fe', marginBottom: 12 }} />
-              <Title level={4} style={{ color: '#fff', margin: '0 0 6px 0', fontWeight: 800, fontFamily: 'Syne, sans-serif' }}>Terverifikasi Kampus</Title>
-              <Paragraph style={{ color: '#94a3b8', margin: 0, fontSize: 13, lineHeight: 1.6 }}>
-                Akun khusus mahasiswas President University dengan domain resmi @student.president.ac.id.
-              </Paragraph>
+            <div className="neo-card neo-card-yellow" style={{ padding: '24px', textAlign: 'center' }}>
+              <SafetyCertificateOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>100% TERVERIFIKASI</Title>
+              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13 }}>Khusus mahasiswa President University dengan email @student.president.ac.id.</Text>
             </div>
           </Col>
 
           <Col xs={24} md={8}>
-            <div className="bento-card bento-dark" style={{ padding: '28px 24px', textAlign: 'center', height: '100%' }}>
-              <ThunderboltOutlined style={{ fontSize: 36, color: '#f59e0b', marginBottom: 12 }} />
-              <Title level={4} style={{ color: '#fff', margin: '0 0 6px 0', fontWeight: 800, fontFamily: 'Syne, sans-serif' }}>COD Bebas Ongkir</Title>
-              <Paragraph style={{ color: '#94a3b8', margin: 0, fontSize: 13, lineHeight: 1.6 }}>
-                Serah terima barang langsung saat ketemuan di area kampus Cikarang Jababeka.
-              </Paragraph>
+            <div className="neo-card neo-card-cyan" style={{ padding: '24px', textAlign: 'center' }}>
+              <ThunderboltOutlined style={{ fontSize: 36, color: '#000000', marginBottom: 8 }} />
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#000000' }}>COD KAMPUS JABABEKAN</Title>
+              <Text style={{ fontWeight: 700, color: '#000000', fontSize: 13 }}>Ketemuan langsung di Student Center tanpa biaya ongkir.</Text>
             </div>
           </Col>
 
           <Col xs={24} md={8}>
-            <div className="bento-card bento-dark" style={{ padding: '28px 24px', textAlign: 'center', height: '100%' }}>
-              <CheckCircleOutlined style={{ fontSize: 36, color: '#10b981', marginBottom: 12 }} />
-              <Title level={4} style={{ color: '#fff', margin: '0 0 6px 0', fontWeight: 800, fontFamily: 'Syne, sans-serif' }}>0% Biaya Admin</Title>
-              <Paragraph style={{ color: '#94a3b8', margin: 0, fontSize: 13, lineHeight: 1.6 }}>
-                Bebas komisi platform. Seluruh hasil penjualan 100% utuh milik penjual.
-              </Paragraph>
+            <div className="neo-card neo-card-pink" style={{ padding: '24px', textAlign: 'center' }}>
+              <CheckCircleOutlined style={{ fontSize: 36, color: '#ffffff', marginBottom: 8 }} />
+              <Title level={4} style={{ margin: '0 0 6px 0', fontWeight: 900, color: '#ffffff' }}>0% BIAYA ADMIN</Title>
+              <Text style={{ fontWeight: 700, color: '#ffffff', fontSize: 13 }}>Hasil penjualan 100% utuh milik penjual tanpa potongan komisi.</Text>
             </div>
           </Col>
         </Row>

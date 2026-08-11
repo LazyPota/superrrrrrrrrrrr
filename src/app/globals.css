@@ -1,21 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Syne:wght@800;900&display=swap');
 
 :root {
-  --primary: #0052cc;
-  --primary-glow: rgba(0, 82, 204, 0.4);
-  --cyan-glow: rgba(0, 242, 254, 0.4);
-  --accent-cyan: #00f2fe;
-  --accent-gold: #f59e0b;
-  --dark-bg: #090d16;
-  --dark-surface: #111827;
-  --dark-border: rgba(255, 255, 255, 0.1);
-  --light-bg: #f8fafc;
-  --card-bg: #ffffff;
-  --radius-lg: 24px;
-  --radius-md: 16px;
-  --radius-sm: 12px;
-  --shadow-bento: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(226, 232, 240, 0.8);
-  --shadow-bento-hover: 0 20px 40px -10px rgba(0, 82, 204, 0.2), 0 0 0 1px rgba(0, 82, 204, 0.3);
+  --neo-yellow: #ffe600;
+  --neo-cyan: #00f0ff;
+  --neo-pink: #ff2a85;
+  --neo-green: #00e676;
+  --neo-purple: #7c3aed;
+  --neo-orange: #ff6b00;
+  --neo-blue: #2563eb;
+  --neo-bg: #faf9f6;
+  --neo-black: #000000;
+  --neo-white: #ffffff;
+  --neo-border: 3px solid #000000;
+  --neo-border-lg: 4px solid #000000;
+  --neo-shadow-sm: 3px 3px 0px #000000;
+  --neo-shadow-md: 5px 5px 0px #000000;
+  --neo-shadow-lg: 8px 8px 0px #000000;
+  --neo-shadow-hover: 7px 7px 0px #000000;
 }
 
 *, *::before, *::after {
@@ -26,188 +27,201 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--neo-bg);
+  color: #000000;
   min-height: 100vh;
   overflow-x: hidden;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   scroll-behavior: smooth;
 }
 
-h1, h2, h3, h4, .font-display {
+h1, h2, h3, h4, .font-neo {
   font-family: 'Syne', 'Outfit', sans-serif !important;
   letter-spacing: -0.03em;
+  font-weight: 900 !important;
+  color: #000000;
 }
 
-/* Ticker Marquee Animation */
+/* Neobrutalist Cards */
+.neo-card {
+  background: #ffffff;
+  border: var(--neo-border);
+  border-radius: 16px;
+  box-shadow: var(--neo-shadow-md);
+  transition: all 0.15s ease;
+  overflow: hidden;
+}
+
+.neo-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--neo-shadow-hover);
+}
+
+.neo-card-yellow {
+  background: var(--neo-yellow) !important;
+}
+
+.neo-card-cyan {
+  background: var(--neo-cyan) !important;
+}
+
+.neo-card-pink {
+  background: var(--neo-pink) !important;
+  color: #ffffff;
+}
+
+.neo-card-green {
+  background: var(--neo-green) !important;
+}
+
+/* Neobrutalist Buttons */
+.neo-btn {
+  border: var(--neo-border) !important;
+  box-shadow: var(--neo-shadow-sm) !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+  transition: all 0.12s ease !important;
+  color: #000000 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.neo-btn:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: var(--neo-shadow-md) !important;
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px) !important;
+  box-shadow: 1px 1px 0px #000000 !important;
+}
+
+.neo-btn-yellow {
+  background: var(--neo-yellow) !important;
+}
+
+.neo-btn-cyan {
+  background: var(--neo-cyan) !important;
+}
+
+.neo-btn-pink {
+  background: var(--neo-pink) !important;
+  color: #ffffff !important;
+}
+
+.neo-btn-black {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Neobrutalist Category Pills */
+.neo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 99px;
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  font-weight: 800;
+  font-size: 13px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+
+.neo-pill:hover, .neo-pill.active {
+  background: var(--neo-yellow);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px #000000;
+}
+
+/* Neobrutalist Badge Tag */
+.neo-tag {
+  border: 2px solid #000000 !important;
+  box-shadow: 2px 2px 0px #000000 !important;
+  font-weight: 800 !important;
+  border-radius: 8px !important;
+  padding: 2px 10px !important;
+  color: #000000 !important;
+}
+
+/* Ant Design Global Neobrutalism Overrides */
+.ant-btn {
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  font-weight: 800 !important;
+}
+
+.ant-card {
+  border: 3px solid #000000 !important;
+  box-shadow: 5px 5px 0px #000000 !important;
+  border-radius: 16px !important;
+}
+
+.ant-input, .ant-input-number, .ant-select-selector {
+  border: 2px solid #000000 !important;
+  box-shadow: 3px 3px 0px #000000 !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+.ant-input:focus, .ant-input-focused,
+.ant-select-focused .ant-select-selector {
+  box-shadow: 4px 4px 0px #000000 !important;
+}
+
+.ant-modal-content {
+  border: 3px solid #000000 !important;
+  box-shadow: 8px 8px 0px #000000 !important;
+  border-radius: 20px !important;
+}
+
+.ant-drawer-content {
+  border-left: 3px solid #000000 !important;
+}
+
+/* Running Marquee Bar Neobrutalist */
+.ticker-wrap-neo {
+  width: 100%;
+  overflow: hidden;
+  background: var(--neo-yellow);
+  border-bottom: 3px solid #000000;
+  white-space: nowrap;
+  padding: 8px 0;
+}
+
+.ticker-move-neo {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 20s linear infinite;
+}
+
+.ticker-item-neo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 24px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
 }
 
-.ticker-wrap {
-  width: 100%;
-  overflow: hidden;
-  background: #090d16;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  white-space: nowrap;
-  padding: 8px 0;
-}
-
-.ticker-move {
-  display: inline-block;
-  white-space: nowrap;
-  animation: marquee 25s linear infinite;
-}
-
-.ticker-move:hover {
-  animation-play-state: paused;
-}
-
-.ticker-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 24px;
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* macOS Floating Island / Dock Nav */
-.floating-dock-nav {
-  position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 1100px;
-  background: rgba(9, 13, 22, 0.82) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  border-radius: 99px !important;
-  padding: 8px 20px !important;
-  z-index: 1000 !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
-  transition: all 0.3s ease !important;
-}
-
-/* Bento Card System */
-.bento-card {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: var(--shadow-bento);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  position: relative;
-}
-
-.bento-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-bento-hover);
-  border-color: rgba(0, 82, 204, 0.35);
-}
-
-.bento-dark {
-  background: #090d16;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.bento-dark:hover {
-  border-color: rgba(0, 242, 254, 0.4);
-  box-shadow: 0 24px 50px rgba(0, 242, 254, 0.15);
-}
-
-/* Category Bento Pill Buttons */
-.cat-bento-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 99px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  font-weight: 700;
-  font-size: 13px;
-  color: #475569;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
-}
-
-.cat-bento-pill:hover, .cat-bento-pill.active {
-  background: #0052cc;
-  color: #ffffff;
-  border-color: #0052cc;
-  box-shadow: 0 8px 20px rgba(0, 82, 204, 0.35);
-  transform: translateY(-2px);
-}
-
-/* Price Badge Pill */
-.price-pill-badge {
-  background: rgba(9, 13, 22, 0.88);
-  backdrop-filter: blur(10px);
-  color: #00f2fe;
-  font-family: 'Syne', sans-serif;
-  font-size: 15px;
-  font-weight: 800;
-  padding: 6px 14px;
-  border-radius: 99px;
-  border: 1px solid rgba(0, 242, 254, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Gradient Text Effect */
-.glow-text-cyan {
-  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.glow-text-primary {
-  background: linear-gradient(135deg, #0052cc 0%, #00f2fe 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #090d16;
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #0052cc;
-}
-
-/* Mobile Bottom Navigation Bar */
+/* Mobile Bottom Navigation Bar Neobrutalist */
 .mobile-bottom-nav {
   display: none;
 }
 
 @media (max-width: 768px) {
-  .floating-dock-nav {
-    top: 10px !important;
-    width: calc(100% - 20px) !important;
-    padding: 6px 14px !important;
-    border-radius: 24px !important;
-  }
-
   .mobile-bottom-nav {
     display: flex;
     position: fixed;
@@ -215,14 +229,12 @@ h1, h2, h3, h4, .font-display {
     left: 0;
     right: 0;
     height: 64px;
-    background: rgba(9, 13, 22, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border-top: 3px solid #000000;
     z-index: 1001;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 -4px 0px #000000;
   }
 
   .mobile-nav-item {
@@ -230,18 +242,17 @@ h1, h2, h3, h4, .font-display {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #94a3b8;
+    color: #000000;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
     flex: 1;
     height: 100%;
     text-decoration: none;
-    transition: color 0.15s ease;
   }
 
   .mobile-nav-item.active,
   .mobile-nav-item:hover {
-    color: #00f2fe;
+    color: var(--neo-pink);
   }
 
   .mobile-nav-item .anticon {
