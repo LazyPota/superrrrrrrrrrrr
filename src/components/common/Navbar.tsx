@@ -165,29 +165,19 @@ export default function Navbar() {
         zIndex: 1000
       }}>
         <div style={{ maxWidth: 1240, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-          {/* Logo Neobrutalist */}
+          {/* Logo Neobrutalist Official */}
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
-            <div style={{
-              width: 42,
-              height: 42,
-              borderRadius: 12,
-              background: '#ffe600',
-              border: '3px solid #000000',
-              boxShadow: '3px 3px 0px #000000',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <ShopOutlined style={{ fontSize: 24, color: '#000000' }} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 24, fontWeight: 900, color: '#000000', fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em', lineHeight: 1 }}>
-                Pres<span style={{ color: '#ff2a85' }}>U</span>Mart!
-              </span>
-              <span className="hide-mobile" style={{ fontSize: 9, fontWeight: 900, color: '#000000', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 2 }}>
-                President Univ Store
-              </span>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="PresUMart Logo" 
+              style={{ 
+                height: 48, 
+                width: 'auto',
+                objectFit: 'contain',
+                borderRadius: 8,
+                filter: 'drop-shadow(3px 3px 0px #000000)'
+              }} 
+            />
           </Link>
 
           {/* Search Bar Neobrutalist */}

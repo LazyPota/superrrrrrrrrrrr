@@ -71,7 +71,19 @@ export default function RegisterPage() {
             padding: '12px 8px'
           }}
         >
-          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <img 
+              src="/logo.png" 
+              alt="PresUMart Logo" 
+              style={{ 
+                height: 64, 
+                width: 'auto',
+                objectFit: 'contain',
+                marginBottom: 12,
+                filter: 'drop-shadow(3px 3px 0px #000000)'
+              }} 
+            />
+            <br />
             <Tag color="blue" icon={<SafetyCertificateOutlined />} style={{ marginBottom: 10, padding: '4px 14px', borderRadius: 20, fontWeight: 700 }}>
               Khusus Komunitas President University
             </Tag>

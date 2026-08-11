@@ -68,21 +68,18 @@ export default function LoginPage() {
             padding: '12px 8px'
           }}
         >
-          <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ 
-              width: 56, 
-              height: 56, 
-              borderRadius: 18, 
-              background: 'linear-gradient(135deg, #0b192c 0%, #0052cc 100%)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              margin: '0 auto 16px auto',
-              boxShadow: '0 8px 20px rgba(0,82,204,0.3)',
-              border: '1px solid rgba(0, 242, 254, 0.3)'
-            }}>
-              <ShopOutlined style={{ fontSize: 28, color: '#00f2fe' }} />
-            </div>
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <img 
+              src="/logo.png" 
+              alt="PresUMart Logo" 
+              style={{ 
+                height: 64, 
+                width: 'auto',
+                objectFit: 'contain',
+                marginBottom: 12,
+                filter: 'drop-shadow(3px 3px 0px #000000)'
+              }} 
+            />
 
             <Tag color="blue" icon={<SafetyCertificateOutlined />} style={{ marginBottom: 10, padding: '4px 12px', borderRadius: 20, fontWeight: 700 }}>
               Khusus Mahasiswa PresUniv

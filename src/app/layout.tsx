@@ -21,10 +21,10 @@ export const metadata = {
     type: "website",
     images: [
       {
-        url: "/icon-512.svg",
+        url: "/logo.png",
         width: 512,
         height: 512,
-        alt: "PresUMart Logo",
+        alt: "PresUMart Official Logo",
       },
     ],
   },
@@ -32,7 +32,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "PresUMart - Marketplace Mahasiswa President University",
     description: "Platform Jual Beli COD Khusus Mahasiswa President University Jababeka.",
-    images: ["/icon-512.svg"],
+    images: ["/logo.png"],
   },
   appleWebApp: {
     capable: true,
@@ -40,8 +40,8 @@ export const metadata = {
     title: "PresUMart",
   },
   icons: {
-    icon: "/icon-192.svg",
-    apple: "/icon-192.svg",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
@@ -49,7 +49,7 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0052cc",
+  themeColor: "#ffe600",
 };
 
 const jsonLd = {
@@ -57,7 +57,7 @@ const jsonLd = {
   "@type": "OnlineMarketplace",
   "name": "PresUMart",
   "url": "https://presumart.netlify.app",
-  "logo": "https://presumart.netlify.app/icon-512.svg",
+  "logo": "https://presumart.netlify.app/logo.png",
   "description": "Marketplace jual beli COD khusus mahasiswa President University Jababeka.",
   "address": {
     "@type": "PostalAddress",
@@ -72,10 +72,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/logo.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="PresUMart" />
-        <link rel="apple-touch-icon" href="/icon-192.svg" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

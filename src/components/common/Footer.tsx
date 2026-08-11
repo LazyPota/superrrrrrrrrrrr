@@ -13,22 +13,16 @@ export default function Footer() {
         <Row gutter={[32, 32]}>
           <Col xs={24} sm={12} md={8}>
             <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 16, textDecoration: 'none' }}>
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                background: '#ff2a85',
-                border: '3px solid #000000',
-                boxShadow: '3px 3px 0px #000000',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <ShopOutlined style={{ fontSize: 22, color: '#ffffff' }} />
-              </div>
-              <span style={{ fontSize: 24, fontWeight: 900, color: '#000000', fontFamily: 'Syne, sans-serif' }}>
-                Pres<span style={{ color: '#ff2a85' }}>U</span>Mart!
-              </span>
+              <img 
+                src="/logo.png" 
+                alt="PresUMart Logo" 
+                style={{ 
+                  height: 52, 
+                  width: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(3px 3px 0px #000000)'
+                }} 
+              />
             </Link>
             <Paragraph style={{ color: '#000000', fontWeight: 700, fontSize: 13, lineHeight: 1.6, maxWidth: 320 }}>
               Platform jual beli resmi khusus mahasiswa President University Jababeka. Transaksi COD aman, cepat, dan 100% bebas biaya admin.
